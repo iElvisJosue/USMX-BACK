@@ -10,9 +10,71 @@ import {
   ValidarTokenParaPeticion,
 } from "../helpers/Func.js";
 
+// EN ESTA FUNCIÓN VAMOS A REGISTRAR UN PRODUCTO
+// SE UTILIZA EN LAS VISTAS:
+// Productos > Registrar Productos
+export const RegistrarProducto = async (req, res) => {
+  const {
+    NombreProducto,
+    AnchoProducto,
+    LargoProducto,
+    AltoProducto,
+    PrecioProducto,
+    CostoLibraExtraProducto,
+    PesoSinCobroProducto,
+    PesoMaximoProducto,
+    ComisionProducto,
+    CookieConToken,
+  } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  const sql = `SELECT * FROM productos WHERE NombreProducto = '${NombreProducto}'`;
+  CONEXION.query(sql, (error, result) => {
+    if (error) throw error;
+    if (result.length > 0) {
+      res
+        .status(500)
+        .json(
+          `El producto ${NombreProducto.toUpperCase()} ya existe, por favor intente con otro nombre de usuario ❌`
+        );
+    } else {
+      const sql = `INSERT INTO productos (NombreProducto, AnchoProducto, LargoProducto, AltoProducto, PrecioProducto, LibraExtraProducto, 
+      PesoSinCobroProducto, PesoMaximoProducto, ComisionProducto, FechaCreacionProducto, HoraCreacionProducto) VALUES (
+              '${NombreProducto}',
+              '${AnchoProducto}',
+              '${LargoProducto}',
+              '${AltoProducto}',
+              '${PrecioProducto}',
+              '${CostoLibraExtraProducto}',
+              '${PesoSinCobroProducto}',
+              '${PesoMaximoProducto}',
+              '${ComisionProducto}',
+              CURDATE(),
+              '${ObtenerHoraActual()}'
+              )`;
+      CONEXION.query(sql, (error, result) => {
+        if (error) throw error;
+        res
+          .status(200)
+          .json(
+            `El producto ${NombreProducto.toUpperCase()} ha sido registrado correctamente ✨`
+          );
+      });
+    }
+  });
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS PRODUCTOS POR UNA AGENCIA
 // SE UTILIZA EN LAS VISTAS:
-// Paquetería > Registrar Productos > Pedido
 // Agencias > Asignar Productos
 export const ObtenerProductosPorAgencia = async (req, res) => {
   const { idAgencia, CookieConToken } = req.body;

@@ -5,6 +5,8 @@ import {
   GuardarTodaLaInformacion,
   BuscarPedidosPorFiltro,
   BuscarPedidosPorPaquete,
+  BuscarRemitentesPorAgencia,
+  BuscarDestinatariosPorAgencia,
 } from "../controllers/pedidos.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -16,6 +18,10 @@ router.post("/GuardarTodaLaInformacion", GuardarTodaLaInformacion);
 router.post("/BuscarPedidosPorFiltro", BuscarPedidosPorFiltro);
 // RUTA PARA OBTENER LOS PEDIDOS POR PAQUETE
 router.post("/BuscarPedidosPorPaquete", BuscarPedidosPorPaquete);
+// RUTA PARA OBTENER LOS REMITENTES POR AGENCIA
+router.post("/BuscarRemitentesPorAgencia", BuscarRemitentesPorAgencia);
+// RUTA PARA OBTENER LOS DESTINATARIOS POR AGENCIA
+router.post("/BuscarDestinatariosPorAgencia", BuscarDestinatariosPorAgencia);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

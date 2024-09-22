@@ -4,3 +4,6 @@ lo más rápido posible. Por favor, inténtalo de nuevo más tarde.`;
 
 export const MENSAJE_DE_NO_AUTORIZADO =
   "Tu petición no puede ser completada, si crees que esto es un error, contacta con el equipo de soporte.";
+
+export const HOST = "https://www.usmxxpress.net";
+export const LINK_QR = "http://localhost:5173/Detalles-Del-Pedido/";

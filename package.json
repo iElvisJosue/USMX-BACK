@@ -19,7 +19,8 @@
     "morgan": "1.10.0",
     "multer": "1.4.3",
     "mysql": "2.18.1",
-    "pdfmake": "0.2.11"
+    "pdfmake": "0.2.11",
+    "qrcode": "1.5.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

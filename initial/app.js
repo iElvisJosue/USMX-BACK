@@ -30,7 +30,11 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173", "https://usmx.vercel.app", "https://www.usmxxpress.net"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://usmx.vercel.app",
+  "https://www.usmxxpress.net",
+];
 
 // APLICAMOS CORS
 app.use(cors({ origin: allowedOrigins, credentials: true }));
@@ -38,7 +42,7 @@ app.use(cors({ origin: allowedOrigins, credentials: true }));
 // DEFINIMOS LA RUTA DE NUESTRAS IMÁGENES
 app.set("public", path.join(__dirname, "public"));
 // DEFINIMOS LA RUTA PARA SER ACCESIBLE DESDE EL NAVEGADOR
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Middleware para analizar solicitudes con cuerpo JSON
 app.use(express.json());
