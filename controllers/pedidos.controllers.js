@@ -387,6 +387,33 @@ const CrearTicketDelPedido = (
             ],
           },
           {
+            text: "Número de guía",
+            alignment: "center",
+            fontSize: TamañoTextoPequeño,
+            margin: [0, 1.5],
+          },
+          {
+            text: GuiaPedido,
+            alignment: "center",
+            fontSize: TamañoTextoTitulo,
+            margin: [0, 1.5],
+          },
+          {
+            margin: [0, 10],
+            canvas: [
+              {
+                type: "line",
+                x1: 0,
+                y1: 0,
+                x2: TamañoDeLaLinea,
+                y2: 0, // Ajusta la longitud del separador según el ancho del PDF
+                lineWidth: 2, // Ancho del separador
+                lineColor: "black", // Color del separador
+                dash: { length: 2 }, // Establece la longitud de los trazos discontinuos
+              },
+            ],
+          },
+          {
             text: "REMITENTE",
             alignment: "left",
             fontSize: TamañoTextoNormal,
@@ -548,7 +575,7 @@ const CrearTicketDelPedido = (
             marginBottom: 7.5,
           },
           {
-            text: "Usuario responsable:",
+            text: "Usuario:",
             alignment: "center",
             fontSize: TamañoTextoPequeño,
           },

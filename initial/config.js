@@ -1,7 +1,6 @@
 export const TOKEN_SECRETO = "Secret-Token-Package";
-export const HOST = "https://www.usmxxpress.online:4000/api";
-// export const HOST = "https://www.embeautyroom.shop:4100/api";
-// export const serverKey =
-//   "/home/embeautyroom/ssl/keys/ce044_400c9_d963bc1848fb1fee6f32350624ebfbdf.key";
-// export const serverCert =
-//   "/home/embeautyroom/ssl/certs/embeautyroom_shop_ce044_400c9_1721806689_01a0db4c82a31545a6f14d0cfd792564.crt";
+export const HOST = "http://www.usmxxpress.online:4000/api";
+export const serverKey =
+  "/home/usmxxpressonline/ssl/keys/d455b_d3c37_7209e8cdc9537557b197ee57620000bb.key";
+export const serverCert =
+  "/home/usmxxpressonline/ssl/certs/usmxxpress_online_d455b_d3c37_1731369599_ab93a4b78e1737e3effba96746e69d38.crt";

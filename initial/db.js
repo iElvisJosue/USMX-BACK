@@ -1,14 +1,5 @@
 import mysql from "mysql";
 
-// PARA PRODUCCIÓN
-// export const CONEXION = mysql.createConnection({
-//   port: 3306,
-//   host: "embeautyroom.shop",
-//   user: "embeautyroom_backone",
-//   password: "Ac8293gA#",
-//   database: "embeautyroom_backone",
-// });
-
 export const CONEXION = mysql.createConnection({
   port: 3307,
   host: "localhost",
@@ -16,6 +7,15 @@ export const CONEXION = mysql.createConnection({
   password: "",
   database: "paqueteria",
 });
+
+// PARA PRODUCCIÓN
+// export const CONEXION = mysql.createConnection({
+//   port: 3306,
+//   host: "localhost",
+//   user: "usmxxpressonline_usmx",
+//   password: "Ac8293gA#",
+//   database: "usmxxpressonline_usmx",
+// });
 
 export const CONECTAR_DB = () => {
   CONEXION.connect((error) => {
