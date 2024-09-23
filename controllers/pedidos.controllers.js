@@ -1,18 +1,10 @@
 // IMPORTAMOS LA CONEXIÓN A LA DB
 import { CONEXION } from "../initial/db.js";
-// LIBRERÍAS PARA EL PDF
-import fs from "fs";
-import createPdf from "pdfmake";
-import { fileURLToPath } from "url";
-import path, { dirname } from "path";
-import QRCode from "qrcode";
 
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
   MENSAJE_DE_NO_AUTORIZADO,
-  LINK_QR,
-  HOST,
 } from "../helpers/Const.js";
 import {
   ValidarTokenParaPeticion,
@@ -20,19 +12,10 @@ import {
   CrearGuia,
   CrearCódigoDeRastreo,
 } from "../helpers/Func.js";
-// RUTAS PARA EL PDF
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const FuenteURL = path.join(__dirname, "../public/Fuentes");
-const PdfURL = path.join(__dirname, "../public/PDF");
-const imgURL = path.join(__dirname, "../public");
-
-// DEFINIMOS PARÁMETROS DEL TICKET
-const TamañoTextoTitulo = 16;
-const TamañoTextoNormal = 13;
-const TamañoTextoPequeño = 10;
-const TamañoDelTicket = 80 * 2.83465;
-const TamañoDeLaLinea = 80 * 2.54965;
+import {
+  CrearTicketDelPedido,
+  CrearTicketsDelPaquete,
+} from "../helpers/PDFs.js";
 
 // EN ESTA FUNCIÓN VAMOS GUARDAR TODA LA INFORMACION DEL DESTINATARIO, REMITENTE Y PEDIDO
 // SE UTILIZA EN LAS VISTAS: Paquetería > Registrar Productos > Pedido > Finalizar
@@ -44,6 +27,7 @@ export const GuardarTodaLaInformacion = async (req, res) => {
   if (RespuestaValidacionToken) {
     try {
       const CodigoRastreo = CrearCódigoDeRastreo();
+      let ListaDeGuias = [];
 
       // SI EL REMITENTE NO EXISTE, GUARDAMOS UNO NUEVO
       // DE LO CONTRARIO, NO LO ALMACENAMOS
@@ -71,7 +55,9 @@ export const GuardarTodaLaInformacion = async (req, res) => {
           infoPedido,
           idRemitente,
           idDestinatario,
-          CodigoRastreo
+          CodigoRastreo,
+          pedido,
+          ListaDeGuias
         );
       }
 
@@ -198,8 +184,12 @@ const EjecutarConsultaValidarPedido = async (
   infoPedido,
   idRemitente,
   idDestinatario,
-  CodigoRastreo
+  CodigoRastreo,
+  pedido,
+  ListaDeGuias
 ) => {
+  // CREAMOS EL NOMBRE DEL PAQUETE DE TICKETS
+  const NombreDelPaqueteDeTickets = `Ticket_Paquete_${CodigoRastreo}.pdf`;
   let GuiaDuplicada = true;
   let GuiaPedido;
 
@@ -212,6 +202,21 @@ const EjecutarConsultaValidarPedido = async (
     }
   }
 
+  // GUARDAMOS TODAS LAS GUIAS EN UNA LISTA
+  ListaDeGuias.push(GuiaPedido);
+
+  // SOLO CREAREMOS UN PDF CON VARIOS TICKETS SI SON MÁS DE 1 PEDIDO
+  // Y CUANDO LA CANTIDAD DE GUIAS SEA IGUAL A LA CANTIDAD DE PEDIDOS
+  if (ListaDeGuias.length > 1 && ListaDeGuias.length === pedido.length) {
+    CrearTicketsDelPaquete(
+      NombreDelPaqueteDeTickets,
+      remitente,
+      destinatario,
+      ListaDeGuias,
+      pedido
+    );
+  }
+
   try {
     await EjecutarConsultaGuardarPedido(
       remitente,
@@ -220,7 +225,8 @@ const EjecutarConsultaValidarPedido = async (
       idRemitente,
       idDestinatario,
       CodigoRastreo,
-      GuiaPedido
+      GuiaPedido,
+      NombreDelPaqueteDeTickets
     );
 
     console.log("Pedido guardado correctamente");
@@ -245,7 +251,8 @@ const EjecutarConsultaGuardarPedido = (
   idRemitente,
   idDestinatario,
   CodigoRastreo,
-  GuiaPedido
+  GuiaPedido,
+  NombreDelPaqueteDeTickets
 ) => {
   // CREAMOS EL NOMBRE DEL PDF
   const NombreDelTicket = `Ticket_Pedido_${GuiaPedido}.pdf`;
@@ -254,7 +261,7 @@ const EjecutarConsultaGuardarPedido = (
     const sql = `
     INSERT INTO pedidos (
       GuiaPedido, ProductoPedido, TipoCargaPedido, TipoEnvioPedido, ContenidoPedido, LargoPedido, AnchoPedido, AltoPedido, PieCubicoPedido, PesoPedido, ValorDeclaradoPedido, ValorAseguradoPedido, CostoSeguroPedido, 
-      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, UsuarioResponsablePedido, TicketPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (
+      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, UsuarioResponsablePedido, TicketPedido, PaqueteTicketsPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (
       '${GuiaPedido}',
       '${infoPedido.Producto}',
       '${infoPedido.TipoDeCarga}',
@@ -273,6 +280,7 @@ const EjecutarConsultaGuardarPedido = (
       '${infoPedido.Total}',
       '${infoPedido.UsuarioResponsable}',
       '${NombreDelTicket}',
+      '${NombreDelPaqueteDeTickets}',
       CURDATE(),
       '${ObtenerHoraActual()}'
     )`;
@@ -296,314 +304,6 @@ const EjecutarConsultaGuardarPedido = (
       );
       resolve(true);
     });
-  });
-};
-const CrearTicketDelPedido = (
-  NombreDelTicket,
-  remitente,
-  destinatario,
-  infoPedido,
-  GuiaPedido
-) => {
-  const LinkDelQR = `${LINK_QR}${GuiaPedido}`;
-  QRCode.toDataURL(LinkDelQR, (err, imgQR) => {
-    if (err) {
-      console.error(err);
-    } else {
-      const Hoy = new Date();
-      const Opciones = {
-        timeZone: "America/Mexico_City", // Zona horaria de México (Guerrero)
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false, // Formato de 24 horas
-      };
-      const FechaConHora = Hoy.toLocaleString("es-MX", Opciones);
-      // ASIGNAMOS LA FUENTE AL PDF
-      const Fuente = {
-        Roboto: {
-          normal: path.join(FuenteURL, "Ticketing.ttf"),
-        },
-      };
-      var ImpresorDelPDF = new createPdf(Fuente);
-      // DEFINIMOS EL TAMAÑO DE LA PAGINA
-      const TamañoDePagina = {
-        width: TamañoDelTicket,
-        height: "auto", // Altura automática
-      };
-      // IMAGEN DEL LOGO
-      const ImagenDelPDF = path.join(imgURL, "ImagenTicket.png");
-      // DEFINIMOS EL DOCUMENTO PDF
-      const CuerpoDelPDF = {
-        pageSize: TamañoDePagina,
-        content: [
-          {
-            image: ImagenDelPDF,
-            width: 50,
-            height: 50,
-            alignment: "center",
-            marginBottom: 2.5,
-          },
-          {
-            text: "USMX XPRESS",
-            alignment: "center",
-            fontSize: TamañoTextoTitulo,
-            margin: [0, 1.5],
-          },
-          {
-            text: "Ciudad, Estado",
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-            margin: [0, 1.5],
-          },
-          {
-            text: "Dirección del local",
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-            margin: [0, 1.5],
-          },
-          {
-            text: `Fecha y hora ${FechaConHora}`,
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-            margin: [0, 1.5],
-          },
-          {
-            margin: [0, 10],
-            canvas: [
-              {
-                type: "line",
-                x1: 0,
-                y1: 0,
-                x2: TamañoDeLaLinea,
-                y2: 0, // Ajusta la longitud del separador según el ancho del PDF
-                lineWidth: 2, // Ancho del separador
-                lineColor: "black", // Color del separador
-                dash: { length: 2 }, // Establece la longitud de los trazos discontinuos
-              },
-            ],
-          },
-          {
-            text: "Número de guía",
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-            margin: [0, 1.5],
-          },
-          {
-            text: GuiaPedido,
-            alignment: "center",
-            fontSize: TamañoTextoTitulo,
-            margin: [0, 1.5],
-          },
-          {
-            margin: [0, 10],
-            canvas: [
-              {
-                type: "line",
-                x1: 0,
-                y1: 0,
-                x2: TamañoDeLaLinea,
-                y2: 0, // Ajusta la longitud del separador según el ancho del PDF
-                lineWidth: 2, // Ancho del separador
-                lineColor: "black", // Color del separador
-                dash: { length: 2 }, // Establece la longitud de los trazos discontinuos
-              },
-            ],
-          },
-          {
-            text: "REMITENTE",
-            alignment: "left",
-            fontSize: TamañoTextoNormal,
-            margin: [0, 1.5],
-          },
-          {
-            text: `${remitente.NombreRemitente} ${remitente.ApellidosRemitente}`,
-            alignment: "left",
-            fontSize: TamañoTextoPequeño,
-            marginBottom: 7.5,
-          },
-          {
-            text: "DESTINATARIO",
-            alignment: "left",
-            fontSize: TamañoTextoNormal,
-            margin: [0, 1.5],
-          },
-          {
-            text: `${destinatario.NombreDestinatario} ${destinatario.ApellidoPaternoDestinatario} ${destinatario.ApellidoMaternoDestinatario}`,
-            alignment: "left",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: `${destinatario.DireccionDestinatario}, Col. ${destinatario.ColoniaDestinatario}, CP. ${destinatario.CodigoPostalDestinatario}`,
-            alignment: "left",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: `Telefono(s): ${destinatario.TelefonoCasaDestinatario} - ${destinatario.CelularDestinatario}`,
-            alignment: "left",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: `${
-              destinatario.MunicipioDelegacionDestinatario
-                ? destinatario.MunicipioDelegacionDestinatario + " / "
-                : ""
-            }${destinatario.CiudadDestinatario} / ${
-              destinatario.EstadoDestinatario
-            }`,
-            alignment: "left",
-            fontSize: TamañoTextoPequeño,
-          },
-          destinatario.ReferenciaDestinatario && {
-            text: `Ref. ${destinatario.ReferenciaDestinatario}`,
-            alignment: "left",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            margin: [0, 10],
-            canvas: [
-              {
-                type: "line",
-                x1: 0,
-                y1: 0,
-                x2: TamañoDeLaLinea,
-                y2: 0, // Ajusta la longitud del separador según el ancho del PDF
-                lineWidth: 2, // Ancho del separador
-                lineColor: "black", // Color del separador
-                dash: { length: 2 }, // Establece la longitud de los trazos discontinuos
-              },
-            ],
-          },
-          {
-            text: infoPedido.Producto,
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: `Ancho: ${infoPedido.Ancho} - Largo: ${infoPedido.Largo} - Alto: ${infoPedido.Alto}`,
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: `Peso: ${infoPedido.Peso} lb(s)`,
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: `Costo envío ${infoPedido.CostoEnvio.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-            })} | TCF: $0.00 | Costo seguro ${infoPedido.CostoSeguro.toLocaleString(
-              "en-US",
-              {
-                style: "currency",
-                currency: "USD",
-              }
-            )} | Costo sobre peso ${infoPedido.CostoSobrePeso.toLocaleString(
-              "en-US",
-              {
-                style: "currency",
-                currency: "USD",
-              }
-            )}`,
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: `TOTAL: ${infoPedido.Total.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-            })}`,
-            alignment: "center",
-            fontSize: TamañoTextoNormal,
-            margin: [0, 5, 0, 2.5],
-          },
-          {
-            margin: [0, 7.5, 0, 2.5],
-            canvas: [
-              {
-                type: "line",
-                x1: 0,
-                y1: 0,
-                x2: TamañoDeLaLinea,
-                y2: 0, // Ajusta la longitud del separador según el ancho del PDF
-                lineWidth: 2, // Ancho del separador
-                lineColor: "black", // Color del separador
-                dash: { length: 2 }, // Establece la longitud de los trazos discontinuos
-              },
-            ],
-          },
-          {
-            image: imgQR,
-            width: 100,
-            height: 100,
-            alignment: "center",
-          },
-          {
-            text: HOST,
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            margin: [0, 7.5, 0, 2.5],
-            canvas: [
-              {
-                type: "line",
-                x1: 0,
-                y1: 0,
-                x2: TamañoDeLaLinea,
-                y2: 0, // Ajusta la longitud del separador según el ancho del PDF
-                lineWidth: 2, // Ancho del separador
-                lineColor: "black", // Color del separador
-                dash: { length: 2 }, // Establece la longitud de los trazos discontinuos
-              },
-            ],
-          },
-          {
-            text: "Agencia:",
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-            marginTop: 7.5,
-          },
-          {
-            text: infoPedido.NombreAgencia.toUpperCase(),
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-            marginBottom: 7.5,
-          },
-          {
-            text: "Usuario:",
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-          },
-          {
-            text: infoPedido.UsuarioResponsable.toUpperCase(),
-            alignment: "center",
-            fontSize: TamañoTextoPequeño,
-          },
-        ],
-
-        defaultStyle: {
-          font: "Roboto", // Establece la fuente predeterminada para todo el documento
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 10,
-        },
-        pageMargins: [10, 10, 10, 10],
-      };
-      // CREAMOS EL DOCUMENTO PDF
-      const pdfDoc = ImpresorDelPDF.createPdfKitDocument(CuerpoDelPDF);
-      // Generar el PDF y guardarlo en un archivo
-      const RutaDelPDF = path.join(PdfURL, NombreDelTicket);
-      // Guarda el documento PDF en un archivo
-      pdfDoc.pipe(fs.createWriteStream(RutaDelPDF));
-      pdfDoc.end();
-    }
   });
 };
 const CrearUnionRemitenteDestinatarioPedido = (
