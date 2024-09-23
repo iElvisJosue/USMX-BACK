@@ -319,7 +319,7 @@ export const CrearTicketDelPedido = (
   pdfDoc.pipe(fs.createWriteStream(RutaDelPDF));
   pdfDoc.end();
 };
-export const CrearTicketsDelPaquete = (
+export const CrearPaqueteDeTickets = (
   NombreDelPaqueteDeTickets,
   remitente,
   destinatario,

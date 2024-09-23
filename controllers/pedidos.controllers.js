@@ -14,7 +14,7 @@ import {
 } from "../helpers/Func.js";
 import {
   CrearTicketDelPedido,
-  CrearTicketsDelPaquete,
+  CrearPaqueteDeTickets,
 } from "../helpers/PDFs.js";
 
 // EN ESTA FUNCIÓN VAMOS GUARDAR TODA LA INFORMACION DEL DESTINATARIO, REMITENTE Y PEDIDO
@@ -208,7 +208,7 @@ const EjecutarConsultaValidarPedido = async (
   // SOLO CREAREMOS UN PDF CON VARIOS TICKETS SI SON MÁS DE 1 PEDIDO
   // Y CUANDO LA CANTIDAD DE GUIAS SEA IGUAL A LA CANTIDAD DE PEDIDOS
   if (ListaDeGuias.length > 1 && ListaDeGuias.length === pedido.length) {
-    CrearTicketsDelPaquete(
+    CrearPaqueteDeTickets(
       NombreDelPaqueteDeTickets,
       remitente,
       destinatario,
