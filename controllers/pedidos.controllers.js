@@ -576,3 +576,34 @@ export const BuscarDestinatariosPorAgencia = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS ULTIMOS 10 PEDIDOS REALIZADOS
+// SE UTILIZA EN LAS VISTAS: Bienvenida
+export const BuscarUltimosDiezPedidos = async (req, res) => {
+  try {
+    const sql = `SELECT 
+      p.GuiaPedido, 
+      p.FechaCreacionPedido,
+      p.HoraCreacionPedido,
+      a.NombreAgencia, 
+      urdp.CodigoRastreo  
+      FROM 
+          union_remitentes_destinatarios_pedidos urdp
+      LEFT JOIN 
+          pedidos p ON urdp.idPedido = p.idPedido
+      LEFT JOIN 
+          agencias a ON urdp.idAgencia = a.idAgencia
+      ORDER BY 
+          p.FechaCreacionPedido DESC, 
+          p.HoraCreacionPedido DESC,
+          p.idPedido DESC 
+      LIMIT 10;
+      `;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result); // Devuelve un array con los destinatarios
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
