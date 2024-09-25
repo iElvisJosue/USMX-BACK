@@ -16,6 +16,7 @@ import {
   CrearTicketDelPedido,
   CrearPaqueteDeTickets,
 } from "../helpers/PDFs.js";
+import { ChildProcess } from "child_process";
 
 // EN ESTA FUNCIÓN VAMOS GUARDAR TODA LA INFORMACION DEL DESTINATARIO, REMITENTE Y PEDIDO
 // SE UTILIZA EN LAS VISTAS: Paquetería > Registrar Productos > Pedido > Finalizar
@@ -637,6 +638,28 @@ export const BuscarMovimientosDeUnPedido = async (req, res) => {
   if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
     const sql = `SELECT * FROM movimientos WHERE GuiaPedido = '${GuiaPedido}' ORDER BY idMovimiento DESC;`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LA INFORMACIÓN DE UN PEDIDO
+// SE UTILIZA EN LAS VISTAS: Numero de Guía
+export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
+  const { GuiaPedido } = req.params;
+  try {
+    const sql = `SELECT r.*, d.*, p.*, m.* 
+    FROM union_remitentes_destinatarios_pedidos urdp 
+    LEFT JOIN remitentes r ON urdp.idRemitente = r.idRemitente 
+    LEFT JOIN destinatarios d ON urdp.idDestinatario = d.idDestinatario 
+    LEFT JOIN pedidos p ON urdp.idPedido = p.idPedido 
+    LEFT JOIN movimientos m ON p.GuiaPedido = m.GuiaPedido 
+    WHERE p.GuiaPedido = "${GuiaPedido}"
+    ORDER BY m.idMovimiento DESC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
