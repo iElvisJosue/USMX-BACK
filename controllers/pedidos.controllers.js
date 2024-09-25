@@ -669,3 +669,39 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS POR FECHA
+// SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Pedidos por fecha
+export const BuscarPedidosPorFecha = async (req, res) => {
+  const { primeraFecha, segundaFecha } = req.body;
+  try {
+    const sql = `SELECT 
+            urdp.idRemitente,
+            urdp.idDestinatario,
+            urdp.idPedido,
+            urdp.idAgencia,
+            urdp.CodigoRastreo,
+            r.*,
+            d.*,
+            p.*,
+            a.*
+            FROM 
+                union_remitentes_destinatarios_pedidos urdp
+            LEFT JOIN 
+                remitentes r ON urdp.idRemitente = r.idRemitente
+            LEFT JOIN 
+                destinatarios d ON urdp.idDestinatario = d.idDestinatario
+            LEFT JOIN 
+                pedidos p ON urdp.idPedido = p.idPedido
+            LEFT JOIN 
+                agencias a ON urdp.idAgencia = a.idAgencia
+            WHERE 
+                p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
+            ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    res.status(500).json(error500);
+  }
+};

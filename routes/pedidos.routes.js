@@ -10,6 +10,7 @@ import {
   BuscarUltimosDiezPedidos,
   BuscarMovimientosDeUnPedido,
   BuscarPedidoPorNumeroDeGuia,
+  BuscarPedidosPorFecha,
 } from "../controllers/pedidos.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -34,6 +35,8 @@ router.get(
   "/BuscarPedidoPorNumeroDeGuia/:GuiaPedido",
   BuscarPedidoPorNumeroDeGuia
 );
+// RUTA PARA BUSCAR PEDIDOS POR FECHA
+router.post("/BuscarPedidosPorFecha", BuscarPedidosPorFecha);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;
