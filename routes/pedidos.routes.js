@@ -8,6 +8,7 @@ import {
   BuscarRemitentesPorAgencia,
   BuscarDestinatariosPorAgencia,
   BuscarUltimosDiezPedidos,
+  BuscarMovimientosDeUnPedido,
 } from "../controllers/pedidos.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -25,6 +26,8 @@ router.post("/BuscarRemitentesPorAgencia", BuscarRemitentesPorAgencia);
 router.post("/BuscarDestinatariosPorAgencia", BuscarDestinatariosPorAgencia);
 // RUTA PARA BUSCAR LOS DESTINATARIOS POR AGENCIA
 router.get("/BuscarUltimosDiezPedidos", BuscarUltimosDiezPedidos);
+// RUTA PARA BUSCAR LOS MOVIMIENTOS DE UN PEDIDO
+router.post("/BuscarMovimientosDeUnPedido", BuscarMovimientosDeUnPedido);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

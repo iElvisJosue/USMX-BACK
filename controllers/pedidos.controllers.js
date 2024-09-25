@@ -288,6 +288,7 @@ const EjecutarConsultaGuardarPedido = (
       if (error) {
         return reject(error); // Rechaza la promesa si hay un error
       }
+      CrearMovimientosPorDefecto(GuiaPedido, infoPedido.UsuarioResponsable);
       CrearTicketDelPedido(
         NombreDelTicket,
         remitente,
@@ -302,6 +303,24 @@ const EjecutarConsultaGuardarPedido = (
         infoPedido.idAgencia,
         CodigoRastreo
       );
+      resolve(true);
+    });
+  });
+};
+const CrearMovimientosPorDefecto = (GuiaPedido, UsuarioResponsable) => {
+  const sql = `INSERT INTO movimientos (GuiaPedido, EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, UsuarioResponsableMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento)
+  VALUES
+    ('${GuiaPedido}', 'Creado', 'El pedido ha sido creado en el sistema.', 'Sistema USMX', '${
+    UsuarioResponsable ?? "No definido"
+  }', CURDATE(), '${ObtenerHoraActual()}'),
+    ('${GuiaPedido}', 'Pendiente', 'El pago no ha sido confirmado.', 'Sistema USMX', '${
+    UsuarioResponsable ?? "No definido"
+  }', CURDATE(), '${ObtenerHoraActual()}')`;
+  return new Promise((resolve, reject) => {
+    CONEXION.query(sql, (error, result) => {
+      if (error) {
+        return reject(error); // Rechaza la promesa si hay un error
+      }
       resolve(true);
     });
   });
@@ -600,7 +619,27 @@ export const BuscarUltimosDiezPedidos = async (req, res) => {
       `;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
-      res.status(200).json(result); // Devuelve un array con los destinatarios
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS MOVIMIENTOS DE UN PEDIDO
+// SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Detalles del pedido
+// SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Detalles del pedido
+export const BuscarMovimientosDeUnPedido = async (req, res) => {
+  const { CookieConToken, GuiaPedido } = req.body;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  try {
+    const sql = `SELECT * FROM movimientos WHERE GuiaPedido = '${GuiaPedido}' ORDER BY idMovimiento DESC;`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result);
     });
   } catch (error) {
     console.error(error);
