@@ -13,8 +13,8 @@ import {
 // EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS POR UN FILTRO DETERMINADO
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Registrar Productos
-// Usuarios > Asignar Agencia
 // Agencias > Asignar Producto
+// Usuarios > Administrar Usuarios
 export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
   const { CookieConToken, filtro, tipoDeUsuario, idDelUsuario } = req.body;
 

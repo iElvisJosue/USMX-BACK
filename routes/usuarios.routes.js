@@ -8,6 +8,8 @@ import {
   BuscarAgenciasQueNoTieneElUsuario,
   DesasignarAgenciaAlUsuario,
   AsignarAgenciaAlUsuario,
+  BuscarUsuariosParaAdministrarPorFiltro,
+  ActualizarEstadoUsuario,
 } from "../controllers/usuarios.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -31,6 +33,12 @@ router.post(
 router.post("/AsignarAgenciaAlUsuario", AsignarAgenciaAlUsuario);
 // PETICIÓN PARA DESASIGNAR UNA AGENCIA AL USUARIO
 router.post("/DesasignarAgenciaAlUsuario", DesasignarAgenciaAlUsuario);
-
+// RUTA PARA BUSCAR LOS USUARIOS A ADMINISTRAR POR FILTRO
+router.post(
+  "/BuscarUsuariosParaAdministrarPorFiltro",
+  BuscarUsuariosParaAdministrarPorFiltro
+);
+// RUTA PARA ACTUALIZAR EL ESTADO DE UN USUARIO
+router.put("/ActualizarEstadoUsuario", ActualizarEstadoUsuario);
 // EXPORTAMOS EL ENRUTADOR
 export default router;

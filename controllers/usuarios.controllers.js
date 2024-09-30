@@ -53,7 +53,7 @@ export const RegistrarUsuario = async (req, res) => {
   }
 };
 // EN ESTA FUNCIÓN VAMOS A BUSCAR LOS USUARIO POR UN FILTRO DETERMINADO
-// SE UTILIZA EN LAS VISTAS: Usuarios > Asignar Agencia
+// SE UTILIZA EN LAS VISTAS: Usuarios > Administrar Usuarios
 export const BuscarUsuariosPorFiltro = async (req, res) => {
   const { CookieConToken, filtro } = req.body;
 
@@ -78,7 +78,7 @@ export const BuscarUsuariosPorFiltro = async (req, res) => {
   }
 };
 // EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS QUE TIENE EL USUARIO
-// SE UTILIZA EN LAS VISTAS: Usuarios > Asignar Agencia
+// SE UTILIZA EN LAS VISTAS: Usuarios > Administrar Usuarios
 export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
   const { CookieConToken, idUsuario } = req.body;
 
@@ -101,7 +101,7 @@ export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
   }
 };
 // EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS QUE NO TIENE EL USUARIO
-// SE UTILIZA EN LAS VISTAS: Usuarios > Asignar Agencia
+// SE UTILIZA EN LAS VISTAS: Usuarios > Administrar Usuarios
 export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
   const { CookieConToken, filtro, idUsuario } = req.body;
 
@@ -117,11 +117,13 @@ export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
       filtro === ""
         ? `SELECT * 
           FROM agencias 
-          WHERE idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario})`
+          WHERE idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario}) 
+          ORDER BY idAgencia DESC`
         : `SELECT * 
           FROM agencias 
           WHERE NombreAgencia LIKE '%${filtro}%' 
-          AND idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario})`;
+          AND idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario}) 
+          ORDER BY idAgencia DESC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);
@@ -171,6 +173,53 @@ export const DesasignarAgenciaAlUsuario = async (req, res) => {
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.status(200).json("La agencia ha sido desasignada con éxito ✨");
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS USUARIO POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS: Usuarios > Asignar Agencia
+export const BuscarUsuariosParaAdministrarPorFiltro = async (req, res) => {
+  const { CookieConToken, filtro, idUsuario } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql =
+      filtro === ""
+        ? `SELECT * FROM usuarios WHERE idUsuario != ${idUsuario} ORDER BY idUsuario DESC`
+        : `SELECT * FROM usuarios WHERE idUsuario != ${idUsuario} AND Usuario LIKE '%${filtro}%' ORDER BY idUsuario DESC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS USUARIO POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS: Usuarios > Asignar Agencia
+export const ActualizarEstadoUsuario = async (req, res) => {
+  const { idUsuario, EstadoUsuario, CookieConToken } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `UPDATE usuarios SET EstadoUsuario = '${EstadoUsuario}' WHERE idUsuario = ${idUsuario}`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json("El usuario ha sido actualizado con éxito ✨");
     });
   } catch (error) {
     console.log(error);
