@@ -672,37 +672,65 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS POR FECHA
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Pedidos por fecha
 export const BuscarPedidosPorFecha = async (req, res) => {
-  const { primeraFecha, segundaFecha } = req.body;
+  const { primeraFecha, segundaFecha, idDelUsuario } = req.body;
+
+  const sqlObtenerAgencias = `SELECT uua.idAgencia 
+                              FROM union_usuarios_agencias uua 
+                              LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia 
+                              WHERE uua.idUsuario = '${idDelUsuario}' 
+                              AND a.StatusAgencia = 'Activa' 
+                              ORDER BY a.idAgencia DESC`;
+
   try {
-    const sql = `SELECT 
-            urdp.idRemitente,
-            urdp.idDestinatario,
-            urdp.idPedido,
-            urdp.idAgencia,
-            urdp.CodigoRastreo,
-            r.*,
-            d.*,
-            p.*,
-            a.*
-            FROM 
-                union_remitentes_destinatarios_pedidos urdp
-            LEFT JOIN 
-                remitentes r ON urdp.idRemitente = r.idRemitente
-            LEFT JOIN 
-                destinatarios d ON urdp.idDestinatario = d.idDestinatario
-            LEFT JOIN 
-                pedidos p ON urdp.idPedido = p.idPedido
-            LEFT JOIN 
-                agencias a ON urdp.idAgencia = a.idAgencia
-            WHERE 
-                p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
-                AND a.StatusAgencia = 'Activa'
-            ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
-    CONEXION.query(sql, (error, result) => {
-      if (error) throw error;
-      res.send(result);
+    // Obtener agencias activas del usuario
+    const agenciasResult = await new Promise((resolve, reject) => {
+      CONEXION.query(sqlObtenerAgencias, (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      });
     });
+
+    // Mapear las agencias para obtener los pedidos
+    const promesasDeBusqueda = agenciasResult.map(({ idAgencia }) => {
+      const sql = `SELECT 
+                  urdp.idRemitente,
+                  urdp.idDestinatario,
+                  urdp.idPedido,
+                  urdp.idAgencia,
+                  urdp.CodigoRastreo,
+                  r.*, d.*, p.*, a.*
+                FROM 
+                  union_remitentes_destinatarios_pedidos urdp
+                INNER JOIN 
+                  remitentes r ON urdp.idRemitente = r.idRemitente
+                INNER JOIN 
+                  destinatarios d ON urdp.idDestinatario = d.idDestinatario
+                INNER JOIN 
+                  pedidos p ON urdp.idPedido = p.idPedido
+                INNER JOIN 
+                  agencias a ON urdp.idAgencia = a.idAgencia
+                WHERE 
+                  urdp.idAgencia = '${idAgencia}'
+                  AND p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
+                  AND a.StatusAgencia = 'Activa'
+                ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC;
+`;
+
+      return new Promise((resolve, reject) => {
+        CONEXION.query(sql, (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        });
+      });
+    });
+
+    // Esperar a que todas las promesas de búsqueda se resuelvan
+    const resultadosPedidos = await Promise.all(promesasDeBusqueda);
+
+    // Enviar la respuesta con los resultados
+    res.json(resultadosPedidos.flat());
   } catch (error) {
-    res.status(500).json(error500);
+    // Manejar errores
+    res.status(500).json({ error: error.message });
   }
 };
