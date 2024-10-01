@@ -90,7 +90,7 @@ export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ${idUsuario}`;
+    const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ${idUsuario} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);
@@ -117,11 +117,12 @@ export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
       filtro === ""
         ? `SELECT * 
           FROM agencias 
-          WHERE idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario}) 
+          WHERE StatusAgencia = 'Activa' AND idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario}) 
           ORDER BY idAgencia DESC`
         : `SELECT * 
           FROM agencias 
           WHERE NombreAgencia LIKE '%${filtro}%' 
+          AND StatusAgencia = 'Activa'
           AND idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario}) 
           ORDER BY idAgencia DESC`;
     CONEXION.query(sql, (error, result) => {
@@ -220,6 +221,42 @@ export const ActualizarEstadoUsuario = async (req, res) => {
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.status(200).json("El usuario ha sido actualizado con éxito ✨");
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A ACTUALIZAR INFORMACION DE UN USUARIO
+// SE UTILIZA EN LAS VISTAS: Usuarios > Administrar Usuarios > Editar Usuario
+export const ActualizarInformacionDeUnUsuario = async (req, res) => {
+  const { idUsuario, Usuario, Permisos, Contraseña, CookieConToken } = req.body;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  try {
+    const sql = `SELECT * FROM usuarios WHERE Usuario = '${Usuario}' AND idUsuario != ${idUsuario}`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      if (result.length > 0) {
+        res
+          .status(500)
+          .json(
+            `El usuario ${Usuario.toUpperCase()} ya existe, por favor intente con otro nombre de usuario ❌`
+          );
+      } else {
+        const sql = `UPDATE usuarios SET Usuario = '${Usuario}', Permisos = '${Permisos}', Contraseña = '${Contraseña}' WHERE idUsuario = ${idUsuario}`;
+        CONEXION.query(sql, (error, result) => {
+          if (error) throw error;
+          res
+            .status(200)
+            .json(
+              `El usuario ${Usuario.toUpperCase()} ha sido actualizado correctamente ✨`
+            );
+        });
+      }
     });
   } catch (error) {
     console.log(error);

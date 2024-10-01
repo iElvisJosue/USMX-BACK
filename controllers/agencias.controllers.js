@@ -12,7 +12,6 @@ import {
 
 // EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS POR UN FILTRO DETERMINADO
 // SE UTILIZA EN LAS VISTAS:
-// Paquetería > Registrar Productos
 // Agencias > Asignar Producto
 // Usuarios > Administrar Usuarios
 export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
@@ -30,15 +29,15 @@ export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
     if (tipoDeUsuario === "Administrador") {
       const sql =
         filtro === ""
-          ? `SELECT * FROM agencias ORDER BY idAgencia DESC`
-          : `SELECT * FROM agencias WHERE NombreAgencia LIKE '%${filtro}%' ORDER BY idAgencia DESC`;
+          ? `SELECT * FROM agencias WHERE StatusAgencia = 'Activa' ORDER BY idAgencia DESC`
+          : `SELECT * FROM agencias WHERE NombreAgencia LIKE '%${filtro}%' AND StatusAgencia = 'Activa' ORDER BY idAgencia DESC`;
       CONEXION.query(sql, (error, result) => {
         if (error) throw error;
         res.send(result);
       });
     }
     if (tipoDeUsuario === "Usuario") {
-      const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ${idDelUsuario} ORDER BY a.idAgencia DESC`;
+      const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ${idDelUsuario} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
       CONEXION.query(sql, (error, result) => {
         if (error) throw error;
         res.send(result);
@@ -216,6 +215,95 @@ export const DesasignarProductoAgencia = async (req, res) => {
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.status(200).json("El producto ha sido desasignado con éxito ✨");
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A ACTUALIZAR EL ESTADO DE UNA AGENCIA
+// SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias
+export const ActualizarEstadoAgencia = async (req, res) => {
+  const { idAgencia, StatusAgencia, CookieConToken } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `UPDATE agencias SET StatusAgencia = '${StatusAgencia}' WHERE idAgencia = ${idAgencia}`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res
+        .status(200)
+        .json(`Agencia ${StatusAgencia.toUpperCase()} con éxito ✨`);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A ACTUALIZAR LA INFORMACIoN DE UNA AGENCIA
+// SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias
+export const ActualizarInformacionAgencia = async (req, res) => {
+  const {
+    CookieConToken,
+    idAgencia,
+    Agencia,
+    Contacto,
+    Telefono,
+    Correo,
+    Estado,
+    Ciudad,
+    CP,
+    Direccion,
+  } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `UPDATE agencias SET NombreAgencia = '${Agencia}', NombreContactoAgencia = '${Contacto}', TelefonoContactoAgencia = '${Telefono}', CorreoContactoAgencia = '${Correo}', EstadoAgencia = '${Estado}', CiudadAgencia = '${Ciudad}', CodigoPostalAgencia = '${CP}', DireccionAgencia = '${Direccion}' WHERE idAgencia = '${idAgencia}'`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res
+        .status(200)
+        .json(
+          `La agencia ${Agencia.toUpperCase()} ha sido actualizada con éxito ✨`
+        );
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS:
+// Agencias > Administrar Agencias
+export const BuscarAgenciasPorFiltro = async (req, res) => {
+  const { CookieConToken, filtro } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+
+  try {
+    const sql =
+      filtro === ""
+        ? `SELECT * FROM agencias  ORDER BY idAgencia DESC`
+        : `SELECT * FROM agencias WHERE NombreAgencia LIKE '%${filtro}%' ORDER BY idAgencia DESC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
     });
   } catch (error) {
     console.log(error);

@@ -10,6 +10,7 @@ import {
   AsignarAgenciaAlUsuario,
   BuscarUsuariosParaAdministrarPorFiltro,
   ActualizarEstadoUsuario,
+  ActualizarInformacionDeUnUsuario,
 } from "../controllers/usuarios.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -40,5 +41,10 @@ router.post(
 );
 // RUTA PARA ACTUALIZAR EL ESTADO DE UN USUARIO
 router.put("/ActualizarEstadoUsuario", ActualizarEstadoUsuario);
+// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
+router.put(
+  "/ActualizarInformacionDeUnUsuario",
+  ActualizarInformacionDeUnUsuario
+);
 // EXPORTAMOS EL ENRUTADOR
 export default router;

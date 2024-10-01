@@ -16,7 +16,6 @@ import {
   CrearTicketDelPedido,
   CrearPaqueteDeTickets,
 } from "../helpers/PDFs.js";
-import { ChildProcess } from "child_process";
 
 // EN ESTA FUNCIÓN VAMOS GUARDAR TODA LA INFORMACION DEL DESTINATARIO, REMITENTE Y PEDIDO
 // SE UTILIZA EN LAS VISTAS: Paquetería > Registrar Productos > Pedido > Finalizar
@@ -437,7 +436,7 @@ const BusquedaDePedidosParaElAdministrador = (filtro) => {
   });
 };
 const BusquedaDePedidosParaElUsuario = async (filtro, idDelUsuario) => {
-  const sqlObtenerAgencias = `SELECT uua.idAgencia FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = '${idDelUsuario}'`;
+  const sqlObtenerAgencias = `SELECT uua.idAgencia FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = '${idDelUsuario}' AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
 
   return new Promise((resolve, reject) => {
     CONEXION.query(sqlObtenerAgencias, (error, result) => {
@@ -612,6 +611,7 @@ export const BuscarUltimosDiezPedidos = async (req, res) => {
           pedidos p ON urdp.idPedido = p.idPedido
       LEFT JOIN 
           agencias a ON urdp.idAgencia = a.idAgencia
+      WHERE a.StatusAgencia = 'Activa'
       ORDER BY 
           p.FechaCreacionPedido DESC, 
           p.HoraCreacionPedido DESC,
@@ -696,6 +696,7 @@ export const BuscarPedidosPorFecha = async (req, res) => {
                 agencias a ON urdp.idAgencia = a.idAgencia
             WHERE 
                 p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
+                AND a.StatusAgencia = 'Activa'
             ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
