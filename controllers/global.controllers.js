@@ -10,8 +10,8 @@ import { MENSAJE_DE_ERROR } from "../helpers/Const.js";
 export const IniciarSesion = (req, res) => {
   try {
     const { Usuario, Contraseña } = req.body;
-    const sql = `SELECT * FROM usuarios WHERE Usuario = '${Usuario}' AND Contraseña = '${Contraseña}' AND EstadoUsuario = 'Activo'`;
-    CONEXION.query(sql, async (error, result) => {
+    const sql = `SELECT * FROM usuarios WHERE Usuario = ? AND Contraseña = ? AND EstadoUsuario = 'Activo'`;
+    CONEXION.query(sql, [Usuario, Contraseña], async (error, result) => {
       if (result.length > 0) {
         // CREAMOS EL ID EN UN TOKEN
         const TokenDeAcceso = await CrearTokenDeAcceso({
