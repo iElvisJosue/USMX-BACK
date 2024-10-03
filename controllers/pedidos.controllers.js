@@ -363,14 +363,22 @@ export const BuscarPedidosPorFiltro = async (req, res) => {
       console.log(error);
       res.status(500).json(MENSAJE_DE_ERROR);
     }
-  }
-  if (tipoDeUsuario === "Usuario") {
+  } else {
     try {
       const PedidosParaElUsuario = await BusquedaDePedidosParaElUsuario(
         filtro,
         idDelUsuario
       );
-      res.send(PedidosParaElUsuario);
+      const pedidosOrdenadosPorFecha = (a, b) => {
+        if (a.FechaCreacionPedido > b.FechaCreacionPedido) {
+          return -1;
+        }
+        if (a.FechaCreacionPedido < b.FechaCreacionPedido) {
+          return 1;
+        }
+        return 0;
+      };
+      res.send(PedidosParaElUsuario.sort(pedidosOrdenadosPorFecha));
     } catch (error) {
       console.log(error);
       res.status(500).send(MENSAJE_DE_ERROR);
@@ -672,15 +680,68 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS POR FECHA
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Pedidos por fecha
 export const BuscarPedidosPorFecha = async (req, res) => {
-  const { primeraFecha, segundaFecha, idDelUsuario } = req.body;
+  const { primeraFecha, segundaFecha, idDelUsuario, permisosUsuario } =
+    req.body;
 
-  const sqlObtenerAgencias = `SELECT uua.idAgencia 
-                              FROM union_usuarios_agencias uua 
-                              LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia 
-                              WHERE uua.idUsuario = '${idDelUsuario}' 
-                              AND a.StatusAgencia = 'Activa' 
-                              ORDER BY a.idAgencia DESC`;
+  const pedidosPorFecha =
+    permisosUsuario === "Administrador"
+      ? await BuscarPedidosPorFechaParaElAdministrador(
+          primeraFecha,
+          segundaFecha
+        )
+      : await BuscarPedidosPorFechaParaLosEmpleados(
+          primeraFecha,
+          segundaFecha,
+          idDelUsuario
+        );
 
+  res.status(200).json(pedidosPorFecha);
+};
+const BuscarPedidosPorFechaParaElAdministrador = (
+  primeraFecha,
+  segundaFecha
+) => {
+  const sql = `SELECT
+                urdp.idRemitente,
+                urdp.idDestinatario,
+                urdp.idPedido,
+                urdp.idAgencia,
+                urdp.CodigoRastreo,
+                r.*, d.*, p.*, a.*
+              FROM
+                union_remitentes_destinatarios_pedidos urdp
+              INNER JOIN
+                remitentes r ON urdp.idRemitente = r.idRemitente
+              INNER JOIN
+                destinatarios d ON urdp.idDestinatario = d.idDestinatario
+              INNER JOIN
+                pedidos p ON urdp.idPedido = p.idPedido
+              INNER JOIN
+                agencias a ON urdp.idAgencia = a.idAgencia
+              WHERE
+                p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
+              ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
+  return new Promise((resolve, reject) => {
+    CONEXION.query(sql, (error, result) => {
+      if (error) {
+        reject(error); // Si hay error, rechaza la promesa
+      } else {
+        resolve(result.flat()); // Si todo va bien, resuelve con el insertId
+      }
+    });
+  });
+};
+const BuscarPedidosPorFechaParaLosEmpleados = async (
+  primeraFecha,
+  segundaFecha,
+  idDelUsuario
+) => {
+  const sqlObtenerAgencias = `SELECT uua.idAgencia
+            FROM union_usuarios_agencias uua
+            LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia
+            WHERE uua.idUsuario = '${idDelUsuario}'
+            AND a.StatusAgencia = 'Activa'
+            ORDER BY a.idAgencia DESC`;
   try {
     // Obtener agencias activas del usuario
     const agenciasResult = await new Promise((resolve, reject) => {
@@ -689,33 +750,31 @@ export const BuscarPedidosPorFecha = async (req, res) => {
         resolve(result);
       });
     });
-
     // Mapear las agencias para obtener los pedidos
     const promesasDeBusqueda = agenciasResult.map(({ idAgencia }) => {
-      const sql = `SELECT 
-                  urdp.idRemitente,
-                  urdp.idDestinatario,
-                  urdp.idPedido,
-                  urdp.idAgencia,
-                  urdp.CodigoRastreo,
-                  r.*, d.*, p.*, a.*
-                FROM 
-                  union_remitentes_destinatarios_pedidos urdp
-                INNER JOIN 
-                  remitentes r ON urdp.idRemitente = r.idRemitente
-                INNER JOIN 
-                  destinatarios d ON urdp.idDestinatario = d.idDestinatario
-                INNER JOIN 
-                  pedidos p ON urdp.idPedido = p.idPedido
-                INNER JOIN 
-                  agencias a ON urdp.idAgencia = a.idAgencia
-                WHERE 
-                  urdp.idAgencia = '${idAgencia}'
-                  AND p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
-                  AND a.StatusAgencia = 'Activa'
-                ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC;
-`;
-
+      const sql = `SELECT
+                    urdp.idRemitente,
+                    urdp.idDestinatario,
+                    urdp.idPedido,
+                    urdp.idAgencia,
+                    urdp.CodigoRastreo, 
+                    r.*, d.*, p.*, a.*
+                  FROM
+                    union_remitentes_destinatarios_pedidos urdp
+                  INNER JOIN
+                    remitentes r ON urdp.idRemitente = r.idRemitente
+                  INNER JOIN
+                    destinatarios d ON urdp.idDestinatario = d.idDestinatario
+                  INNER JOIN
+                    pedidos p ON urdp.idPedido = p.idPedido
+                  INNER JOIN
+                    agencias a ON urdp.idAgencia = a.idAgencia
+                  WHERE
+                    urdp.idAgencia = '${idAgencia}'
+                    AND p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
+                    AND a.StatusAgencia = 'Activa'
+                  ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC;
+  `;
       return new Promise((resolve, reject) => {
         CONEXION.query(sql, (error, result) => {
           if (error) return reject(error);
@@ -723,14 +782,21 @@ export const BuscarPedidosPorFecha = async (req, res) => {
         });
       });
     });
-
     // Esperar a que todas las promesas de búsqueda se resuelvan
     const resultadosPedidos = await Promise.all(promesasDeBusqueda);
 
-    // Enviar la respuesta con los resultados
-    res.json(resultadosPedidos.flat());
+    const pedidosOrdenadosPorFecha = (a, b) => {
+      if (a.FechaCreacionPedido > b.FechaCreacionPedido) {
+        return -1;
+      }
+      if (a.FechaCreacionPedido < b.FechaCreacionPedido) {
+        return 1;
+      }
+      return 0;
+    };
+    return resultadosPedidos.flat().sort(pedidosOrdenadosPorFecha);
   } catch (error) {
     // Manejar errores
-    res.status(500).json({ error: error.message });
+    res.status(500).json(MENSAJE_DE_ERROR);
   }
 };

@@ -35,8 +35,7 @@ export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
         if (error) throw error;
         res.send(result);
       });
-    }
-    if (tipoDeUsuario === "Usuario") {
+    } else {
       const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ${idDelUsuario} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
       CONEXION.query(sql, (error, result) => {
         if (error) throw error;
