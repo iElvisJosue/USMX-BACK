@@ -263,3 +263,23 @@ export const ActualizarInformacionDeUnUsuario = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A OBTENER LA INFORMACION DE UN USUARIO
+// SE UTILIZA EN LAS VISTAS: Perfil
+export const ObtenerInformacionDeUnUsuario = async (req, res) => {
+  const { idUsuario, CookieConToken } = req.body;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  try {
+    const sql = "SELECT * FROM usuarios WHERE idUsuario = ?";
+    CONEXION.query(sql, [idUsuario], (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};

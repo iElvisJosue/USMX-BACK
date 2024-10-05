@@ -11,6 +11,7 @@ import {
   BuscarUsuariosParaAdministrarPorFiltro,
   ActualizarEstadoUsuario,
   ActualizarInformacionDeUnUsuario,
+  ObtenerInformacionDeUnUsuario,
 } from "../controllers/usuarios.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -46,5 +47,8 @@ router.put(
   "/ActualizarInformacionDeUnUsuario",
   ActualizarInformacionDeUnUsuario
 );
+// RUTA PARA OBTENER LA INFORMACION DE UN USUARIO
+router.post("/ObtenerInformacionDeUnUsuario", ObtenerInformacionDeUnUsuario);
+
 // EXPORTAMOS EL ENRUTADOR
 export default router;
