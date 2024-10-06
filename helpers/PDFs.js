@@ -261,8 +261,13 @@ export const CrearTicketDelPedido = (
         ],
       },
       { qr: LinkDelQR, fit: 90, alignment: "center", margin: [0, 10] },
+      // {
+      //   text: HOST,
+      //   alignment: "center",
+      //   fontSize: TamañoTextoPequeño,
+      // },
       {
-        text: HOST,
+        text: "PARA CONOCER EL ESTATUS DE TU PAQUETE, ESCANEA EL CÓDIGO QR DE ARRIBA.",
         alignment: "center",
         fontSize: TamañoTextoPequeño,
       },
@@ -971,8 +976,13 @@ export const CrearPaqueteDeTickets = (
         alignment: "center",
         margin: [0, 10],
       },
+      // {
+      //   text: HOST,
+      //   alignment: "center",
+      //   fontSize: TamañoTextoPequeño,
+      // },
       {
-        text: HOST,
+        text: "PARA CONOCER EL ESTATUS DE TU PAQUETE, ESCANEA EL CÓDIGO QR DE ARRIBA.",
         alignment: "center",
         fontSize: TamañoTextoPequeño,
       },
