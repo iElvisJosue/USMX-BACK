@@ -1,4 +1,5 @@
 // LIBRERÍAS PARA EL PDF
+import bwipjs from "bwip-js";
 import fs from "fs";
 import createPdf from "pdfmake";
 import { fileURLToPath } from "url";
@@ -15,7 +16,9 @@ const imgURL = path.join(__dirname, "../public");
 const TamañoTextoTitulo = 16;
 const TamañoTextoNormal = 13;
 const TamañoTextoPequeño = 10;
+const TamañoTextoMuyPequeño = 6;
 const TamañoDelTicket = 80 * 2.83465;
+// const TamañoDeLaEtiqueta = 102 * 2.83465;
 const TamañoDeLaLinea = 80 * 2.54965;
 
 // IMPORTAMOS LAS AYUDAS
@@ -318,6 +321,409 @@ export const CrearTicketDelPedido = (
   // Guarda el documento PDF en un archivo
   pdfDoc.pipe(fs.createWriteStream(RutaDelPDF));
   pdfDoc.end();
+};
+export const CrearEtiquetaDelPedido = (
+  NombreDeLaEtiqueta,
+  remitente,
+  destinatario,
+  infoPedido,
+  GuiaPedido
+) => {
+  const LinkDelQR = GuiaPedido;
+
+  const Hoy = new Date();
+  const Opciones = {
+    timeZone: "America/Mexico_City", // Zona horaria de México (Guerrero)
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false, // Formato de 24 horas
+  };
+  const FechaConHora = Hoy.toLocaleString("es-MX", Opciones);
+  // ASIGNAMOS LA FUENTE AL PDF
+  const Fuente = {
+    Roboto: {
+      normal: path.join(FuenteURL, "Roboto-Regular.ttf"),
+    },
+  };
+  bwipjs.toBuffer(
+    {
+      bcid: "code128", // Tipo de código de barras (Code 128)
+      text: GuiaPedido, // Texto del código de barras
+      scale: 0, // Reduce el grosor de las barras (más delgado)
+      height: 5, // Aumenta la altura de las barras
+    },
+    function (err, png) {
+      if (err) {
+        console.log(err);
+      } else {
+        var ImpresorDelPDF = new createPdf(Fuente);
+        // DEFINIMOS EL DOCUMENTO PDF
+        const CuerpoDelPDF = {
+          // DEFINIMOS EL TAMAÑO DE LA PAGINA
+          pageSize: "LETTER",
+          content: [
+            {
+              columns: [
+                { width: "*", text: "" },
+                {
+                  width: "auto",
+                  table: {
+                    headerRows: 1,
+                    widths: [200, 200],
+                    body: [
+                      [
+                        {
+                          colSpan: 2,
+                          marginTop: 2.5,
+                          qr: LinkDelQR,
+                          fit: 80,
+                          alignment: "center",
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: "USMX EXPRESS",
+                          alignment: "center",
+                          fontSize: TamañoTextoNormal,
+                          margin: [0, 2.5],
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: GuiaPedido,
+                          alignment: "center",
+                          color: "white",
+                          fillColor: "black",
+                          fontSize: TamañoTextoTitulo,
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          text: "REMITENTE",
+                          alignment: "center",
+                          fontSize: TamañoTextoPequeño,
+                          marginTop: 2.5,
+                        },
+                        {
+                          text: "DESTINATARIO",
+                          alignment: "center",
+                          fontSize: TamañoTextoPequeño,
+                          marginTop: 2.5,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.NombreRemitente.toUpperCase()} ${remitente.ApellidosRemitente.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${destinatario.NombreDestinatario.toUpperCase()} ${destinatario.ApellidoPaternoDestinatario.toUpperCase()} ${destinatario.ApellidoMaternoDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.DireccionRemitente.toUpperCase()}, CP. ${
+                            remitente.CodigoPostalRemitente
+                          }`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${destinatario.DireccionDestinatario.toUpperCase()}, Col. ${destinatario.ColoniaDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${
+                            destinatario.MunicipioDelegacionDestinatario.toUpperCase()
+                              ? destinatario.MunicipioDelegacionDestinatario.toUpperCase() +
+                                " / "
+                              : ""
+                          }${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          marginBottom: 2.5,
+                          text: `${
+                            remitente.ReferenciaRemitente &&
+                            `REF. ${remitente.ReferenciaRemitente.toUpperCase()}`
+                          }`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          marginBottom: 2.5,
+                          text: `${
+                            destinatario.ReferenciaDestinatario &&
+                            `REF. ${destinatario.ReferenciaDestinatario.toUpperCase()}`
+                          }`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: `${infoPedido.Peso} lb(s)`,
+                          alignment: "center",
+                          fontSize: TamañoTextoNormal,
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: `Fecha documentación: ${FechaConHora}`,
+                          alignment: "center",
+                          color: "white",
+                          fillColor: "black",
+                          fontSize: TamañoTextoPequeño,
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          image:
+                            "data:image/png;base64," + png.toString("base64"),
+                          marginTop: 2.5,
+                          width: 400,
+                        },
+                        {},
+                      ],
+                    ],
+                  },
+                  // Layout personalizado para los bordes solo en los extremos
+                  layout: {
+                    hLineWidth: function (i, node) {
+                      return i === 0 || i === node.table.body.length ? 1 : 0; // Líneas horizontales solo arriba y abajo
+                    },
+                    vLineWidth: function (i, node) {
+                      return i === 0 || i === node.table.widths.length ? 1 : 0; // Líneas verticales solo en los costados
+                    },
+                    hLineColor: function (i, node) {
+                      return "black"; // Color de las líneas horizontales
+                    },
+                    vLineColor: function (i, node) {
+                      return "black"; // Color de las líneas verticales
+                    },
+                  },
+                },
+                { width: "*", text: "" },
+              ],
+            },
+            {
+              columns: [
+                { width: "*", text: "" },
+                {
+                  width: "auto",
+                  table: {
+                    headerRows: 1,
+                    widths: [200, 200],
+                    body: [
+                      [
+                        {
+                          colSpan: 2,
+                          marginTop: 2.5,
+                          qr: LinkDelQR,
+                          fit: 80,
+                          alignment: "center",
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: "USMX EXPRESS",
+                          alignment: "center",
+                          fontSize: TamañoTextoNormal,
+                          margin: [0, 2.5],
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: GuiaPedido,
+                          alignment: "center",
+                          color: "white",
+                          fillColor: "black",
+                          fontSize: TamañoTextoTitulo,
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          text: "REMITENTE",
+                          alignment: "center",
+                          fontSize: TamañoTextoPequeño,
+                          marginTop: 2.5,
+                        },
+                        {
+                          text: "DESTINATARIO",
+                          alignment: "center",
+                          fontSize: TamañoTextoPequeño,
+                          marginTop: 2.5,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.NombreRemitente.toUpperCase()} ${remitente.ApellidosRemitente.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${destinatario.NombreDestinatario.toUpperCase()} ${destinatario.ApellidoPaternoDestinatario.toUpperCase()} ${destinatario.ApellidoMaternoDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.DireccionRemitente.toUpperCase()}, CP. ${
+                            remitente.CodigoPostalRemitente
+                          }`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${destinatario.DireccionDestinatario.toUpperCase()}, Col. ${destinatario.ColoniaDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${
+                            destinatario.MunicipioDelegacionDestinatario.toUpperCase()
+                              ? destinatario.MunicipioDelegacionDestinatario.toUpperCase() +
+                                " / "
+                              : ""
+                          }${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          marginBottom: 2.5,
+                          text: `${
+                            remitente.ReferenciaRemitente &&
+                            `REF. ${remitente.ReferenciaRemitente.toUpperCase()}`
+                          }`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          marginBottom: 2.5,
+                          text: `${
+                            destinatario.ReferenciaDestinatario &&
+                            `REF. ${destinatario.ReferenciaDestinatario.toUpperCase()}`
+                          }`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: `${infoPedido.Peso} lb(s)`,
+                          alignment: "center",
+                          fontSize: TamañoTextoNormal,
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          text: `Fecha documentación: ${FechaConHora}`,
+                          alignment: "center",
+                          color: "white",
+                          fillColor: "black",
+                          fontSize: TamañoTextoPequeño,
+                        },
+                        {},
+                      ],
+                      [
+                        {
+                          colSpan: 2,
+                          image:
+                            "data:image/png;base64," + png.toString("base64"),
+                          marginTop: 2.5,
+                          width: 400,
+                        },
+                        {},
+                      ],
+                    ],
+                  },
+                  // Layout personalizado para los bordes solo en los extremos
+                  layout: {
+                    hLineWidth: function (i, node) {
+                      return i === 0 || i === node.table.body.length ? 1 : 0; // Líneas horizontales solo arriba y abajo
+                    },
+                    vLineWidth: function (i, node) {
+                      return i === 0 || i === node.table.widths.length ? 1 : 0; // Líneas verticales solo en los costados
+                    },
+                    hLineColor: function (i, node) {
+                      return "black"; // Color de las líneas horizontales
+                    },
+                    vLineColor: function (i, node) {
+                      return "black"; // Color de las líneas verticales
+                    },
+                  },
+                  marginTop: 25,
+                },
+                { width: "*", text: "" },
+              ],
+            },
+          ],
+          defaultStyle: {
+            font: "Roboto", // Establece la fuente predeterminada para todo el documento
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 10,
+          },
+          pageMargins: [10, 10, 10, 10],
+        };
+        // CREAMOS EL DOCUMENTO PDF
+        const pdfDoc = ImpresorDelPDF.createPdfKitDocument(CuerpoDelPDF);
+        // Generar el PDF y guardarlo en un archivo
+        const RutaDelPDF = path.join(PdfURL, NombreDeLaEtiqueta);
+        // Guarda el documento PDF en un archivo
+        pdfDoc.pipe(fs.createWriteStream(RutaDelPDF));
+        pdfDoc.end();
+      }
+    }
+  );
 };
 export const CrearPaqueteDeTickets = (
   NombreDelPaqueteDeTickets,

@@ -14,6 +14,7 @@ import {
 } from "../helpers/Func.js";
 import {
   CrearTicketDelPedido,
+  CrearEtiquetaDelPedido,
   CrearPaqueteDeTickets,
 } from "../helpers/PDFs.js";
 
@@ -256,12 +257,13 @@ const EjecutarConsultaGuardarPedido = (
 ) => {
   // CREAMOS EL NOMBRE DEL PDF
   const NombreDelTicket = `Ticket_Pedido_${GuiaPedido}.pdf`;
+  const NombreDeLaEtiqueta = `Etiqueta_Pedido_${GuiaPedido}.pdf`;
 
   return new Promise((resolve, reject) => {
     const sql = `
     INSERT INTO pedidos (
       GuiaPedido, ProductoPedido, TipoCargaPedido, TipoEnvioPedido, ContenidoPedido, LargoPedido, AnchoPedido, AltoPedido, PieCubicoPedido, PesoPedido, ValorDeclaradoPedido, ValorAseguradoPedido, CostoSeguroPedido, 
-      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, UsuarioResponsablePedido, TicketPedido, PaqueteTicketsPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (
+      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, UsuarioResponsablePedido, TicketPedido, EtiquetaPedido, PaqueteTicketsPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (
       '${GuiaPedido}',
       '${infoPedido.Producto}',
       '${infoPedido.TipoDeCarga}',
@@ -280,6 +282,7 @@ const EjecutarConsultaGuardarPedido = (
       '${infoPedido.Total}',
       '${infoPedido.UsuarioResponsable}',
       '${NombreDelTicket}',
+      '${NombreDeLaEtiqueta}',
       '${NombreDelPaqueteDeTickets}',
       CURDATE(),
       '${ObtenerHoraActual()}'
@@ -291,6 +294,13 @@ const EjecutarConsultaGuardarPedido = (
       CrearMovimientosPorDefecto(GuiaPedido, infoPedido.UsuarioResponsable);
       CrearTicketDelPedido(
         NombreDelTicket,
+        remitente,
+        destinatario,
+        infoPedido,
+        GuiaPedido
+      );
+      CrearEtiquetaDelPedido(
+        NombreDeLaEtiqueta,
         remitente,
         destinatario,
         infoPedido,
