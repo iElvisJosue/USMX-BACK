@@ -55,3 +55,45 @@ export const ObtenerTiposDeEnvio = async (req, res) => {
     res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   }
 };
+// EN ESTA FUNCION VAMOS A OBTENER EL MODO OSCURO DEL USUARIO
+// SE UTILIZA EN LAS VISTAS: Configuración
+export const ObtenerModoOscuro = async (req, res) => {
+  const { idUsuario } = req.params;
+  try {
+    const sql = `SELECT ModoOscuro FROM usuarios WHERE idUsuario = ?`;
+    CONEXION.query(sql, [idUsuario], (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCION VAMOS A ACTUALIZAR EL MODO OSCURO DEL USUARIO
+// SE UTILIZA EN LAS VISTAS: Configuración
+export const ActualizarModoOscuro = async (req, res) => {
+  const { CookieConToken, idUsuario, ModoOscuro } = req.body;
+
+  const TextoRespuesta = ModoOscuro ? "MODO OSCURO" : "MODO CLARO";
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `UPDATE usuarios SET ModoOscuro = ? WHERE idUsuario = ?`;
+    CONEXION.query(sql, [ModoOscuro, idUsuario], (error, result) => {
+      if (error) throw error;
+      res
+        .status(200)
+        .json(`El ${TextoRespuesta} ha sido aplicado correctamente ✨`);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};

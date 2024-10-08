@@ -18,6 +18,7 @@ export const IniciarSesion = (req, res) => {
           idUsuario: result[0].idUsuario,
           Usuario: result[0].Usuario,
           Permisos: result[0].Permisos,
+          ModoOscuro: result[0].ModoOscuro,
         });
         // ALMACENAMOS EL TOKEN EN UN COOKIE
         // res.cookie("TokenDeAcceso", TokenDeAcceso);
@@ -30,6 +31,7 @@ export const IniciarSesion = (req, res) => {
           idUsuario: result[0].idUsuario,
           Usuario: result[0].Usuario,
           Permisos: result[0].Permisos,
+          ModoOscuro: result[0].ModoOscuro,
           TokenDeAcceso,
         };
         // ENVIAMOS EL TOKEN AL CLIENTE
@@ -46,6 +48,7 @@ export const IniciarSesion = (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+
 export const VerificarToken = async (req, res) => {
   const { cookie } = req.body;
 
