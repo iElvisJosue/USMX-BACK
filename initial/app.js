@@ -8,16 +8,20 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS GLOBALES
 import globalRoutes from "../routes/global.routes.js";
-// IMPORTAMOS LAS RUTAS PARA PROCESOS DE AGENCIAS
-import agenciasRoutes from "../routes/agencias.routes.js";
-// IMPORTAMOS LAS RUTAS PARA PROCESOS DE CONFIGURACIÓN
-import configuracionRoutes from "../routes/configuracion.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE PEDIDOS
 import pedidosRoutes from "../routes/pedidos.routes.js";
-// IMPORTAMOS LAS RUTAS PARA PROCESOS DE USUARIOS
-import usuariosRoutes from "../routes/usuarios.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE AGENCIAS
+import agenciasRoutes from "../routes/agencias.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE PRODUCTOS
 import productosRoutes from "../routes/productos.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE USUARIOS
+import usuariosRoutes from "../routes/usuarios.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE OPERACIONES
+import operacionesRoutes from "../routes/operaciones.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE OCURRENCIAS
+import ocurreRoutes from "../routes/ocurre.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE CONFIGURACIÓN
+import configuracionRoutes from "../routes/configuracion.routes.js";
 
 // IMPORTAMOS LA CONFIGURACIÓN DE MULTER
 import { multerConfig } from "../middlewares/multer.js";
@@ -54,10 +58,12 @@ app.use(cookieParser());
 app.use(multerConfig);
 
 app.use("/api/global", globalRoutes);
-app.use("/api/agencias", agenciasRoutes);
 app.use("/api/pedidos", pedidosRoutes);
+app.use("/api/agencias", agenciasRoutes);
 app.use("/api/productos", productosRoutes);
 app.use("/api/usuarios", usuariosRoutes);
+app.use("/api/operaciones", operacionesRoutes);
+app.use("/api/ocurre", ocurreRoutes);
 app.use("/api/configuracion", configuracionRoutes);
 
 export default app;

@@ -318,20 +318,35 @@ const EjecutarConsultaGuardarPedido = (
   });
 };
 const CrearMovimientosPorDefecto = (GuiaPedido, UsuarioResponsable) => {
-  const sql = `INSERT INTO movimientos (GuiaPedido, EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, UsuarioResponsableMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento)
-  VALUES
-    ('${GuiaPedido}', 'Creado', 'El pedido ha sido creado en el sistema.', 'Sistema USMX', '${
-    UsuarioResponsable ?? "No definido"
-  }', CURDATE(), '${ObtenerHoraActual()}'),
-    ('${GuiaPedido}', 'Pendiente', 'El pago no ha sido confirmado.', 'Sistema USMX', '${
-    UsuarioResponsable ?? "No definido"
-  }', CURDATE(), '${ObtenerHoraActual()}')`;
+  const sqlMovimientos = `SELECT * FROM listamovimientos WHERE PorDefectoMovimiento = "Si" AND ActivoMovimiento = "Activo" ORDER BY EstadoMovimiento  = "Creado" DESC`;
+  let valores = [];
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, (error, result) => {
+    CONEXION.query(sqlMovimientos, (error, movimientos) => {
       if (error) {
         return reject(error); // Rechaza la promesa si hay un error
       }
-      resolve(true);
+      if (movimientos.length === 0) {
+        return reject("No hay movimientos por defecto");
+      }
+      movimientos.forEach((movimiento, index) => {
+        const { EstadoMovimiento, DetallesMovimiento, OrigenMovimiento } =
+          movimiento;
+        valores.push(
+          `('${GuiaPedido}', '${EstadoMovimiento}', '${DetallesMovimiento}', '${OrigenMovimiento}', '${
+            UsuarioResponsable ?? "No definido"
+          }', CURDATE(), '${ObtenerHoraActual()}')`
+        );
+      });
+      // HACEMOS LA INSERCIÓN
+      const sql = `INSERT INTO movimientos (GuiaPedido, EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, UsuarioResponsableMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento)
+      VALUES ${valores.join(",\n")};`;
+      // Ejecutamos la consulta de inserción
+      CONEXION.query(sql, (error, result) => {
+        if (error) {
+          return reject(error); // Rechaza la promesa si hay un error en la inserción
+        }
+        resolve(true); // Resuelve la promesa si todo sale bien
+      });
     });
   });
 };
