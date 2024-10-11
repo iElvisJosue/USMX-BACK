@@ -189,3 +189,28 @@ export const ActualizarInformacionOcurre = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS OCURRE POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS:
+// Realizar Pedido > Destinatario > Seleccionar Ocurre
+export const BuscarOcurresActivosPorFiltro = async (req, res) => {
+  const { CookieConToken, filtro } = req.body;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken) {
+    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+  try {
+    const sql =
+      filtro === ""
+        ? `SELECT * FROM ocurres WHERE StatusOcurre = 'Activa' ORDER BY idOcurre DESC`
+        : `SELECT * FROM ocurres WHERE StatusOcurre = 'Activa' AND NombreOcurre LIKE '%${filtro}%' ORDER BY idOcurre DESC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};

@@ -132,18 +132,16 @@ const EjecutarConsultaGuardarDestinatario = (destinatario) => {
       '${NombreDestinatario}',
       '${ApellidoPaternoDestinatario}',
       '${ApellidoMaternoDestinatario}',
-      '${TelefonoCasaDestinatario}',
-      '${CelularDestinatario}',
+      '${TelefonoCasaDestinatario || ""}',
+      '${CelularDestinatario || ""}',
       '${CorreoDestinatario}',
       '${ColoniaDestinatario}',
-      '${
-        MunicipioDelegacionDestinatario ? MunicipioDelegacionDestinatario : ""
-      }',
+      '${MunicipioDelegacionDestinatario || ""}',
       '${CodigoPostalDestinatario}',
       '${CiudadDestinatario}',
       '${EstadoDestinatario}',
       '${DireccionDestinatario}',
-      '${ReferenciaDestinatario ? ReferenciaDestinatario : ""}',
+      '${ReferenciaDestinatario || ""}',
       CURDATE(),
       '${ObtenerHoraActual()}')`;
 

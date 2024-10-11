@@ -6,6 +6,7 @@ import {
   BuscarOcurresPorFiltro,
   ActualizarEstadoOcurre,
   ActualizarInformacionOcurre,
+  BuscarOcurresActivosPorFiltro,
 } from "../controllers/ocurre.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -19,6 +20,8 @@ router.post("/BuscarOcurresPorFiltro", BuscarOcurresPorFiltro);
 router.put("/ActualizarEstadoOcurre", ActualizarEstadoOcurre);
 // RUTA PARA ACTUALIZAR LA INFORMACION DE UNA OCURRE
 router.put("/ActualizarInformacionOcurre", ActualizarInformacionOcurre);
+// RUTA PARA BUSCAR UNA OCURRE ACTIVA POR FILTRO
+router.post("/BuscarOcurresActivosPorFiltro", BuscarOcurresActivosPorFiltro);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;
