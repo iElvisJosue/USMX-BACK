@@ -10,6 +10,7 @@ import {
   AsignarAgenciaAlProducto,
   DesasignarAgenciaAlProducto,
   ActualizarInformacionDeUnProducto,
+  ActualizarEstadoProducto,
 } from "../controllers/productos.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -40,6 +41,8 @@ router.put(
   "/ActualizarInformacionDeUnProducto",
   ActualizarInformacionDeUnProducto
 );
+// RUTA PARA ACTUALIZAR EL ESTADO DE UN PRODUCTO
+router.put("/ActualizarEstadoProducto", ActualizarEstadoProducto);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

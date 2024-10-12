@@ -98,7 +98,7 @@ export const ObtenerProductosPorAgencia = async (req, res) => {
       uap.PesoMaximoProducto
       FROM union_agencias_productos uap
       LEFT JOIN productos p ON uap.idProducto = p.idProducto
-      WHERE uap.idAgencia = ${idAgencia};`;
+      WHERE uap.idAgencia = ${idAgencia} AND p.StatusProducto = 'Activo'`;
       CONEXION.query(sql, (error, result) => {
         if (error) throw error;
         res.send(result);
@@ -152,7 +152,6 @@ export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    // const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idUsuario = ${idUsuario} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
     const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ${idProducto} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
@@ -281,6 +280,30 @@ export const ActualizarInformacionDeUnProducto = async (req, res) => {
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.status(200).json("El producto ha sido actualizado correctamente ✨");
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A ACTUALIZAR EL ESTADO DE UN PRODUCTO
+// SE UTILIZA EN LAS VISTAS: Productos > Administrar Productos
+export const ActualizarEstadoProducto = async (req, res) => {
+  const { idProducto, StatusProducto, CookieConToken } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `UPDATE productos SET StatusProducto = '${StatusProducto}' WHERE idProducto = ${idProducto}`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res
+        .status(200)
+        .json(`Producto ${StatusProducto.toUpperCase()} con éxito ✨`);
     });
   } catch (error) {
     console.log(error);

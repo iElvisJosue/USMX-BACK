@@ -129,7 +129,7 @@ export const BuscarProductosQueTieneLaAgencia = async (req, res) => {
     uap.PesoMaximoProducto
     FROM union_agencias_productos uap 
     LEFT JOIN productos p ON uap.idProducto = p.idProducto 
-    WHERE uap.idAgencia = ${idAgencia}`;
+    WHERE uap.idAgencia = ${idAgencia} AND p.StatusProducto = 'Activo'`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);
@@ -154,8 +154,8 @@ export const BuscarProductosQueNoTieneLaAgencia = async (req, res) => {
   try {
     const sql =
       filtro === ""
-        ? `SELECT * FROM productos WHERE idProducto NOT IN (SELECT idProducto FROM union_agencias_productos WHERE idAgencia = ${idAgencia})`
-        : `SELECT * FROM productos WHERE NombreProducto LIKE '%${filtro}%' AND idProducto NOT IN (SELECT idProducto FROM union_agencias_productos WHERE idAgencia = ${idAgencia})`;
+        ? `SELECT * FROM productos WHERE idProducto NOT IN (SELECT idProducto FROM union_agencias_productos WHERE idAgencia = ${idAgencia}) AND StatusProducto = 'Activo'`
+        : `SELECT * FROM productos WHERE NombreProducto LIKE '%${filtro}%' AND StatusProducto = 'Activo' AND idProducto NOT IN (SELECT idProducto FROM union_agencias_productos WHERE idAgencia = ${idAgencia})`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);
