@@ -5,7 +5,7 @@ export const CONEXION = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database: "paqueteria",
+  database: "db_usmx",
 });
 
 // PARA PRODUCCIÓN

@@ -173,3 +173,87 @@ export const EditarMovimiento = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PAÍSES ACTIVOS
+// SE UTILIZA EN LAS VISTAS: Agencias > Registrar Agencia
+// SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias > Editar Agencia
+export const ObtenerPaisesActivos = async (req, res) => {
+  const { CookieConToken } = req.params;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  try {
+    const sql = `SELECT * FROM paises WHERE ActivoPais = 'Activo'`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS ESTADOS POR CÓDIGO DEL PAÍS
+// SE UTILIZA EN LAS VISTAS: Agencias > Registrar Agencia
+// SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias > Editar Agencia
+export const ObtenerEstadosPorCodigoDelPais = async (req, res) => {
+  const { CookieConToken, CodigoPais } = req.body;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  try {
+    const sql = `SELECT * FROM estados WHERE CodigoPais = '${CodigoPais}' AND ActivoEstado = 'Activo' ORDER BY NombreEstado ASC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LAS CIUDADES POR ESTADO SELECCIONADO
+// SE UTILIZA EN LAS VISTAS: Agencias > Registrar Agencia
+// SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias > Editar Agencia
+export const ObtenerCiudadesPorEstado = async (req, res) => {
+  const { CookieConToken, idEstado } = req.body;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  try {
+    const sql = `SELECT * FROM ciudades WHERE idEstado = '${idEstado}' AND ActivaCiudad = 'Activa' ORDER BY NombreCiudad ASC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LAS COLONIAS POR CODIGO POSTAL
+// SE UTILIZA EN LAS VISTAS: Agencias > Registrar Agencia
+// SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias > Editar Agencia
+export const ObtenerColoniasPorCodigoPostal = async (req, res) => {
+  const { CookieConToken, CodigoPostal } = req.body;
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+  if (!RespuestaValidacionToken)
+    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  try {
+    const sql = `SELECT * FROM colonias WHERE CodigoPostalColonia = '${CodigoPostal}' AND ActivaColonia = 'Activa' ORDER BY NombreColonia ASC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};

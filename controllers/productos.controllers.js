@@ -39,7 +39,7 @@ export const RegistrarProducto = async (req, res) => {
       res
         .status(500)
         .json(
-          `El producto ${NombreProducto.toUpperCase()} ya existe, por favor intente con otro nombre de usuario ❌`
+          `El producto ${NombreProducto.toUpperCase()} ya existe, por favor intente con otro nombre de producto ❌`
         );
     } else {
       const sql = `INSERT INTO productos (NombreProducto, AnchoProducto, LargoProducto, AltoProducto, PrecioProducto, LibraExtraProducto, 
@@ -56,8 +56,9 @@ export const RegistrarProducto = async (req, res) => {
               CURDATE(),
               '${ObtenerHoraActual()}'
               )`;
-      CONEXION.query(sql, (error, result) => {
+      CONEXION.query(sql, async (error, result) => {
         if (error) throw error;
+        await CrearUnionAgenciaProducto(result.insertId, req.body);
         res
           .status(200)
           .json(
@@ -71,6 +72,19 @@ export const RegistrarProducto = async (req, res) => {
     console.log(error);
     res.status(500).json(MENSAJE_DE_ERROR);
   }
+};
+const CrearUnionAgenciaProducto = (idProducto, DetallesProducto) => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT idAgencia FROM agencias WHERE NombreAgencia = "USMX Express"`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      const sql = `INSERT INTO union_agencias_productos (idAgencia, idProducto, PrecioProducto, ComisionProducto, LibraExtraProducto, PesoMaximoProducto, PesoSinCobroProducto) VALUES (${result[0].idAgencia}, ${idProducto}, '${DetallesProducto.PrecioProducto}', '${DetallesProducto.ComisionProducto}', '${DetallesProducto.CostoLibraExtraProducto}', '${DetallesProducto.PesoMaximoProducto}', '${DetallesProducto.PesoSinCobroProducto}')`;
+      CONEXION.query(sql, (error, result) => {
+        if (error) reject(error);
+        resolve(true);
+      });
+    });
+  });
 };
 
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS PRODUCTOS POR UNA AGENCIA
@@ -139,7 +153,7 @@ export const BuscarProductosPorFiltro = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
-// EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS QUE TIENE EL USUARIO
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS QUE TIENE EN UN PRODUCTO
 // SE UTILIZA EN LAS VISTAS: Productos > Administrar Productos
 export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
   const { CookieConToken, idProducto } = req.body;
@@ -152,7 +166,7 @@ export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ${idProducto} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
+    const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ${idProducto} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia ASC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);
@@ -162,7 +176,7 @@ export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
-// EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS QUE NO TIENE EL USUARIO
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LAS AGENCIAS QUE NO TIENE UN PRODUCTO
 // SE UTILIZA EN LAS VISTAS: Productos > Administrar Productos
 export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
   const { CookieConToken, filtro, idProducto } = req.body;
@@ -180,13 +194,13 @@ export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
         ? `SELECT *
           FROM agencias
           WHERE StatusAgencia = 'Activa' AND idAgencia NOT IN (SELECT idAgencia FROM union_agencias_productos WHERE idProducto = ${idProducto})
-          ORDER BY idAgencia DESC`
+          ORDER BY idAgencia ASC`
         : `SELECT *
           FROM agencias
           WHERE NombreAgencia LIKE '%${filtro}%'
           AND StatusAgencia = 'Activa'
           AND idAgencia NOT IN (SELECT idAgencia FROM union_agencias_productos WHERE idProducto = ${idProducto})
-          ORDER BY idAgencia DESC`;
+          ORDER BY idAgencia ASC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);
@@ -276,10 +290,24 @@ export const ActualizarInformacionDeUnProducto = async (req, res) => {
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `UPDATE productos SET NombreProducto = '${NombreProducto}', AnchoProducto = '${AnchoProducto}', LargoProducto = '${LargoProducto}', AltoProducto = '${AltoProducto}', PrecioProducto = '${PrecioProducto}', LibraExtraProducto = ${CostoLibraExtraProducto}, PesoSinCobroProducto = '${PesoSinCobroProducto}', PesoMaximoProducto = '${PesoMaximoProducto}', ComisionProducto = '${ComisionProducto}' WHERE idProducto = ${idProducto}`;
+    const sql = `SELECT * FROM productos WHERE NombreProducto = '${NombreProducto}'`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
-      res.status(200).json("El producto ha sido actualizado correctamente ✨");
+      if (result.length > 0) {
+        res
+          .status(500)
+          .json(
+            `El producto ${NombreProducto.toUpperCase()} ya existe, por favor intente con otro nombre de producto ❌`
+          );
+      } else {
+        const sql = `UPDATE productos SET NombreProducto = '${NombreProducto}', AnchoProducto = '${AnchoProducto}', LargoProducto = '${LargoProducto}', AltoProducto = '${AltoProducto}', PrecioProducto = '${PrecioProducto}', LibraExtraProducto = ${CostoLibraExtraProducto}, PesoSinCobroProducto = '${PesoSinCobroProducto}', PesoMaximoProducto = '${PesoMaximoProducto}', ComisionProducto = '${ComisionProducto}' WHERE idProducto = ${idProducto}`;
+        CONEXION.query(sql, (error, result) => {
+          if (error) throw error;
+          res
+            .status(200)
+            .json("El producto ha sido actualizado correctamente ✨");
+        });
+      }
     });
   } catch (error) {
     console.log(error);

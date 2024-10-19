@@ -90,7 +90,7 @@ export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ${idUsuario} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
+    const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ${idUsuario} AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia ASC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);
@@ -118,13 +118,13 @@ export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
         ? `SELECT * 
           FROM agencias 
           WHERE StatusAgencia = 'Activa' AND idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario}) 
-          ORDER BY idAgencia DESC`
+          ORDER BY idAgencia ASC`
         : `SELECT * 
           FROM agencias 
           WHERE NombreAgencia LIKE '%${filtro}%' 
           AND StatusAgencia = 'Activa'
           AND idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ${idUsuario}) 
-          ORDER BY idAgencia DESC`;
+          ORDER BY idAgencia ASC`;
     CONEXION.query(sql, (error, result) => {
       if (error) throw error;
       res.send(result);

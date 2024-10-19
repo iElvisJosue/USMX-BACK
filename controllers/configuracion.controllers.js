@@ -219,3 +219,115 @@ export const EliminarTipoDeEnvio = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS PAISES POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS:
+// Paises > Administrar Paises
+export const BuscarPaisesPorFiltro = async (req, res) => {
+  const { CookieConToken, filtro } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+
+  try {
+    const sql =
+      filtro === ""
+        ? `SELECT * FROM paises ORDER BY ActivoPais = "Activo" DESC`
+        : `SELECT * FROM paises WHERE NombrePais LIKE '%${filtro}%' OR CodigoPais LIKE '%${filtro}%' ORDER BY ActivoPais = "Activo" DESC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS ESTADOS POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS:
+// Estados > Administrar Estados
+export const BuscarEstadosPorFiltro = async (req, res) => {
+  const { CookieConToken, filtro } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+
+  try {
+    const sql =
+      filtro === ""
+        ? `SELECT * FROM estados ORDER BY NombreEstado ASC`
+        : `SELECT * FROM estados WHERE NombreEstado LIKE '%${filtro}%' OR CodigoPais LIKE '%${filtro}%' ORDER BY NombreEstado ASC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LAS CIUDADES POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS:
+// Ciudades > Administrar Ciudades
+export const BuscarCiudadesPorFiltro = async (req, res) => {
+  const { CookieConToken, filtro } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+
+  try {
+    const sql =
+      filtro === ""
+        ? `SELECT c.*, e.NombreEstado FROM ciudades c JOIN estados e ON c.idEstado = e.idEstado ORDER BY NombreCiudad ASC`
+        : `SELECT c.*, e.NombreEstado FROM ciudades  c JOIN estados e ON c.idEstado = e.idEstado WHERE NombreCiudad LIKE '%${filtro}%' ORDER BY NombreCiudad ASC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LAS COLONIAS POR UN FILTRO DETERMINADO
+// SE UTILIZA EN LAS VISTAS:
+// Colonias > Administrar Colonias
+export const BuscarColoniasPorFiltro = async (req, res) => {
+  const { CookieConToken, filtro } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+
+  try {
+    const sql =
+      filtro === ""
+        ? `SELECT * FROM colonias ORDER BY NombreColonia ASC LIMIT 1000`
+        : `SELECT * FROM colonias WHERE NombreColonia LIKE '%${filtro}%' OR NombreRegionUnoColonia LIKE '%${filtro}%' ORDER BY NombreColonia ASC LIMIT 1000`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) throw error;
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};

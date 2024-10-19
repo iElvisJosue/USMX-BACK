@@ -10,6 +10,10 @@ import {
   EliminarTipoDeCarga,
   RegistrarTipoDeEnvio,
   EliminarTipoDeEnvio,
+  BuscarPaisesPorFiltro,
+  BuscarEstadosPorFiltro,
+  BuscarCiudadesPorFiltro,
+  BuscarColoniasPorFiltro,
 } from "../controllers/configuracion.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -37,6 +41,15 @@ router.delete(
   "/EliminarTipoDeEnvio/:CookieConToken/:idTipoEnvio",
   EliminarTipoDeEnvio
 );
+// RUTA PARA BUSCAR LOS PAISES POR FILTRO
+router.post("/BuscarPaisesPorFiltro", BuscarPaisesPorFiltro);
+// RUTA PARA BUSCAR LOS ESTADOS POR FILTRO
+router.post("/BuscarEstadosPorFiltro", BuscarEstadosPorFiltro);
+// RUTA PARA BUSCAR LAS CIUDADES POR FILTRO
+router.post("/BuscarCiudadesPorFiltro", BuscarCiudadesPorFiltro);
+// RUTA PARA BUSCAR LAS COLONIAS POR FILTRO
+router.post("/BuscarColoniasPorFiltro", BuscarColoniasPorFiltro);
+//
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

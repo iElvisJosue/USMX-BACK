@@ -22,7 +22,7 @@ const TamañoDelTicket = 80 * 2.83465;
 const TamañoDeLaLinea = 80 * 2.54965;
 
 // IMPORTAMOS LAS AYUDAS
-import { LINK_QR, HOST } from "./Const.js";
+import { LINK_QR } from "./Const.js";
 
 export const CrearTicketDelPedido = (
   NombreDelTicket,
@@ -160,24 +160,32 @@ export const CrearTicketDelPedido = (
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
-      {
-        text: `${destinatario.DireccionDestinatario}, Col. ${destinatario.ColoniaDestinatario}, CP. ${destinatario.CodigoPostalDestinatario}`,
-        alignment: "left",
-        fontSize: TamañoTextoPequeño,
-      },
-      {
-        text: `Telefono(s): ${destinatario.TelefonoCasaDestinatario} - ${destinatario.CelularDestinatario}`,
-        alignment: "left",
-        fontSize: TamañoTextoPequeño,
-      },
+      destinatario.CelularDestinatario || destinatario.TelefonoCasaDestinatario
+        ? {
+            text: `Telefono(s): ${destinatario.CelularDestinatario}${
+              destinatario.TelefonoCasaDestinatario &&
+              ` - ${destinatario.TelefonoCasaDestinatario}`
+            }`,
+            alignment: "left",
+            fontSize: TamañoTextoPequeño,
+          }
+        : {
+            text: `Teléfono(s): N/A`,
+            alignment: "left",
+            fontSize: TamañoTextoPequeño,
+          },
       {
         text: `${
-          destinatario.MunicipioDelegacionDestinatario
-            ? destinatario.MunicipioDelegacionDestinatario + " / "
-            : ""
-        }${destinatario.CiudadDestinatario} / ${
-          destinatario.EstadoDestinatario
+          destinatario.MunicipioDelegacionDestinatario &&
+          `${destinatario.MunicipioDelegacionDestinatario}, `
+        }${destinatario.DireccionDestinatario}, CP. ${
+          destinatario.CodigoPostalDestinatario
         }`,
+        alignment: "left",
+        fontSize: TamañoTextoPequeño,
+      },
+      {
+        text: `${destinatario.PaisDestinatario} / ${destinatario.EstadoDestinatario} / ${destinatario.CiudadDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
@@ -446,14 +454,14 @@ export const CrearEtiquetaDelPedido = (
                           fontSize: TamañoTextoMuyPequeño,
                         },
                         {
-                          text: `${destinatario.DireccionDestinatario.toUpperCase()}, Col. ${destinatario.ColoniaDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
+                          text: `${destinatario.DireccionDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
                       ],
                       [
                         {
-                          text: `${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
+                          text: `${remitente.PaisRemitente.toUpperCase()} / ${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -463,7 +471,7 @@ export const CrearEtiquetaDelPedido = (
                               ? destinatario.MunicipioDelegacionDestinatario.toUpperCase() +
                                 " / "
                               : ""
-                          }${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
+                          }${destinatario.PaisDestinatario.toUpperCase()} / ${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -614,14 +622,14 @@ export const CrearEtiquetaDelPedido = (
                           fontSize: TamañoTextoMuyPequeño,
                         },
                         {
-                          text: `${destinatario.DireccionDestinatario.toUpperCase()}, Col. ${destinatario.ColoniaDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
+                          text: `${destinatario.DireccionDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
                       ],
                       [
                         {
-                          text: `${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
+                          text: `${remitente.PaisRemitente.toUpperCase()} / ${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -631,7 +639,7 @@ export const CrearEtiquetaDelPedido = (
                               ? destinatario.MunicipioDelegacionDestinatario.toUpperCase() +
                                 " / "
                               : ""
-                          }${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
+                          }${destinatario.PaisDestinatario.toUpperCase()} / ${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -870,24 +878,32 @@ export const CrearPaqueteDeTickets = (
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
-      {
-        text: `${destinatario.DireccionDestinatario}, Col. ${destinatario.ColoniaDestinatario}, CP. ${destinatario.CodigoPostalDestinatario}`,
-        alignment: "left",
-        fontSize: TamañoTextoPequeño,
-      },
-      {
-        text: `Telefono(s): ${destinatario.TelefonoCasaDestinatario} - ${destinatario.CelularDestinatario}`,
-        alignment: "left",
-        fontSize: TamañoTextoPequeño,
-      },
+      destinatario.CelularDestinatario || destinatario.TelefonoCasaDestinatario
+        ? {
+            text: `Telefono(s): ${destinatario.CelularDestinatario}${
+              destinatario.TelefonoCasaDestinatario &&
+              ` - ${destinatario.TelefonoCasaDestinatario}`
+            }`,
+            alignment: "left",
+            fontSize: TamañoTextoPequeño,
+          }
+        : {
+            text: `Teléfono(s): N/A`,
+            alignment: "left",
+            fontSize: TamañoTextoPequeño,
+          },
       {
         text: `${
-          destinatario.MunicipioDelegacionDestinatario
-            ? destinatario.MunicipioDelegacionDestinatario + " / "
-            : ""
-        }${destinatario.CiudadDestinatario} / ${
-          destinatario.EstadoDestinatario
+          destinatario.MunicipioDelegacionDestinatario &&
+          `${destinatario.MunicipioDelegacionDestinatario}, `
+        }${destinatario.DireccionDestinatario}, CP. ${
+          destinatario.CodigoPostalDestinatario
         }`,
+        alignment: "left",
+        fontSize: TamañoTextoPequeño,
+      },
+      {
+        text: `${destinatario.PaisDestinatario} / ${destinatario.EstadoDestinatario} / ${destinatario.CiudadDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },

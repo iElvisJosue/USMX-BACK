@@ -78,25 +78,29 @@ const EjecutarConsultaGuardarRemitente = (remitente) => {
     TelefonoCasaRemitente,
     CelularRemitente,
     CorreoRemitente,
-    CodigoPostalRemitente,
-    CiudadRemitente,
+    PaisRemitente,
+    CodigoPaisRemitente,
     EstadoRemitente,
+    CiudadRemitente,
+    CodigoPostalRemitente,
     DireccionRemitente,
     ReferenciaRemitente,
   } = remitente;
 
-  const sql = `INSERT INTO remitentes (NombreRemitente, ApellidosRemitente, TelefonoCasaRemitente, CelularRemitente, CorreoRemitente, CodigoPostalRemitente, CiudadRemitente, EstadoRemitente, DireccionRemitente, ReferenciaRemitente, FechaCreacionRemitente, HoraCreacionRemitente) 
+  const sql = `INSERT INTO remitentes (NombreRemitente, ApellidosRemitente, TelefonoCasaRemitente, CelularRemitente, CorreoRemitente, PaisRemitente, CodigoPaisRemitente, EstadoRemitente, CiudadRemitente, CodigoPostalRemitente, DireccionRemitente, ReferenciaRemitente, FechaCreacionRemitente, HoraCreacionRemitente) 
     VALUES (
       '${NombreRemitente}', 
       '${ApellidosRemitente}', 
-      '${TelefonoCasaRemitente}', 
+      '${TelefonoCasaRemitente || ""}', 
       '${CelularRemitente}', 
       '${CorreoRemitente}', 
-      '${CodigoPostalRemitente}', 
-      '${CiudadRemitente}', 
+      '${PaisRemitente}',
+      '${CodigoPaisRemitente}',
       '${EstadoRemitente}', 
+      '${CiudadRemitente}', 
+      '${CodigoPostalRemitente}', 
       '${DireccionRemitente}',
-      '${ReferenciaRemitente ? ReferenciaRemitente : ""}',
+      '${ReferenciaRemitente || ""}',
       CURDATE(),
       '${ObtenerHoraActual()}')`;
 
@@ -118,16 +122,18 @@ const EjecutarConsultaGuardarDestinatario = (destinatario) => {
     TelefonoCasaDestinatario,
     CelularDestinatario,
     CorreoDestinatario,
-    ColoniaDestinatario,
-    MunicipioDelegacionDestinatario,
-    CodigoPostalDestinatario,
-    CiudadDestinatario,
+    PaisDestinatario,
+    CodigoPaisDestinatario,
     EstadoDestinatario,
+    CiudadDestinatario,
+    CodigoPostalDestinatario,
     DireccionDestinatario,
+    MunicipioDelegacionDestinatario,
     ReferenciaDestinatario,
   } = destinatario;
 
-  const sql = `INSERT INTO destinatarios (NombreDestinatario, ApellidoPaternoDestinatario, ApellidoMaternoDestinatario, TelefonoCasaDestinatario, CelularDestinatario, CorreoDestinatario, ColoniaDestinatario, MunicipioDelegacionDestinatario, CodigoPostalDestinatario, CiudadDestinatario, EstadoDestinatario, DireccionDestinatario, ReferenciaDestinatario, FechaCreacionDestinatario, HoraCreacionDestinatario)
+  const sql = `INSERT INTO destinatarios (NombreDestinatario, ApellidoPaternoDestinatario, ApellidoMaternoDestinatario, TelefonoCasaDestinatario, CelularDestinatario, CorreoDestinatario,
+   PaisDestinatario, CodigoPaisDestinatario, EstadoDestinatario, CiudadDestinatario, CodigoPostalDestinatario, DireccionDestinatario, MunicipioDelegacionDestinatario, ReferenciaDestinatario, FechaCreacionDestinatario, HoraCreacionDestinatario)
     VALUES (
       '${NombreDestinatario}',
       '${ApellidoPaternoDestinatario}',
@@ -135,12 +141,13 @@ const EjecutarConsultaGuardarDestinatario = (destinatario) => {
       '${TelefonoCasaDestinatario || ""}',
       '${CelularDestinatario || ""}',
       '${CorreoDestinatario}',
-      '${ColoniaDestinatario}',
-      '${MunicipioDelegacionDestinatario || ""}',
-      '${CodigoPostalDestinatario}',
-      '${CiudadDestinatario}',
+      '${PaisDestinatario}',
+      '${CodigoPaisDestinatario}',
       '${EstadoDestinatario}',
+      '${CiudadDestinatario}',
+      '${CodigoPostalDestinatario}',
       '${DireccionDestinatario}',
+      '${MunicipioDelegacionDestinatario || ""}',
       '${ReferenciaDestinatario || ""}',
       CURDATE(),
       '${ObtenerHoraActual()}')`;

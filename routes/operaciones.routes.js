@@ -6,6 +6,10 @@ import {
   ObtenerTodosLosMovimientos,
   ActualizarEstadoDeUnMovimiento,
   EditarMovimiento,
+  ObtenerPaisesActivos,
+  ObtenerEstadosPorCodigoDelPais,
+  ObtenerCiudadesPorEstado,
+  ObtenerColoniasPorCodigoPostal,
 } from "../controllers/operaciones.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -19,6 +23,14 @@ router.post("/ObtenerTodosLosMovimientos", ObtenerTodosLosMovimientos);
 router.put("/ActualizarEstadoDeUnMovimiento", ActualizarEstadoDeUnMovimiento);
 // RUTA PARA EDITAR UN MOVIMIENTO
 router.put("/EditarMovimiento", EditarMovimiento);
+// RUTA PARA OBTENER LOS PAISES ACTIVOS
+router.get("/ObtenerPaisesActivos/:CookieConToken", ObtenerPaisesActivos);
+// RUTA PARA OBTENER LOS ESTADOS POR CODIGO DEL PAIS
+router.post("/ObtenerEstadosPorCodigoDelPais", ObtenerEstadosPorCodigoDelPais);
+// RUTA PARA OBTENER LAS CIUDADES POR ESTADO
+router.post("/ObtenerCiudadesPorEstado", ObtenerCiudadesPorEstado);
+// RUTA PARA OBTENER LAS COLONIAS POR CODIGO POSTAL
+router.post("/ObtenerColoniasPorCodigoPostal", ObtenerColoniasPorCodigoPostal);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

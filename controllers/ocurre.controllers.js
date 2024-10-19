@@ -20,12 +20,13 @@ export const RegistrarOcurre = async (req, res) => {
     OperadorLogisticoOcurre,
     TelefonoOcurre,
     CorreoOcurre,
-    ColoniaOcurre,
-    MunicipioDelegacionOcurre,
-    CodigoPostalOcurre,
-    CiudadOcurre,
+    PaisOcurre,
+    CodigoPaisOcurre,
     EstadoOcurre,
+    CiudadOcurre,
+    CodigoPostalOcurre,
     DireccionOcurre,
+    MunicipioDelegacionOcurre,
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
@@ -43,22 +44,23 @@ export const RegistrarOcurre = async (req, res) => {
           .status(500)
           .json(`La ocurrencia ${NombreOcurre.toUpperCase()} ya existe ❌`);
       } else {
-        const sql = `INSERT INTO ocurres (NombreOcurre, OperadorLogisticoOcurre, TelefonoOcurre, CorreoOcurre, ColoniaOcurre, MunicipioDelegacionOcurre, CodigoPostalOcurre, CiudadOcurre, EstadoOcurre, DireccionOcurre, ReferenciaOcurre, ObservacionesOcurre, FechaCreacionOcurre, HoraCreacionOcurre) VALUES (?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(), '${ObtenerHoraActual()}') `;
+        const sql = `INSERT INTO ocurres (NombreOcurre, OperadorLogisticoOcurre, TelefonoOcurre, CorreoOcurre, PaisOcurre, CodigoPaisOcurre, EstadoOcurre, CiudadOcurre, CodigoPostalOcurre, DireccionOcurre, MunicipioDelegacionOcurre, ReferenciaOcurre, ObservacionesOcurre, FechaCreacionOcurre, HoraCreacionOcurre) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(), '${ObtenerHoraActual()}') `;
         CONEXION.query(
           sql,
           [
             NombreOcurre,
             OperadorLogisticoOcurre,
-            TelefonoOcurre,
+            TelefonoOcurre || "",
             CorreoOcurre,
-            ColoniaOcurre,
-            MunicipioDelegacionOcurre,
-            CodigoPostalOcurre,
-            CiudadOcurre,
+            PaisOcurre,
+            CodigoPaisOcurre,
             EstadoOcurre,
+            CiudadOcurre,
+            CodigoPostalOcurre,
             DireccionOcurre,
-            ReferenciaOcurre,
-            ObservacionesOcurre,
+            MunicipioDelegacionOcurre || "",
+            ReferenciaOcurre || "",
+            ObservacionesOcurre || "",
           ],
           (error, result) => {
             if (error) throw error;
@@ -132,12 +134,13 @@ export const ActualizarInformacionOcurre = async (req, res) => {
     OperadorLogisticoOcurre,
     TelefonoOcurre,
     CorreoOcurre,
-    ColoniaOcurre,
-    MunicipioDelegacionOcurre,
-    CodigoPostalOcurre,
-    CiudadOcurre,
+    PaisOcurre,
+    CodigoPaisOcurre,
     EstadoOcurre,
+    CiudadOcurre,
+    CodigoPostalOcurre,
     DireccionOcurre,
+    MunicipioDelegacionOcurre,
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
@@ -155,7 +158,7 @@ export const ActualizarInformacionOcurre = async (req, res) => {
           .status(500)
           .json(`La ocurrencia ${NombreOcurre.toUpperCase()} ya existe ❌`);
       } else {
-        const sql = `UPDATE ocurres SET NombreOcurre = ?, OperadorLogisticoOcurre = ?, TelefonoOcurre = ?, CorreoOcurre = ?, ColoniaOcurre = ?, MunicipioDelegacionOcurre = ?, CodigoPostalOcurre = ?, CiudadOcurre = ?, EstadoOcurre = ?, DireccionOcurre = ?, ReferenciaOcurre = ?, ObservacionesOcurre = ? WHERE idOcurre = ?`;
+        const sql = `UPDATE ocurres SET NombreOcurre = ?, OperadorLogisticoOcurre = ?, TelefonoOcurre = ?, CorreoOcurre = ?, PaisOcurre = ?, CodigoPaisOcurre = ?, EstadoOcurre = ?, CiudadOcurre = ?, CodigoPostalOcurre = ?, DireccionOcurre = ?,  MunicipioDelegacionOcurre = ?, ReferenciaOcurre = ?, ObservacionesOcurre = ? WHERE idOcurre = ?`;
         CONEXION.query(
           sql,
           [
@@ -163,12 +166,13 @@ export const ActualizarInformacionOcurre = async (req, res) => {
             OperadorLogisticoOcurre,
             TelefonoOcurre,
             CorreoOcurre,
-            ColoniaOcurre,
-            MunicipioDelegacionOcurre,
-            CodigoPostalOcurre,
-            CiudadOcurre,
+            PaisOcurre,
+            CodigoPaisOcurre,
             EstadoOcurre,
+            CiudadOcurre,
+            CodigoPostalOcurre,
             DireccionOcurre,
+            MunicipioDelegacionOcurre,
             ReferenciaOcurre,
             ObservacionesOcurre,
             idOcurre,
