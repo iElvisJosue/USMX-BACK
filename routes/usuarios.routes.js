@@ -3,14 +3,13 @@ import { Router } from "express";
 // IMPORTAMOS LAS CONSULTAS
 import {
   RegistrarUsuario,
-  BuscarUsuariosPorFiltro,
+  BuscarUsuariosParaAdministrarPorFiltro,
+  ActualizarEstadoUsuario,
+  ActualizarInformacionDeUnUsuario,
   BuscarAgenciasQueTieneElUsuario,
   BuscarAgenciasQueNoTieneElUsuario,
   DesasignarAgenciaAlUsuario,
   AsignarAgenciaAlUsuario,
-  BuscarUsuariosParaAdministrarPorFiltro,
-  ActualizarEstadoUsuario,
-  ActualizarInformacionDeUnUsuario,
   ObtenerInformacionDeUnUsuario,
 } from "../controllers/usuarios.controllers.js";
 
@@ -19,8 +18,18 @@ const router = Router();
 
 // RUTA PARA REGISTRAR UN USUARIO
 router.post("/RegistrarUsuario", RegistrarUsuario);
-// RUTA PARA BUSCAR LOS USUARIOS POR FILTRO
-router.post("/BuscarUsuariosPorFiltro", BuscarUsuariosPorFiltro);
+// RUTA PARA BUSCAR LOS USUARIOS A ADMINISTRAR POR FILTRO
+router.post(
+  "/BuscarUsuariosParaAdministrarPorFiltro",
+  BuscarUsuariosParaAdministrarPorFiltro
+);
+// RUTA PARA ACTUALIZAR EL ESTADO DE UN USUARIO
+router.put("/ActualizarEstadoUsuario", ActualizarEstadoUsuario);
+// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
+router.put(
+  "/ActualizarInformacionDeUnUsuario",
+  ActualizarInformacionDeUnUsuario
+);
 // RUTA PARA BUSCAR LAS AGENCIAS QUE TIENE EL USUARIO
 router.post(
   "/BuscarAgenciasQueTieneElUsuario",
@@ -35,18 +44,6 @@ router.post(
 router.post("/AsignarAgenciaAlUsuario", AsignarAgenciaAlUsuario);
 // PETICIÓN PARA DESASIGNAR UNA AGENCIA AL USUARIO
 router.post("/DesasignarAgenciaAlUsuario", DesasignarAgenciaAlUsuario);
-// RUTA PARA BUSCAR LOS USUARIOS A ADMINISTRAR POR FILTRO
-router.post(
-  "/BuscarUsuariosParaAdministrarPorFiltro",
-  BuscarUsuariosParaAdministrarPorFiltro
-);
-// RUTA PARA ACTUALIZAR EL ESTADO DE UN USUARIO
-router.put("/ActualizarEstadoUsuario", ActualizarEstadoUsuario);
-// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
-router.put(
-  "/ActualizarInformacionDeUnUsuario",
-  ActualizarInformacionDeUnUsuario
-);
 // RUTA PARA OBTENER LA INFORMACION DE UN USUARIO
 router.post("/ObtenerInformacionDeUnUsuario", ObtenerInformacionDeUnUsuario);
 

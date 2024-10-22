@@ -3,14 +3,14 @@ import { Router } from "express";
 // IMPORTAMOS LAS CONSULTAS
 import {
   RegistrarProducto,
-  ObtenerProductosPorAgencia,
   BuscarProductosPorFiltro,
+  ActualizarEstadoProducto,
+  ObtenerProductosPorAgencia,
   BuscarAgenciasQueTieneUnProducto,
   BuscarAgenciasQueNoTieneUnProducto,
   AsignarAgenciaAlProducto,
   DesasignarAgenciaAlProducto,
   ActualizarInformacionDeUnProducto,
-  ActualizarEstadoProducto,
 } from "../controllers/productos.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -18,10 +18,12 @@ const router = Router();
 
 // RUTA PARA REGISTRAR UN PRODUCTO
 router.post("/RegistrarProducto", RegistrarProducto);
-// RUTA PARA OBTENER LOS PRODUCTOS DE UNA AGENCIA
-router.post("/ObtenerProductosPorAgencia", ObtenerProductosPorAgencia);
 // RUTA PARA BUSCAR LOS PRODUCTOS POR FILTRO
 router.post("/BuscarProductosPorFiltro", BuscarProductosPorFiltro);
+// RUTA PARA ACTUALIZAR EL ESTADO DE UN PRODUCTO
+router.put("/ActualizarEstadoProducto", ActualizarEstadoProducto);
+// RUTA PARA OBTENER LOS PRODUCTOS DE UNA AGENCIA
+router.post("/ObtenerProductosPorAgencia", ObtenerProductosPorAgencia);
 // RUTA PARA BUSCAR LAS AGENCIAS QUE TIENE UN PRODUCTO
 router.post(
   "/BuscarAgenciasQueTieneUnProducto",
@@ -41,8 +43,6 @@ router.put(
   "/ActualizarInformacionDeUnProducto",
   ActualizarInformacionDeUnProducto
 );
-// RUTA PARA ACTUALIZAR EL ESTADO DE UN PRODUCTO
-router.put("/ActualizarEstadoProducto", ActualizarEstadoProducto);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

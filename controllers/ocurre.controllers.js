@@ -12,7 +12,8 @@ import {
 } from "../helpers/Func.js";
 
 // EN ESTA FUNCIÓN VAMOS A REGISTRAR UNA OCURRE
-// SE UTILIZA EN LAS VISTAS: Ocurres > Registrar Ocurre
+// SE UTILIZA EN LAS VISTAS:
+// Ocurres > Registrar Ocurre
 export const RegistrarOcurre = async (req, res) => {
   const {
     CookieConToken,
@@ -36,28 +37,30 @@ export const RegistrarOcurre = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sqlVerificar = `SELECT * FROM ocurres WHERE NombreOcurre = '${NombreOcurre}';`;
-    CONEXION.query(sqlVerificar, (error, result) => {
+    const sqlVerificar = `SELECT * FROM ocurres WHERE NombreOcurre = ?;`;
+    CONEXION.query(sqlVerificar, [NombreOcurre], (error, result) => {
       if (error) throw error;
       if (result.length > 0) {
         return res
           .status(500)
-          .json(`La ocurrencia ${NombreOcurre.toUpperCase()} ya existe ❌`);
+          .json(
+            `La ocurrencia ${NombreOcurre.toUpperCase()} ya existe, por favor intente con otro ❌`
+          );
       } else {
         const sql = `INSERT INTO ocurres (NombreOcurre, OperadorLogisticoOcurre, TelefonoOcurre, CorreoOcurre, PaisOcurre, CodigoPaisOcurre, EstadoOcurre, CiudadOcurre, CodigoPostalOcurre, DireccionOcurre, MunicipioDelegacionOcurre, ReferenciaOcurre, ObservacionesOcurre, FechaCreacionOcurre, HoraCreacionOcurre) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(), '${ObtenerHoraActual()}') `;
         CONEXION.query(
           sql,
           [
-            NombreOcurre,
-            OperadorLogisticoOcurre,
+            NombreOcurre || "",
+            OperadorLogisticoOcurre || "",
             TelefonoOcurre || "",
-            CorreoOcurre,
-            PaisOcurre,
-            CodigoPaisOcurre,
-            EstadoOcurre,
-            CiudadOcurre,
-            CodigoPostalOcurre,
-            DireccionOcurre,
+            CorreoOcurre || "",
+            PaisOcurre || "",
+            CodigoPaisOcurre || "",
+            EstadoOcurre || "",
+            CiudadOcurre || "",
+            CodigoPostalOcurre || "",
+            DireccionOcurre || "",
             MunicipioDelegacionOcurre || "",
             ReferenciaOcurre || "",
             ObservacionesOcurre || "",
@@ -93,8 +96,8 @@ export const BuscarOcurresPorFiltro = async (req, res) => {
     const sql =
       filtro === ""
         ? `SELECT * FROM ocurres ORDER BY idOcurre DESC`
-        : `SELECT * FROM ocurres WHERE NombreOcurre LIKE '%${filtro}%' OR OperadorLogisticoOcurre LIKE '%${filtro}%' ORDER BY idOcurre DESC`;
-    CONEXION.query(sql, (error, result) => {
+        : `SELECT * FROM ocurres WHERE NombreOcurre LIKE ? OR OperadorLogisticoOcurre LIKE ? ORDER BY idOcurre DESC`;
+    CONEXION.query(sql, [`%${filtro}%`, `%${filtro}%`], (error, result) => {
       if (error) throw error;
       res.send(result);
     });
@@ -104,7 +107,8 @@ export const BuscarOcurresPorFiltro = async (req, res) => {
   }
 };
 // EN ESTA FUNCIÓN VAMOS A ACTUALIZAR EL ESTADO DE UN OCURRE
-// SE UTILIZA EN LAS VISTAS: Ocurres > Administrar Ocurres
+// SE UTILIZA EN LAS VISTAS:
+// Ocurres > Administrar Ocurres
 export const ActualizarEstadoOcurre = async (req, res) => {
   const { CookieConToken, idOcurre, StatusOcurre } = req.body;
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
@@ -114,8 +118,8 @@ export const ActualizarEstadoOcurre = async (req, res) => {
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `UPDATE ocurres SET StatusOcurre = '${StatusOcurre}' WHERE idOcurre = ${idOcurre}`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `UPDATE ocurres SET StatusOcurre = ? WHERE idOcurre = ?`;
+    CONEXION.query(sql, [StatusOcurre, idOcurre], (error, result) => {
       if (error) throw error;
       res.status(200).json(`Ocurre ${StatusOcurre.toUpperCase()} con éxito ✨`);
     });
@@ -125,7 +129,8 @@ export const ActualizarEstadoOcurre = async (req, res) => {
   }
 };
 // EN ESTA FUNCION VAMOS A ACTUALIZAR LA INFORMACIÓN DE UN OCURRE
-// SE UTILIZA EN LAS VISTAS: Ocurres > Editar Ocurre
+// SE UTILIZA EN LAS VISTAS:
+// Ocurres > Administrar Ocurres > Editar Ocurre
 export const ActualizarInformacionOcurre = async (req, res) => {
   const {
     CookieConToken,
@@ -150,8 +155,8 @@ export const ActualizarInformacionOcurre = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sqlValidar = `SELECT * FROM ocurres WHERE NombreOcurre = '${NombreOcurre}' AND idOcurre != ${idOcurre}`;
-    CONEXION.query(sqlValidar, (error, result) => {
+    const sqlValidar = `SELECT * FROM ocurres WHERE NombreOcurre = ? AND idOcurre != ?`;
+    CONEXION.query(sqlValidar, [NombreOcurre, idOcurre], (error, result) => {
       if (error) throw error;
       if (result.length > 0) {
         res
@@ -198,6 +203,10 @@ export const ActualizarInformacionOcurre = async (req, res) => {
 // Realizar Pedido > Destinatario > Seleccionar Ocurre
 export const BuscarOcurresActivosPorFiltro = async (req, res) => {
   const { CookieConToken, filtro } = req.body;
+
+  // INICIALIZAMOS LOS PARAMETROS
+  let paramsBOAPF = ["Activa"];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
@@ -205,11 +214,14 @@ export const BuscarOcurresActivosPorFiltro = async (req, res) => {
     res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   }
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT * FROM ocurres WHERE StatusOcurre = 'Activa' ORDER BY idOcurre DESC`
-        : `SELECT * FROM ocurres WHERE StatusOcurre = 'Activa' AND NombreOcurre LIKE '%${filtro}%' ORDER BY idOcurre DESC`;
-    CONEXION.query(sql, (error, result) => {
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT * FROM ocurres WHERE StatusOcurre = ? ORDER BY idOcurre DESC`;
+    } else {
+      paramsBOAPF.push(`%${filtro}%`);
+      sql = `SELECT * FROM ocurres WHERE StatusOcurre = ? AND NombreOcurre LIKE ? ORDER BY idOcurre DESC`;
+    }
+    CONEXION.query(sql, paramsBOAPF, (error, result) => {
       if (error) throw error;
       res.send(result);
     });

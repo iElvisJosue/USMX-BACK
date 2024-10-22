@@ -40,20 +40,22 @@ export const RegistrarMovimiento = async (req, res) => {
               `Ya existe un movimiento con estos mismos datos, por favor intente con otros datos ❌`
             );
         } else {
-          const sql = `INSERT INTO listamovimientos (EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, PorDefectoMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento) VALUES (
-                '${EstadoMovimiento}',
-                '${DetallesMovimiento}',
-                '${OrigenMovimiento}',
-                '${PorDefectoMovimiento}',
-                CURDATE(),
-                '${ObtenerHoraActual()}'
-                )`;
-          CONEXION.query(sql, (error, result) => {
-            if (error) throw error;
-            res
-              .status(200)
-              .json(`El movimiento ha sido registrado correctamente ✨`);
-          });
+          const sql = `INSERT INTO listamovimientos (EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, PorDefectoMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento) VALUES (?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+          CONEXION.query(
+            sql,
+            [
+              EstadoMovimiento || "",
+              DetallesMovimiento || "",
+              OrigenMovimiento || "",
+              PorDefectoMovimiento || "No",
+            ],
+            (error, result) => {
+              if (error) throw error;
+              res
+                .status(200)
+                .json(`El movimiento ha sido registrado correctamente ✨`);
+            }
+          );
         }
       }
     );
@@ -75,11 +77,15 @@ export const ObtenerTodosLosMovimientos = async (req, res) => {
     const sql =
       filtro === ""
         ? `SELECT * FROM listamovimientos ORDER BY idListaMovimiento DESC`
-        : `SELECT * FROM listamovimientos WHERE DetallesMovimiento LIKE '%${filtro}%' OR EstadoMovimiento LIKE '%${filtro}%' OR OrigenMovimiento LIKE '%${filtro}%' OR ActivoMovimiento LIKE '${filtro}' ORDER BY idListaMovimiento DESC`;
-    CONEXION.query(sql, (error, result) => {
-      if (error) throw error;
-      res.status(200).json(result);
-    });
+        : `SELECT * FROM listamovimientos WHERE DetallesMovimiento LIKE ? OR EstadoMovimiento LIKE ? OR OrigenMovimiento LIKE ? OR ActivoMovimiento LIKE ? ORDER BY idListaMovimiento DESC`;
+    CONEXION.query(
+      sql,
+      [`%${filtro}%`, `%${filtro}%`, `%${filtro}%`, `%${filtro}%`],
+      (error, result) => {
+        if (error) throw error;
+        res.status(200).json(result);
+      }
+    );
   } catch (error) {
     console.log(error);
     res.status(500).json(MENSAJE_DE_ERROR);
@@ -184,8 +190,8 @@ export const ObtenerPaisesActivos = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sql = `SELECT * FROM paises WHERE ActivoPais = 'Activo'`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `SELECT * FROM paises WHERE ActivoPais = ?`;
+    CONEXION.query(sql, ["Activo"], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });
@@ -205,8 +211,8 @@ export const ObtenerEstadosPorCodigoDelPais = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sql = `SELECT * FROM estados WHERE CodigoPais = '${CodigoPais}' AND ActivoEstado = 'Activo' ORDER BY NombreEstado ASC`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `SELECT * FROM estados WHERE CodigoPais = ? AND ActivoEstado = ? ORDER BY NombreEstado ASC`;
+    CONEXION.query(sql, [CodigoPais, "Activo"], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });
@@ -226,8 +232,8 @@ export const ObtenerCiudadesPorEstado = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sql = `SELECT * FROM ciudades WHERE idEstado = '${idEstado}' AND ActivaCiudad = 'Activa' ORDER BY NombreCiudad ASC`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `SELECT * FROM ciudades WHERE idEstado = ? AND ActivaCiudad = ? ORDER BY NombreCiudad ASC`;
+    CONEXION.query(sql, [idEstado, "Activa"], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });
@@ -247,8 +253,8 @@ export const ObtenerColoniasPorCodigoPostal = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sql = `SELECT * FROM colonias WHERE CodigoPostalColonia = '${CodigoPostal}' AND ActivaColonia = 'Activa' ORDER BY NombreColonia ASC`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `SELECT * FROM colonias WHERE CodigoPostalColonia = ? AND ActivaColonia = ? ORDER BY NombreColonia ASC`;
+    CONEXION.query(sql, [CodigoPostal, "Activa"], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });

@@ -19,7 +19,8 @@ import {
 } from "../helpers/PDFs.js";
 
 // EN ESTA FUNCIÓN VAMOS GUARDAR TODA LA INFORMACION DEL DESTINATARIO, REMITENTE Y PEDIDO
-// SE UTILIZA EN LAS VISTAS: Paquetería > Registrar Productos > Pedido > Finalizar
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería > Realizar pedido > Detalles del pedido > Finalizar
 export const GuardarTodaLaInformacion = async (req, res) => {
   const { CookieConToken, remitente, destinatario, pedido } = req.body;
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
@@ -88,30 +89,33 @@ const EjecutarConsultaGuardarRemitente = (remitente) => {
   } = remitente;
 
   const sql = `INSERT INTO remitentes (NombreRemitente, ApellidosRemitente, TelefonoCasaRemitente, CelularRemitente, CorreoRemitente, PaisRemitente, CodigoPaisRemitente, EstadoRemitente, CiudadRemitente, CodigoPostalRemitente, DireccionRemitente, ReferenciaRemitente, FechaCreacionRemitente, HoraCreacionRemitente) 
-    VALUES (
-      '${NombreRemitente}', 
-      '${ApellidosRemitente}', 
-      '${TelefonoCasaRemitente || ""}', 
-      '${CelularRemitente}', 
-      '${CorreoRemitente}', 
-      '${PaisRemitente}',
-      '${CodigoPaisRemitente}',
-      '${EstadoRemitente}', 
-      '${CiudadRemitente}', 
-      '${CodigoPostalRemitente}', 
-      '${DireccionRemitente}',
-      '${ReferenciaRemitente || ""}',
-      CURDATE(),
-      '${ObtenerHoraActual()}')`;
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
 
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, (error, result) => {
-      if (error) {
-        reject(error); // Si hay error, rechaza la promesa
-      } else {
-        resolve(result.insertId); // Si todo va bien, resuelve con el insertId
+    CONEXION.query(
+      sql,
+      [
+        NombreRemitente || "",
+        ApellidosRemitente || "",
+        TelefonoCasaRemitente || "",
+        CelularRemitente || "",
+        CorreoRemitente || "",
+        PaisRemitente || "",
+        CodigoPaisRemitente || "",
+        EstadoRemitente || "",
+        CiudadRemitente || "",
+        CodigoPostalRemitente || "",
+        DireccionRemitente || "",
+        ReferenciaRemitente || "",
+      ],
+      (error, result) => {
+        if (error) {
+          reject(error); // Si hay error, rechaza la promesa
+        } else {
+          resolve(result.insertId); // Si todo va bien, resuelve con el insertId
+        }
       }
-    });
+    );
   });
 };
 const EjecutarConsultaGuardarDestinatario = (destinatario) => {
@@ -132,40 +136,41 @@ const EjecutarConsultaGuardarDestinatario = (destinatario) => {
     ReferenciaDestinatario,
   } = destinatario;
 
-  const sql = `INSERT INTO destinatarios (NombreDestinatario, ApellidoPaternoDestinatario, ApellidoMaternoDestinatario, TelefonoCasaDestinatario, CelularDestinatario, CorreoDestinatario,
-   PaisDestinatario, CodigoPaisDestinatario, EstadoDestinatario, CiudadDestinatario, CodigoPostalDestinatario, DireccionDestinatario, MunicipioDelegacionDestinatario, ReferenciaDestinatario, FechaCreacionDestinatario, HoraCreacionDestinatario)
-    VALUES (
-      '${NombreDestinatario}',
-      '${ApellidoPaternoDestinatario}',
-      '${ApellidoMaternoDestinatario}',
-      '${TelefonoCasaDestinatario || ""}',
-      '${CelularDestinatario || ""}',
-      '${CorreoDestinatario}',
-      '${PaisDestinatario}',
-      '${CodigoPaisDestinatario}',
-      '${EstadoDestinatario}',
-      '${CiudadDestinatario}',
-      '${CodigoPostalDestinatario}',
-      '${DireccionDestinatario}',
-      '${MunicipioDelegacionDestinatario || ""}',
-      '${ReferenciaDestinatario || ""}',
-      CURDATE(),
-      '${ObtenerHoraActual()}')`;
+  const sql = `INSERT INTO destinatarios (NombreDestinatario, ApellidoPaternoDestinatario, ApellidoMaternoDestinatario, TelefonoCasaDestinatario, CelularDestinatario, CorreoDestinatario, PaisDestinatario, CodigoPaisDestinatario, EstadoDestinatario, CiudadDestinatario, CodigoPostalDestinatario, DireccionDestinatario, MunicipioDelegacionDestinatario, ReferenciaDestinatario, FechaCreacionDestinatario, HoraCreacionDestinatario) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
 
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, (error, result) => {
-      if (error) {
-        reject(error); // Si hay error, rechaza la promesa
-      } else {
-        resolve(result.insertId); // Si todo va bien, resuelve con el insertId
+    CONEXION.query(
+      sql,
+      [
+        NombreDestinatario || "",
+        ApellidoPaternoDestinatario || "",
+        ApellidoMaternoDestinatario || "",
+        TelefonoCasaDestinatario || "",
+        CelularDestinatario || "",
+        CorreoDestinatario || "",
+        PaisDestinatario || "",
+        CodigoPaisDestinatario || "",
+        EstadoDestinatario || "",
+        CiudadDestinatario || "",
+        CodigoPostalDestinatario || "",
+        DireccionDestinatario || "",
+        MunicipioDelegacionDestinatario || "",
+        ReferenciaDestinatario || "",
+      ],
+      (error, result) => {
+        if (error) {
+          reject(error); // Si hay error, rechaza la promesa
+        } else {
+          resolve(result.insertId); // Si todo va bien, resuelve con el insertId
+        }
       }
-    });
+    );
   });
 };
-const CrearUnionRemitenteAgencia = (idRemitente, idAgencia) => {
+const CrearUnionRemitenteAgencia = (idRemitente = 0, idAgencia = 0) => {
   return new Promise((resolve, reject) => {
-    const sql = `INSERT INTO union_remitentes_agencias (idRemitente, idAgencia) VALUES ('${idRemitente}', '${idAgencia}')`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `INSERT INTO union_remitentes_agencias (idRemitente, idAgencia) VALUES (?,?)`;
+    CONEXION.query(sql, [idRemitente, idAgencia], (error, result) => {
       if (error) {
         return reject(error); // Rechaza la promesa si hay un error
       }
@@ -173,10 +178,10 @@ const CrearUnionRemitenteAgencia = (idRemitente, idAgencia) => {
     });
   });
 };
-const CrearUnionDestinatarioAgencia = (idDestinatario, idAgencia) => {
+const CrearUnionDestinatarioAgencia = (idDestinatario = 0, idAgencia = 0) => {
   return new Promise((resolve, reject) => {
-    const sql = `INSERT INTO union_destinatarios_agencias (idDestinatario, idAgencia) VALUES ('${idDestinatario}', '${idAgencia}')`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `INSERT INTO union_destinatarios_agencias (idDestinatario, idAgencia) VALUES (?,?)`;
+    CONEXION.query(sql, [idDestinatario, idAgencia], (error, result) => {
       if (error) {
         return reject(error); // Rechaza la promesa si hay un error
       }
@@ -188,9 +193,9 @@ const EjecutarConsultaValidarPedido = async (
   remitente,
   destinatario,
   infoPedido,
-  idRemitente,
-  idDestinatario,
-  CodigoRastreo,
+  idRemitente = 0,
+  idDestinatario = 0,
+  CodigoRastreo = "",
   pedido,
   ListaDeGuias
 ) => {
@@ -241,10 +246,10 @@ const EjecutarConsultaValidarPedido = async (
     throw error; // Lanza el error para que sea capturado en el bloque que llama a esta función
   }
 };
-const VerificarGuiaRepetida = (GuiaPedido) => {
-  const sql = `SELECT * FROM pedidos WHERE GuiaPedido = '${GuiaPedido}'`;
+const VerificarGuiaRepetida = (GuiaPedido = "") => {
+  const sql = `SELECT * FROM pedidos WHERE GuiaPedido = ?`;
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, (error, result) => {
+    CONEXION.query(sql, [GuiaPedido], (error, result) => {
       if (error) return reject(error);
       resolve(result.length > 0); // Devuelve true si la guia está duplicado
     });
@@ -254,11 +259,11 @@ const EjecutarConsultaGuardarPedido = (
   remitente,
   destinatario,
   infoPedido,
-  idRemitente,
-  idDestinatario,
-  CodigoRastreo,
-  GuiaPedido,
-  NombreDelPaqueteDeTickets
+  idRemitente = 0,
+  idDestinatario = 0,
+  CodigoRastreo = "",
+  GuiaPedido = "",
+  NombreDelPaqueteDeTickets = ""
 ) => {
   // CREAMOS EL NOMBRE DEL PDF
   const NombreDelTicket = `Ticket_Pedido_${GuiaPedido}.pdf`;
@@ -268,112 +273,125 @@ const EjecutarConsultaGuardarPedido = (
     const sql = `
     INSERT INTO pedidos (
       GuiaPedido, ProductoPedido, TipoCargaPedido, TipoEnvioPedido, ContenidoPedido, LargoPedido, AnchoPedido, AltoPedido, PieCubicoPedido, PesoPedido, ValorDeclaradoPedido, ValorAseguradoPedido, CostoSeguroPedido, 
-      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, UsuarioResponsablePedido, TicketPedido, EtiquetaPedido, PaqueteTicketsPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (
-      '${GuiaPedido}',
-      '${infoPedido.Producto}',
-      '${infoPedido.TipoDeCarga}',
-      '${infoPedido.TipoDeEnvio}',
-      '${infoPedido.ContenidoDeEnvio}',
-      '${infoPedido.Largo}',
-      '${infoPedido.Ancho}',
-      '${infoPedido.Alto}',
-      '${infoPedido.PieCubico}',
-      '${infoPedido.Peso}',
-      '${Number(infoPedido.ValorDeclarado)}',
-      '${Number(infoPedido.ValorAsegurado)}',
-      '${infoPedido.CostoSeguro}',
-      '${infoPedido.CostoEnvio}',
-      '${infoPedido.CostoSobrePeso}',
-      '${infoPedido.Total}',
-      '${infoPedido.UsuarioResponsable}',
-      '${NombreDelTicket}',
-      '${NombreDeLaEtiqueta}',
-      '${NombreDelPaqueteDeTickets}',
-      CURDATE(),
-      '${ObtenerHoraActual()}'
-    )`;
-    CONEXION.query(sql, (error, result) => {
-      if (error) {
-        return reject(error); // Rechaza la promesa si hay un error
-      }
-      CrearMovimientosPorDefecto(GuiaPedido, infoPedido.UsuarioResponsable);
-      CrearTicketDelPedido(
+      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, UsuarioResponsablePedido, TicketPedido, EtiquetaPedido, PaqueteTicketsPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+    CONEXION.query(
+      sql,
+      [
+        GuiaPedido,
+        infoPedido.Producto || "",
+        infoPedido.TipoDeCarga || "",
+        infoPedido.TipoDeEnvio || "",
+        infoPedido.ContenidoDeEnvio || "",
+        infoPedido.Largo || "",
+        infoPedido.Ancho || "",
+        infoPedido.Alto || "",
+        infoPedido.PieCubico || "",
+        infoPedido.Peso || "",
+        Number(infoPedido.ValorDeclarado) || 0,
+        Number(infoPedido.ValorAsegurado) || 0,
+        infoPedido.CostoSeguro || 0,
+        infoPedido.CostoEnvio || 0,
+        infoPedido.CostoSobrePeso || 0,
+        infoPedido.Total || 0,
+        infoPedido.UsuarioResponsable || "No definido",
         NombreDelTicket,
-        remitente,
-        destinatario,
-        infoPedido,
-        GuiaPedido
-      );
-      CrearEtiquetaDelPedido(
         NombreDeLaEtiqueta,
-        remitente,
-        destinatario,
-        infoPedido,
-        GuiaPedido
-      );
-      CrearUnionRemitenteDestinatarioPedido(
-        idRemitente,
-        idDestinatario,
-        result.insertId,
-        infoPedido.idAgencia,
-        CodigoRastreo
-      );
-      resolve(true);
-    });
+        NombreDelPaqueteDeTickets,
+      ],
+      (error, result) => {
+        if (error) {
+          return reject(error); // Rechaza la promesa si hay un error
+        }
+        CrearMovimientosPorDefecto(GuiaPedido, infoPedido.UsuarioResponsable);
+        CrearTicketDelPedido(
+          NombreDelTicket,
+          remitente,
+          destinatario,
+          infoPedido,
+          GuiaPedido
+        );
+        CrearEtiquetaDelPedido(
+          NombreDeLaEtiqueta,
+          remitente,
+          destinatario,
+          infoPedido,
+          GuiaPedido
+        );
+        CrearUnionRemitenteDestinatarioPedido(
+          idRemitente,
+          idDestinatario,
+          result.insertId,
+          infoPedido.idAgencia,
+          CodigoRastreo
+        );
+        resolve(true);
+      }
+    );
   });
 };
-const CrearMovimientosPorDefecto = (GuiaPedido, UsuarioResponsable) => {
-  const sqlMovimientos = `SELECT * FROM listamovimientos WHERE PorDefectoMovimiento = "Si" AND ActivoMovimiento = "Activo" ORDER BY EstadoMovimiento  = "Creado" DESC`;
+const CrearMovimientosPorDefecto = (
+  GuiaPedido = "",
+  UsuarioResponsable = "No definido"
+) => {
   let valores = [];
+
+  const sqlMovimientos = `SELECT * FROM listamovimientos WHERE PorDefectoMovimiento = ? AND ActivoMovimiento = ? ORDER BY EstadoMovimiento = ? DESC`;
   return new Promise((resolve, reject) => {
-    CONEXION.query(sqlMovimientos, (error, movimientos) => {
-      if (error) {
-        return reject(error); // Rechaza la promesa si hay un error
-      }
-      if (movimientos.length === 0) {
-        return reject("No hay movimientos por defecto");
-      }
-      movimientos.forEach((movimiento, index) => {
-        const { EstadoMovimiento, DetallesMovimiento, OrigenMovimiento } =
-          movimiento;
-        valores.push(
-          `('${GuiaPedido}', '${EstadoMovimiento}', '${DetallesMovimiento}', '${OrigenMovimiento}', '${
-            UsuarioResponsable ?? "No definido"
-          }', CURDATE(), '${ObtenerHoraActual()}')`
-        );
-      });
-      // HACEMOS LA INSERCIÓN
-      const sql = `INSERT INTO movimientos (GuiaPedido, EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, UsuarioResponsableMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento)
-      VALUES ${valores.join(",\n")};`;
-      // Ejecutamos la consulta de inserción
-      CONEXION.query(sql, (error, result) => {
+    CONEXION.query(
+      sqlMovimientos,
+      ["Si", "Activo", "Creado"],
+      (error, movimientos) => {
         if (error) {
-          return reject(error); // Rechaza la promesa si hay un error en la inserción
+          return reject(error); // Rechaza la promesa si hay un error
         }
-        resolve(true); // Resuelve la promesa si todo sale bien
-      });
-    });
+        if (movimientos.length === 0) {
+          return reject("No hay movimientos por defecto");
+        }
+        movimientos.forEach((movimiento, index) => {
+          const { EstadoMovimiento, DetallesMovimiento, OrigenMovimiento } =
+            movimiento;
+          valores.push(
+            `('${GuiaPedido}', '${EstadoMovimiento}', '${DetallesMovimiento}', '${OrigenMovimiento}', '${UsuarioResponsable}', CURDATE(), '${ObtenerHoraActual()}')`
+          );
+        });
+        // HACEMOS LA INSERCIÓN
+        const sql = `INSERT INTO movimientos (GuiaPedido, EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, UsuarioResponsableMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento)
+      VALUES ${valores.join(",\n")};`;
+        // Ejecutamos la consulta de inserción
+        CONEXION.query(sql, (error, result) => {
+          if (error) {
+            return reject(error); // Rechaza la promesa si hay un error en la inserción
+          }
+          resolve(true); // Resuelve la promesa si todo sale bien
+        });
+      }
+    );
   });
 };
 const CrearUnionRemitenteDestinatarioPedido = (
-  idRemitente,
-  idDestinatario,
-  idPedido,
-  idAgencia,
-  CodigoRastreo
+  idRemitente = 0,
+  idDestinatario = 0,
+  idPedido = 0,
+  idAgencia = 0,
+  CodigoRastreo = ""
 ) => {
-  const sql = `INSERT INTO union_remitentes_destinatarios_pedidos (idRemitente, idDestinatario, idPedido, idAgencia, CodigoRastreo) VALUES ('${idRemitente}', '${idDestinatario}', '${idPedido}', '${idAgencia}', '${CodigoRastreo}')`;
+  const sql = `INSERT INTO union_remitentes_destinatarios_pedidos (idRemitente, idDestinatario, idPedido, idAgencia, CodigoRastreo) VALUES (?,?,?,?,?)`;
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, (error, result) => {
-      if (error) {
-        return reject(error); // Rechaza la promesa si hay un error
+    CONEXION.query(
+      sql,
+      [idRemitente, idDestinatario, idPedido, idAgencia, CodigoRastreo],
+      (error, result) => {
+        if (error) {
+          return reject(error); // Rechaza la promesa si hay un error
+        }
+        resolve(true);
       }
-      resolve(true);
-    });
+    );
   });
 };
 // EN ESTA FUNCIÓN VAMOS A BUSCAR LOS PEDIDOS POR FILTROS
-// SE UTILIZA EN LAS VISTAS: Paquetería > Detalles de envío
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería > Pedidos > Lista completa de pedidos
 export const BuscarPedidosPorFiltro = async (req, res) => {
   const { filtro, CookieConToken, tipoDeUsuario, idDelUsuario } = req.body;
 
@@ -460,30 +478,44 @@ const BusquedaDePedidosParaElAdministrador = (filtro) => {
             LEFT JOIN 
                 agencias a ON urdp.idAgencia = a.idAgencia
             WHERE 
-                p.GuiaPedido LIKE '%${filtro}%'
-                OR p.UsuarioResponsablePedido LIKE '%${filtro}%'
-                OR r.NombreRemitente LIKE '%${filtro}%'
-                OR d.NombreDestinatario LIKE '%${filtro}%'
-                OR a.NombreAgencia LIKE '%${filtro}%'
+                p.GuiaPedido LIKE ?
+                OR p.UsuarioResponsablePedido LIKE ?
+                OR r.NombreRemitente LIKE ?
+                OR d.NombreDestinatario LIKE ?
+                OR a.NombreAgencia LIKE ?
             ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, (error, result) => {
-      if (error) reject(error);
-      else resolve(result);
-    });
+    CONEXION.query(
+      sql,
+      [
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+      ],
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
   });
 };
 const BusquedaDePedidosParaElUsuario = async (filtro, idDelUsuario) => {
-  const sqlObtenerAgencias = `SELECT uua.idAgencia FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = '${idDelUsuario}' AND a.StatusAgencia = 'Activa' ORDER BY a.idAgencia DESC`;
+  const sqlObtenerAgencias = `SELECT uua.idAgencia FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.idAgencia DESC`;
 
   return new Promise((resolve, reject) => {
-    CONEXION.query(sqlObtenerAgencias, (error, result) => {
-      if (error) return reject(error);
+    CONEXION.query(
+      sqlObtenerAgencias,
+      [idDelUsuario, "Activa"],
+      (error, result) => {
+        if (error) return reject(error);
 
-      const promesasDeBusqueda = result.map(({ idAgencia }) => {
-        const sql =
-          filtro === ""
-            ? `SELECT 
+        const promesasDeBusqueda = result.map(({ idAgencia }) => {
+          let paramsBDPPEU = [idAgencia];
+          let sql;
+          if (filtro === "") {
+            sql = `SELECT 
                 urdp.idRemitente,
                 urdp.idDestinatario,
                 urdp.idPedido,
@@ -504,10 +536,18 @@ const BusquedaDePedidosParaElUsuario = async (filtro, idDelUsuario) => {
                 LEFT JOIN 
                     agencias a ON urdp.idAgencia = a.idAgencia
                 WHERE 
-                    urdp.idAgencia = '${idAgencia}'
+                    urdp.idAgencia = ?
                 ORDER BY 
-                    p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`
-            : `SELECT 
+                    p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
+          } else {
+            paramsBDPPEU.push(
+              `%${filtro}%`,
+              `%${filtro}%`,
+              `%${filtro}%`,
+              `%${filtro}%`,
+              `%${filtro}%`
+            );
+            sql = `SELECT 
                 urdp.idRemitente,
                 urdp.idDestinatario,
                 urdp.idPedido,
@@ -528,32 +568,36 @@ const BusquedaDePedidosParaElUsuario = async (filtro, idDelUsuario) => {
                 LEFT JOIN 
                     agencias a ON urdp.idAgencia = a.idAgencia
                 WHERE 
-                    urdp.idAgencia = '${idAgencia}'
+                    urdp.idAgencia = ?
                     AND (
-                        p.GuiaPedido LIKE '%${filtro}%'
-                        OR p.UsuarioResponsablePedido LIKE '%${filtro}%'
-                        OR r.NombreRemitente LIKE '%${filtro}%'
-                        OR d.NombreDestinatario LIKE '%${filtro}%'
-                        OR a.NombreAgencia LIKE '%${filtro}%'
+                        p.GuiaPedido LIKE ?
+                        OR p.UsuarioResponsablePedido LIKE ?
+                        OR r.NombreRemitente LIKE ?
+                        OR d.NombreDestinatario LIKE ?
+                        OR a.NombreAgencia LIKE ?
                     )
                 ORDER BY 
                     p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
-        return new Promise((resolve, reject) => {
-          CONEXION.query(sql, (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
+          }
+          return new Promise((resolve, reject) => {
+            CONEXION.query(sql, paramsBDPPEU, (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            });
           });
         });
-      });
 
-      Promise.all(promesasDeBusqueda)
-        .then((results) => resolve(results.flat()))
-        .catch((error) => reject(error));
-    });
+        Promise.all(promesasDeBusqueda)
+          .then((results) => resolve(results.flat()))
+          .catch((error) => reject(error));
+      }
+    );
   });
 };
 // EN ESTA FUNCIÓN VAMOS A OBTENER TODOS LOS PEDIDOS QUE SE REALIZARON POR "PAQUETES"
-// SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Detalles del pedido
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería  > Realizar pedido > Detalles del pedido > Finalizar
+// Paquetería  > Pedidos > Detalles del pedido
 export const BuscarPedidosPorPaquete = async (req, res) => {
   const { CookieConToken, CodigoRastreo, GuiaPedido } = req.body;
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
@@ -577,10 +621,10 @@ export const BuscarPedidosPorPaquete = async (req, res) => {
             LEFT JOIN 
                 agencias a ON urdp.idAgencia = a.idAgencia
             WHERE 
-            	urdp.CodigoRastreo = '${CodigoRastreo}'
-            ORDER BY p.GuiaPedido = '${GuiaPedido}' DESC`;
+            	urdp.CodigoRastreo = ?
+            ORDER BY p.GuiaPedido = ? DESC`;
 
-    CONEXION.query(sql, (error, result) => {
+    CONEXION.query(sql, [CodigoRastreo, GuiaPedido], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });
@@ -590,19 +634,27 @@ export const BuscarPedidosPorPaquete = async (req, res) => {
   }
 };
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS REMITENTES POR AGENCIA
-// SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Remitente
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería  > Realizar pedido > Seleccionar Remitente
 export const BuscarRemitentesPorAgencia = async (req, res) => {
   const { CookieConToken, filtro, idAgencia } = req.body;
+
+  // INICIA CON EL ID AGENCIA PORQUE ESE SÍ O SÍ VENDRÁ EN LA PETICIÓN
+  let paramsBRPA = [idAgencia];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
   if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT r.* FROM union_remitentes_agencias ura LEFT JOIN remitentes r ON ura.idRemitente = r.idRemitente WHERE ura.idAgencia = '${idAgencia}'`
-        : `SELECT r.* FROM union_remitentes_agencias ura LEFT JOIN remitentes r ON ura.idRemitente = r.idRemitente WHERE ura.idAgencia = '${idAgencia}' AND r.NombreRemitente LIKE '%${filtro}%'`;
-    CONEXION.query(sql, (error, result) => {
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT r.* FROM union_remitentes_agencias ura LEFT JOIN remitentes r ON ura.idRemitente = r.idRemitente WHERE ura.idAgencia = ?`;
+    } else {
+      paramsBRPA.push(`%${filtro}%`);
+      sql = `SELECT r.* FROM union_remitentes_agencias ura LEFT JOIN remitentes r ON ura.idRemitente = r.idRemitente WHERE ura.idAgencia = ? AND r.NombreRemitente LIKE ?`;
+    }
+    CONEXION.query(sql, paramsBRPA, (error, result) => {
       if (error) throw error;
       res.status(200).json(result); // Devuelve un array con los remitentes
     });
@@ -612,19 +664,28 @@ export const BuscarRemitentesPorAgencia = async (req, res) => {
   }
 };
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS DESTINATARIOS POR AGENCIA
-// SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Remitente
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería  > Realizar pedido > Seleccionar Destinatario
 export const BuscarDestinatariosPorAgencia = async (req, res) => {
   const { CookieConToken, filtro, idAgencia } = req.body;
+
+  // INICIA CON EL ID AGENCIA PORQUE ESE SÍ O SÍ VENDRÁ EN LA PETICIÓN
+  let paramsBDPA = [idAgencia];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
   if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT d.* FROM union_destinatarios_agencias uda LEFT JOIN destinatarios d ON uda.idDestinatario = d.idDestinatario WHERE uda.idAgencia = '${idAgencia}'`
-        : `SELECT d.* FROM union_destinatarios_agencias uda LEFT JOIN destinatarios d ON uda.idDestinatario = d.idDestinatario WHERE uda.idAgencia = '${idAgencia}' AND d.NombreDestinatario LIKE '%${filtro}%'`;
-    CONEXION.query(sql, (error, result) => {
+    let sql;
+
+    if (filtro === "") {
+      sql = `SELECT d.* FROM union_destinatarios_agencias uda LEFT JOIN destinatarios d ON uda.idDestinatario = d.idDestinatario WHERE uda.idAgencia = ?`;
+    } else {
+      paramsBDPA.push(`%${filtro}%`);
+      sql = `SELECT d.* FROM union_destinatarios_agencias uda LEFT JOIN destinatarios d ON uda.idDestinatario = d.idDestinatario WHERE uda.idAgencia = ? AND d.NombreDestinatario LIKE ?`;
+    }
+    CONEXION.query(sql, paramsBDPA, (error, result) => {
       if (error) throw error;
       res.status(200).json(result); // Devuelve un array con los destinatarios
     });
@@ -649,14 +710,14 @@ export const BuscarUltimosDiezPedidos = async (req, res) => {
           pedidos p ON urdp.idPedido = p.idPedido
       LEFT JOIN 
           agencias a ON urdp.idAgencia = a.idAgencia
-      WHERE a.StatusAgencia = 'Activa'
+      WHERE a.StatusAgencia = ?
       ORDER BY 
           p.FechaCreacionPedido DESC, 
           p.HoraCreacionPedido DESC,
           p.idPedido DESC 
       LIMIT 10;
       `;
-    CONEXION.query(sql, (error, result) => {
+    CONEXION.query(sql, ["Activa"], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });
@@ -667,7 +728,7 @@ export const BuscarUltimosDiezPedidos = async (req, res) => {
 };
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS MOVIMIENTOS DE UN PEDIDO
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Detalles del pedido
-// SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Detalles del pedido
+// SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Detalles del pedido > Finalizar
 export const BuscarMovimientosDeUnPedido = async (req, res) => {
   const { CookieConToken, GuiaPedido } = req.body;
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
@@ -675,8 +736,8 @@ export const BuscarMovimientosDeUnPedido = async (req, res) => {
   );
   if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
   try {
-    const sql = `SELECT * FROM movimientos WHERE GuiaPedido = '${GuiaPedido}' ORDER BY idMovimiento DESC;`;
-    CONEXION.query(sql, (error, result) => {
+    const sql = `SELECT * FROM movimientos WHERE GuiaPedido = ? ORDER BY idMovimiento DESC;`;
+    CONEXION.query(sql, [GuiaPedido], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });
@@ -696,9 +757,9 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
     LEFT JOIN destinatarios d ON urdp.idDestinatario = d.idDestinatario 
     LEFT JOIN pedidos p ON urdp.idPedido = p.idPedido 
     LEFT JOIN movimientos m ON p.GuiaPedido = m.GuiaPedido 
-    WHERE p.GuiaPedido = "${GuiaPedido}"
+    WHERE p.GuiaPedido = ?
     ORDER BY m.idMovimiento DESC`;
-    CONEXION.query(sql, (error, result) => {
+    CONEXION.query(sql, [GuiaPedido], (error, result) => {
       if (error) throw error;
       res.status(200).json(result);
     });
@@ -749,10 +810,10 @@ const BuscarPedidosPorFechaParaElAdministrador = (
               INNER JOIN
                 agencias a ON urdp.idAgencia = a.idAgencia
               WHERE
-                p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
+                p.FechaCreacionPedido BETWEEN ? AND ?
               ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, (error, result) => {
+    CONEXION.query(sql, [primeraFecha, segundaFecha], (error, result) => {
       if (error) {
         reject(error); // Si hay error, rechaza la promesa
       } else {
@@ -769,16 +830,20 @@ const BuscarPedidosPorFechaParaLosEmpleados = async (
   const sqlObtenerAgencias = `SELECT uua.idAgencia
             FROM union_usuarios_agencias uua
             LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia
-            WHERE uua.idUsuario = '${idDelUsuario}'
-            AND a.StatusAgencia = 'Activa'
+            WHERE uua.idUsuario = ?
+            AND a.StatusAgencia = ?
             ORDER BY a.idAgencia DESC`;
   try {
     // Obtener agencias activas del usuario
     const agenciasResult = await new Promise((resolve, reject) => {
-      CONEXION.query(sqlObtenerAgencias, (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      });
+      CONEXION.query(
+        sqlObtenerAgencias,
+        [idDelUsuario, "Activa"],
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
     });
     // Mapear las agencias para obtener los pedidos
     const promesasDeBusqueda = agenciasResult.map(({ idAgencia }) => {
@@ -800,16 +865,20 @@ const BuscarPedidosPorFechaParaLosEmpleados = async (
                   INNER JOIN
                     agencias a ON urdp.idAgencia = a.idAgencia
                   WHERE
-                    urdp.idAgencia = '${idAgencia}'
-                    AND p.FechaCreacionPedido BETWEEN '${primeraFecha}' AND '${segundaFecha}'
-                    AND a.StatusAgencia = 'Activa'
+                    urdp.idAgencia = ?
+                    AND p.FechaCreacionPedido BETWEEN ? AND ?
+                    AND a.StatusAgencia = ?
                   ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC;
   `;
       return new Promise((resolve, reject) => {
-        CONEXION.query(sql, (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        });
+        CONEXION.query(
+          sql,
+          [idAgencia, primeraFecha, segundaFecha, "Activa"],
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
       });
     });
     // Esperar a que todas las promesas de búsqueda se resuelvan

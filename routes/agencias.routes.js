@@ -3,14 +3,14 @@ import { Router } from "express";
 // IMPORTAMOS LAS CONSULTAS
 import {
   RegistrarAgencia,
-  BuscarAgenciasPorFiltroYTipoDeUsuario,
+  BuscarAgenciasPorFiltro,
+  ActualizarEstadoAgencia,
+  ActualizarInformacionAgencia,
   BuscarProductosQueTieneLaAgencia,
   BuscarProductosQueNoTieneLaAgencia,
   AsignarProductoAgencia,
   DesasignarProductoAgencia,
-  ActualizarEstadoAgencia,
-  ActualizarInformacionAgencia,
-  BuscarAgenciasPorFiltro,
+  BuscarAgenciasPorFiltroYTipoDeUsuario,
 } from "../controllers/agencias.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -18,11 +18,12 @@ const router = Router();
 
 // RUTA PARA REGISTRAR UNA AGENCIA
 router.post("/RegistrarAgencia", RegistrarAgencia);
-// RUTA PARA BUSCAR LAS AGENCIAS POR FILTRO Y TIPO DE USUARIO
-router.post(
-  "/BuscarAgenciasPorFiltroYTipoDeUsuario",
-  BuscarAgenciasPorFiltroYTipoDeUsuario
-);
+// RUTA PARA BUSCAR LAS AGENCIAS POR FILTRO
+router.post("/BuscarAgenciasPorFiltro", BuscarAgenciasPorFiltro);
+// RUTA PARA ACTUALIZAR EL ESTADO DE UNA AGENCIA
+router.put("/ActualizarEstadoAgencia", ActualizarEstadoAgencia);
+// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UNA AGENCIA
+router.put("/ActualizarInformacionAgencia", ActualizarInformacionAgencia);
 // RUTA PARA BUSCAR LOS PRODUCTOS QUE TIENE LA AGENCIA
 router.post(
   "/BuscarProductosQueTieneLaAgencia",
@@ -37,12 +38,11 @@ router.post(
 router.post("/AsignarProductoAgencia", AsignarProductoAgencia);
 // RUTA PARA DESASIGNAR UN PRODUCTO A UNA AGENCIA
 router.post("/DesasignarProductoAgencia", DesasignarProductoAgencia);
-// RUTA PARA ACTUALIZAR EL ESTADO DE UNA AGENCIA
-router.put("/ActualizarEstadoAgencia", ActualizarEstadoAgencia);
-// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UNA AGENCIA
-router.put("/ActualizarInformacionAgencia", ActualizarInformacionAgencia);
-// RUTA PARA BUSCAR LAS AGENCIAS POR FILTRO
-router.post("/BuscarAgenciasPorFiltro", BuscarAgenciasPorFiltro);
+// RUTA PARA BUSCAR LAS AGENCIAS POR FILTRO Y TIPO DE USUARIO
+router.post(
+  "/BuscarAgenciasPorFiltroYTipoDeUsuario",
+  BuscarAgenciasPorFiltroYTipoDeUsuario
+);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

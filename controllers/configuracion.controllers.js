@@ -8,7 +8,8 @@ import {
 import { ValidarTokenParaPeticion } from "../helpers/Func.js";
 
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS TIPOS DE CARGA
-// SE UTILIZA EN LAS VISTAS: Paquetería > Registrar Productos > Pedido
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería > Realizar Pedido > Detalles del pedido
 export const ObtenerTiposDeCarga = async (req, res) => {
   const { CookieConToken } = req.body;
 
@@ -32,7 +33,8 @@ export const ObtenerTiposDeCarga = async (req, res) => {
   }
 };
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS TIPOS DE ENVIO
-// SE UTILIZA EN LAS VISTAS: Paquetería > Registrar Productos > Pedido
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería > Realizar Pedido > Detalles del pedido
 export const ObtenerTiposDeEnvio = async (req, res) => {
   const { CookieConToken } = req.body;
 
@@ -56,7 +58,7 @@ export const ObtenerTiposDeEnvio = async (req, res) => {
   }
 };
 // EN ESTA FUNCION VAMOS A OBTENER EL MODO OSCURO DEL USUARIO
-// SE UTILIZA EN LAS VISTAS: Configuración > Apariencia
+// SE UTILIZA EN LAS VISTAS: Apariencia
 export const ObtenerModoOscuro = async (req, res) => {
   const { idUsuario } = req.params;
   try {
@@ -71,7 +73,7 @@ export const ObtenerModoOscuro = async (req, res) => {
   }
 };
 // EN ESTA FUNCION VAMOS A ACTUALIZAR EL MODO OSCURO DEL USUARIO
-// SE UTILIZA EN LAS VISTAS: Configuración > Apariencia
+// SE UTILIZA EN LAS VISTAS: Apariencia
 export const ActualizarModoOscuro = async (req, res) => {
   const { CookieConToken, idUsuario, ModoOscuro } = req.body;
 
@@ -225,6 +227,9 @@ export const EliminarTipoDeEnvio = async (req, res) => {
 export const BuscarPaisesPorFiltro = async (req, res) => {
   const { CookieConToken, filtro } = req.body;
 
+  // INICIALIZAMOS LOS PARAMETROS
+  let paramsBPPF = ["Activo"];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
@@ -234,11 +239,14 @@ export const BuscarPaisesPorFiltro = async (req, res) => {
   }
 
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT * FROM paises ORDER BY ActivoPais = "Activo" DESC`
-        : `SELECT * FROM paises WHERE NombrePais LIKE '%${filtro}%' OR CodigoPais LIKE '%${filtro}%' ORDER BY ActivoPais = "Activo" DESC`;
-    CONEXION.query(sql, (error, result) => {
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT * FROM paises ORDER BY ActivoPais = ? DESC`;
+    } else {
+      paramsBPPF.unshift(`%${filtro}%`, `%${filtro}%`);
+      sql = `SELECT * FROM paises WHERE NombrePais LIKE ? OR CodigoPais LIKE ? ORDER BY ActivoPais = ? DESC`;
+    }
+    CONEXION.query(sql, paramsBPPF, (error, result) => {
       if (error) throw error;
       res.send(result);
     });
@@ -253,6 +261,9 @@ export const BuscarPaisesPorFiltro = async (req, res) => {
 export const BuscarEstadosPorFiltro = async (req, res) => {
   const { CookieConToken, filtro } = req.body;
 
+  // INICIALIZAMOS LOS PARAMETROS
+  let paramsBEPF = ["Activo"];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
@@ -262,11 +273,14 @@ export const BuscarEstadosPorFiltro = async (req, res) => {
   }
 
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT * FROM estados ORDER BY NombreEstado ASC`
-        : `SELECT * FROM estados WHERE NombreEstado LIKE '%${filtro}%' OR CodigoPais LIKE '%${filtro}%' ORDER BY NombreEstado ASC`;
-    CONEXION.query(sql, (error, result) => {
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT * FROM estados ORDER BY ActivoEstado = ? DESC`;
+    } else {
+      paramsBEPF.unshift(`%${filtro}%`, `%${filtro}%`);
+      sql = `SELECT * FROM estados WHERE NombreEstado LIKE ? OR CodigoPais LIKE ? ORDER BY ActivoEstado = ? DESC`;
+    }
+    CONEXION.query(sql, paramsBEPF, (error, result) => {
       if (error) throw error;
       res.send(result);
     });
@@ -281,6 +295,9 @@ export const BuscarEstadosPorFiltro = async (req, res) => {
 export const BuscarCiudadesPorFiltro = async (req, res) => {
   const { CookieConToken, filtro } = req.body;
 
+  // INICIALIZAMOS LOS PARAMETROS
+  let paramsBCPF = ["Activa"];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
@@ -290,11 +307,14 @@ export const BuscarCiudadesPorFiltro = async (req, res) => {
   }
 
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT c.*, e.NombreEstado FROM ciudades c JOIN estados e ON c.idEstado = e.idEstado ORDER BY NombreCiudad ASC`
-        : `SELECT c.*, e.NombreEstado FROM ciudades  c JOIN estados e ON c.idEstado = e.idEstado WHERE NombreCiudad LIKE '%${filtro}%' ORDER BY NombreCiudad ASC`;
-    CONEXION.query(sql, (error, result) => {
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT c.*, e.NombreEstado FROM ciudades c JOIN estados e ON c.idEstado = e.idEstado ORDER BY ActivaCiudad = ? DESC`;
+    } else {
+      paramsBCPF.unshift(`%${filtro}%`);
+      sql = `SELECT c.*, e.NombreEstado FROM ciudades c JOIN estados e ON c.idEstado = e.idEstado WHERE NombreCiudad LIKE ? ORDER BY ActivaCiudad = ? DESC`;
+    }
+    CONEXION.query(sql, paramsBCPF, (error, result) => {
       if (error) throw error;
       res.send(result);
     });
@@ -309,6 +329,9 @@ export const BuscarCiudadesPorFiltro = async (req, res) => {
 export const BuscarColoniasPorFiltro = async (req, res) => {
   const { CookieConToken, filtro } = req.body;
 
+  // INICIALIZAMOS LOS PARAMETROS
+  let paramsBCPF = ["Activa"];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
@@ -318,11 +341,14 @@ export const BuscarColoniasPorFiltro = async (req, res) => {
   }
 
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT * FROM colonias ORDER BY NombreColonia ASC LIMIT 1000`
-        : `SELECT * FROM colonias WHERE NombreColonia LIKE '%${filtro}%' OR NombreRegionUnoColonia LIKE '%${filtro}%' ORDER BY NombreColonia ASC LIMIT 1000`;
-    CONEXION.query(sql, (error, result) => {
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT * FROM colonias ORDER BY ActivaColonia = ? DESC LIMIT 1000`;
+    } else {
+      paramsBCPF.unshift(`%${filtro}%`, `%${filtro}%`);
+      sql = `SELECT * FROM colonias WHERE NombreColonia LIKE ? OR NombreRegionUnoColonia LIKE ? ORDER BY ActivaColonia = ? DESC LIMIT 1000`;
+    }
+    CONEXION.query(sql, paramsBCPF, (error, result) => {
       if (error) throw error;
       res.send(result);
     });
