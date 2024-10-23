@@ -35,44 +35,44 @@ export const RegistrarProducto = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
-  const sql = `SELECT * FROM productos WHERE NombreProducto = ?`;
-  CONEXION.query(sql, [NombreProducto], (error, result) => {
-    if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-    if (result.length > 0) {
-      res
-        .status(500)
-        .json(
-          `El producto ${NombreProducto.toUpperCase()} ya existe, por favor intente con otro nombre de producto ❌`
-        );
-    } else {
-      const sql = `INSERT INTO productos (NombreProducto, AnchoProducto, LargoProducto, AltoProducto, PrecioProducto, LibraExtraProducto, 
-      PesoSinCobroProducto, PesoMaximoProducto, ComisionProducto, FechaCreacionProducto, HoraCreacionProducto) VALUES (?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
-      CONEXION.query(
-        sql,
-        [
-          NombreProducto || "",
-          AnchoProducto || "",
-          LargoProducto || "",
-          AltoProducto || "",
-          PrecioProducto || "",
-          CostoLibraExtraProducto || "",
-          PesoSinCobroProducto || "",
-          PesoMaximoProducto || "",
-          ComisionProducto || "",
-        ],
-        async (error, result) => {
-          if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-          await CrearUnionAgenciaProducto(result.insertId, req.body);
-          res
-            .status(200)
-            .json(
-              `El producto ${NombreProducto.toUpperCase()} ha sido registrado correctamente ✨`
-            );
-        }
-      );
-    }
-  });
   try {
+    const sql = `SELECT * FROM productos WHERE NombreProducto = ?`;
+    CONEXION.query(sql, [NombreProducto], (error, result) => {
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (result.length > 0) {
+        res
+          .status(500)
+          .json(
+            `El producto ${NombreProducto.toUpperCase()} ya existe, por favor intente con otro nombre de producto ❌`
+          );
+      } else {
+        const sql = `INSERT INTO productos (NombreProducto, AnchoProducto, LargoProducto, AltoProducto, PrecioProducto, LibraExtraProducto, 
+      PesoSinCobroProducto, PesoMaximoProducto, ComisionProducto, FechaCreacionProducto, HoraCreacionProducto) VALUES (?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+        CONEXION.query(
+          sql,
+          [
+            NombreProducto || "",
+            AnchoProducto || "",
+            LargoProducto || "",
+            AltoProducto || "",
+            PrecioProducto || "",
+            CostoLibraExtraProducto || "",
+            PesoSinCobroProducto || "",
+            PesoMaximoProducto || "",
+            ComisionProducto || "",
+          ],
+          async (error, result) => {
+            if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+            await CrearUnionAgenciaProducto(result.insertId, req.body);
+            res
+              .status(200)
+              .json(
+                `El producto ${NombreProducto.toUpperCase()} ha sido registrado correctamente ✨`
+              );
+          }
+        );
+      }
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json(MENSAJE_DE_ERROR);

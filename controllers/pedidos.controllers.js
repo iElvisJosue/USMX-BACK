@@ -782,22 +782,39 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS POR FECHA
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Pedidos por fecha
 export const BuscarPedidosPorFecha = async (req, res) => {
-  const { primeraFecha, segundaFecha, idDelUsuario, permisosUsuario } =
-    req.body;
+  const {
+    CookieConToken,
+    primeraFecha,
+    segundaFecha,
+    idDelUsuario,
+    permisosUsuario,
+  } = req.body;
 
-  const pedidosPorFecha =
-    permisosUsuario === "Administrador"
-      ? await BuscarPedidosPorFechaParaElAdministrador(
-          primeraFecha,
-          segundaFecha
-        )
-      : await BuscarPedidosPorFechaParaLosEmpleados(
-          primeraFecha,
-          segundaFecha,
-          idDelUsuario
-        );
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
 
-  res.status(200).json(pedidosPorFecha);
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const pedidosPorFecha =
+      permisosUsuario === "Administrador"
+        ? await BuscarPedidosPorFechaParaElAdministrador(
+            primeraFecha,
+            segundaFecha
+          )
+        : await BuscarPedidosPorFechaParaLosEmpleados(
+            primeraFecha,
+            segundaFecha,
+            idDelUsuario
+          );
+
+    res.status(200).json(pedidosPorFecha);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
 };
 const BuscarPedidosPorFechaParaElAdministrador = (
   primeraFecha,
