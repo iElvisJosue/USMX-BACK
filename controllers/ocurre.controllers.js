@@ -4,6 +4,7 @@ import { CONEXION } from "../initial/db.js";
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
+  MENSAJE_ERROR_CONSULTA_SQL,
   MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
 import {
@@ -31,15 +32,18 @@ export const RegistrarOcurre = async (req, res) => {
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sqlVerificar = `SELECT * FROM ocurres WHERE NombreOcurre = ?;`;
     CONEXION.query(sqlVerificar, [NombreOcurre], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         return res
           .status(500)
@@ -66,7 +70,7 @@ export const RegistrarOcurre = async (req, res) => {
             ObservacionesOcurre || "",
           ],
           (error, result) => {
-            if (error) throw error;
+            if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
             res
               .status(200)
               .json(
@@ -89,16 +93,18 @@ export const BuscarOcurresPorFiltro = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken) {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
   }
+
   try {
     const sql =
       filtro === ""
         ? `SELECT * FROM ocurres ORDER BY idOcurre DESC`
         : `SELECT * FROM ocurres WHERE NombreOcurre LIKE ? OR OperadorLogisticoOcurre LIKE ? ORDER BY idOcurre DESC`;
     CONEXION.query(sql, [`%${filtro}%`, `%${filtro}%`], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -114,13 +120,14 @@ export const ActualizarEstadoOcurre = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE ocurres SET StatusOcurre = ? WHERE idOcurre = ?`;
     CONEXION.query(sql, [StatusOcurre, idOcurre], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(`Ocurre ${StatusOcurre.toUpperCase()} con éxito ✨`);
     });
   } catch (error) {
@@ -149,15 +156,18 @@ export const ActualizarInformacionOcurre = async (req, res) => {
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sqlValidar = `SELECT * FROM ocurres WHERE NombreOcurre = ? AND idOcurre != ?`;
     CONEXION.query(sqlValidar, [NombreOcurre, idOcurre], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         res
           .status(500)
@@ -183,7 +193,7 @@ export const ActualizarInformacionOcurre = async (req, res) => {
             idOcurre,
           ],
           (error, result) => {
-            if (error) throw error;
+            if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
             res
               .status(200)
               .json(
@@ -211,7 +221,7 @@ export const BuscarOcurresActivosPorFiltro = async (req, res) => {
     CookieConToken
   );
   if (!RespuestaValidacionToken) {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
   }
   try {
     let sql;
@@ -222,7 +232,7 @@ export const BuscarOcurresActivosPorFiltro = async (req, res) => {
       sql = `SELECT * FROM ocurres WHERE StatusOcurre = ? AND NombreOcurre LIKE ? ORDER BY idOcurre DESC`;
     }
     CONEXION.query(sql, paramsBOAPF, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {

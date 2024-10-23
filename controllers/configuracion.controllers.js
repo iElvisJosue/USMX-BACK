@@ -3,6 +3,7 @@ import { CONEXION } from "../initial/db.js";
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
+  MENSAJE_ERROR_CONSULTA_SQL,
   MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
 import { ValidarTokenParaPeticion } from "../helpers/Func.js";
@@ -17,19 +18,18 @@ export const ObtenerTiposDeCarga = async (req, res) => {
     CookieConToken
   );
 
-  if (RespuestaValidacionToken) {
-    try {
-      const sql = `SELECT * FROM tiposcarga ORDER BY idCarga DESC`;
-      CONEXION.query(sql, (error, result) => {
-        if (error) throw error;
-        res.send(result);
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json(MENSAJE_DE_ERROR);
-    }
-  } else {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `SELECT * FROM tiposcarga ORDER BY idCarga DESC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS TIPOS DE ENVIO
@@ -42,19 +42,18 @@ export const ObtenerTiposDeEnvio = async (req, res) => {
     CookieConToken
   );
 
-  if (RespuestaValidacionToken) {
-    try {
-      const sql = `SELECT * FROM tiposenvio ORDER BY idTipoEnvio DESC`;
-      CONEXION.query(sql, (error, result) => {
-        if (error) throw error;
-        res.send(result);
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json(MENSAJE_DE_ERROR);
-    }
-  } else {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `SELECT * FROM tiposenvio ORDER BY idTipoEnvio DESC`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
 // EN ESTA FUNCION VAMOS A OBTENER EL MODO OSCURO DEL USUARIO
@@ -64,7 +63,7 @@ export const ObtenerModoOscuro = async (req, res) => {
   try {
     const sql = `SELECT ModoOscuro FROM usuarios WHERE idUsuario = ?`;
     CONEXION.query(sql, [idUsuario], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -84,12 +83,12 @@ export const ActualizarModoOscuro = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE usuarios SET ModoOscuro = ? WHERE idUsuario = ?`;
     CONEXION.query(sql, [ModoOscuro, idUsuario], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res
         .status(200)
         .json(`El ${TextoRespuesta} ha sido aplicado correctamente ✨`);
@@ -109,12 +108,12 @@ export const RegistrarTipoDeCarga = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `SELECT * FROM tiposcarga WHERE TipoCarga = ?`;
     CONEXION.query(sql, [TipoCarga], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         return res
           .status(500)
@@ -122,7 +121,7 @@ export const RegistrarTipoDeCarga = async (req, res) => {
       } else {
         const sql = `INSERT INTO tiposcarga (TipoCarga, PorcentajeCarga) VALUES (?, ?)`;
         CONEXION.query(sql, [TipoCarga, PorcentajeCarga], (error, result) => {
-          if (error) throw error;
+          if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
           res
             .status(200)
             .json(
@@ -146,12 +145,12 @@ export const EliminarTipoDeCarga = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `DELETE FROM tiposcarga WHERE idCarga = ?`;
     CONEXION.query(sql, [idCarga], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json("La carga ha sido eliminada correctamente ✨");
     });
   } catch (error) {
@@ -169,12 +168,12 @@ export const RegistrarTipoDeEnvio = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `SELECT * FROM tiposenvio WHERE TipoEnvio = ?`;
     CONEXION.query(sql, [TipoEnvio], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         return res
           .status(500)
@@ -182,7 +181,7 @@ export const RegistrarTipoDeEnvio = async (req, res) => {
       } else {
         const sql = `INSERT INTO tiposenvio (TipoEnvio) VALUES (?)`;
         CONEXION.query(sql, [TipoEnvio], (error, result) => {
-          if (error) throw error;
+          if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
           res
             .status(200)
             .json(
@@ -206,12 +205,12 @@ export const EliminarTipoDeEnvio = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `DELETE FROM tiposenvio WHERE idTipoEnvio = ?`;
     CONEXION.query(sql, [idTipoEnvio], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res
         .status(200)
         .json("El tipo de envio ha sido eliminado correctamente ✨");
@@ -235,7 +234,7 @@ export const BuscarPaisesPorFiltro = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken) {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
   }
 
   try {
@@ -247,7 +246,7 @@ export const BuscarPaisesPorFiltro = async (req, res) => {
       sql = `SELECT * FROM paises WHERE NombrePais LIKE ? OR CodigoPais LIKE ? ORDER BY ActivoPais = ? DESC`;
     }
     CONEXION.query(sql, paramsBPPF, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -269,7 +268,7 @@ export const BuscarEstadosPorFiltro = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken) {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
   }
 
   try {
@@ -281,7 +280,7 @@ export const BuscarEstadosPorFiltro = async (req, res) => {
       sql = `SELECT * FROM estados WHERE NombreEstado LIKE ? OR CodigoPais LIKE ? ORDER BY ActivoEstado = ? DESC`;
     }
     CONEXION.query(sql, paramsBEPF, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -303,7 +302,7 @@ export const BuscarCiudadesPorFiltro = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken) {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
   }
 
   try {
@@ -315,7 +314,7 @@ export const BuscarCiudadesPorFiltro = async (req, res) => {
       sql = `SELECT c.*, e.NombreEstado FROM ciudades c JOIN estados e ON c.idEstado = e.idEstado WHERE NombreCiudad LIKE ? ORDER BY ActivaCiudad = ? DESC`;
     }
     CONEXION.query(sql, paramsBCPF, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -337,7 +336,7 @@ export const BuscarColoniasPorFiltro = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken) {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
   }
 
   try {
@@ -349,7 +348,7 @@ export const BuscarColoniasPorFiltro = async (req, res) => {
       sql = `SELECT * FROM colonias WHERE NombreColonia LIKE ? OR NombreRegionUnoColonia LIKE ? ORDER BY ActivaColonia = ? DESC LIMIT 1000`;
     }
     CONEXION.query(sql, paramsBCPF, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {

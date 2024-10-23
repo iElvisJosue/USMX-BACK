@@ -4,6 +4,7 @@ import { CONEXION } from "../initial/db.js";
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
+  MENSAJE_ERROR_CONSULTA_SQL,
   MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
 import {
@@ -24,15 +25,17 @@ export const RegistrarMovimiento = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT * FROM listamovimientos WHERE EstadoMovimiento = ? AND OrigenMovimiento = ? AND DetallesMovimiento = ?`;
     CONEXION.query(
       sql,
       [EstadoMovimiento, OrigenMovimiento, DetallesMovimiento],
       (error, result) => {
-        if (error) throw error;
+        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
         if (result.length > 0) {
           res
             .status(500)
@@ -50,7 +53,8 @@ export const RegistrarMovimiento = async (req, res) => {
               PorDefectoMovimiento || "No",
             ],
             (error, result) => {
-              if (error) throw error;
+              if (error)
+                return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
               res
                 .status(200)
                 .json(`El movimiento ha sido registrado correctamente ✨`);
@@ -71,8 +75,10 @@ export const ObtenerTodosLosMovimientos = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql =
       filtro === ""
@@ -82,7 +88,7 @@ export const ObtenerTodosLosMovimientos = async (req, res) => {
       sql,
       [`%${filtro}%`, `%${filtro}%`, `%${filtro}%`, `%${filtro}%`],
       (error, result) => {
-        if (error) throw error;
+        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
         res.status(200).json(result);
       }
     );
@@ -100,7 +106,7 @@ export const ActualizarEstadoDeUnMovimiento = async (req, res) => {
     CookieConToken
   );
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE listamovimientos SET ActivoMovimiento = ? WHERE idListaMovimiento = ?`;
@@ -108,7 +114,7 @@ export const ActualizarEstadoDeUnMovimiento = async (req, res) => {
       sql,
       [ActivoMovimiento, idListaMovimiento],
       (error, result) => {
-        if (error) throw error;
+        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
         res
           .status(200)
           .json("El STATUS del movimiento ha sido actualizado con éxito ✨");
@@ -130,11 +136,14 @@ export const EditarMovimiento = async (req, res) => {
     DetallesMovimiento,
     PorDefectoMovimiento,
   } = req.body;
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT * FROM listamovimientos WHERE EstadoMovimiento = ? AND OrigenMovimiento = ? AND DetallesMovimiento = ? AND idListaMovimiento != ?`;
     CONEXION.query(
@@ -146,7 +155,7 @@ export const EditarMovimiento = async (req, res) => {
         idListaMovimiento,
       ],
       (error, result) => {
-        if (error) throw error;
+        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
         if (result.length > 0) {
           res
             .status(500)
@@ -165,7 +174,8 @@ export const EditarMovimiento = async (req, res) => {
               idListaMovimiento,
             ],
             (error, result) => {
-              if (error) throw error;
+              if (error)
+                return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
               res
                 .status(200)
                 .json(`El movimiento ha sido editado correctamente ✨`);
@@ -187,12 +197,14 @@ export const ObtenerPaisesActivos = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT * FROM paises WHERE ActivoPais = ?`;
     CONEXION.query(sql, ["Activo"], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -208,12 +220,14 @@ export const ObtenerEstadosPorCodigoDelPais = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT * FROM estados WHERE CodigoPais = ? AND ActivoEstado = ? ORDER BY NombreEstado ASC`;
     CONEXION.query(sql, [CodigoPais, "Activo"], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -229,12 +243,14 @@ export const ObtenerCiudadesPorEstado = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT * FROM ciudades WHERE idEstado = ? AND ActivaCiudad = ? ORDER BY NombreCiudad ASC`;
     CONEXION.query(sql, [idEstado, "Activa"], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -247,15 +263,18 @@ export const ObtenerCiudadesPorEstado = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias > Editar Agencia
 export const ObtenerColoniasPorCodigoPostal = async (req, res) => {
   const { CookieConToken, CodigoPostal } = req.body;
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT * FROM colonias WHERE CodigoPostalColonia = ? AND ActivaColonia = ? ORDER BY NombreColonia ASC`;
     CONEXION.query(sql, [CodigoPostal, "Activa"], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {

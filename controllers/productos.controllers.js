@@ -3,6 +3,7 @@ import { CONEXION } from "../initial/db.js";
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
+  MENSAJE_ERROR_CONSULTA_SQL,
   MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
 import {
@@ -31,10 +32,12 @@ export const RegistrarProducto = async (req, res) => {
     CookieConToken
   );
 
-  if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   const sql = `SELECT * FROM productos WHERE NombreProducto = ?`;
   CONEXION.query(sql, [NombreProducto], (error, result) => {
-    if (error) throw error;
+    if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
     if (result.length > 0) {
       res
         .status(500)
@@ -58,7 +61,7 @@ export const RegistrarProducto = async (req, res) => {
           ComisionProducto || "",
         ],
         async (error, result) => {
-          if (error) throw error;
+          if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
           await CrearUnionAgenciaProducto(result.insertId, req.body);
           res
             .status(200)
@@ -79,7 +82,7 @@ const CrearUnionAgenciaProducto = (idProducto, DetallesProducto) => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT idAgencia FROM agencias WHERE NombreAgencia = ?`;
     CONEXION.query(sql, ["USMX Express"], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       const sql = `INSERT INTO union_agencias_productos (idAgencia, idProducto, PrecioProducto, ComisionProducto, LibraExtraProducto, PesoMaximoProducto, PesoSinCobroProducto) VALUES (?,?,?,?,?,?,?)`;
       CONEXION.query(
         sql,
@@ -111,15 +114,16 @@ export const BuscarProductosPorFiltro = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken) {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
   }
+
   try {
     const sql =
       filtro === ""
         ? `SELECT * FROM productos ORDER BY idProducto DESC`
         : `SELECT * FROM productos WHERE NombreProducto LIKE ? ORDER BY NombreProducto DESC`;
     CONEXION.query(sql, [`%${filtro}%`], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -137,12 +141,12 @@ export const ActualizarEstadoProducto = async (req, res) => {
     CookieConToken
   );
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE productos SET StatusProducto = ? WHERE idProducto = ?`;
     CONEXION.query(sql, [StatusProducto, idProducto], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res
         .status(200)
         .json(`Producto ${StatusProducto.toUpperCase()} con éxito ✨`);
@@ -175,7 +179,7 @@ export const ActualizarInformacionDeUnProducto = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sqlValidar = `SELECT * FROM productos WHERE NombreProducto = ? AND idProducto != ?`;
@@ -183,7 +187,7 @@ export const ActualizarInformacionDeUnProducto = async (req, res) => {
       sqlValidar,
       [NombreProducto, idProducto],
       (error, result) => {
-        if (error) throw error;
+        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
         if (result.length > 0) {
           res
             .status(500)
@@ -207,7 +211,8 @@ export const ActualizarInformacionDeUnProducto = async (req, res) => {
               idProducto,
             ],
             (error, result) => {
-              if (error) throw error;
+              if (error)
+                return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
               res
                 .status(200)
                 .json("El producto ha sido actualizado correctamente ✨");
@@ -232,12 +237,12 @@ export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ? AND a.StatusAgencia = ? ORDER BY a.idAgencia ASC`;
     CONEXION.query(sql, [idProducto, "Activa"], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -259,7 +264,7 @@ export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     let sql;
@@ -278,7 +283,7 @@ export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
           ORDER BY idAgencia DESC`;
     }
     CONEXION.query(sql, paramBAQNTUP, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -306,7 +311,7 @@ export const AsignarAgenciaAlProducto = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `INSERT INTO union_agencias_productos (idAgencia, idProducto, PrecioProducto, ComisionProducto, LibraExtraProducto, PesoMaximoProducto, PesoSinCobroProducto) VALUES (?,?,?,?,?,?,?)`;
@@ -322,7 +327,7 @@ export const AsignarAgenciaAlProducto = async (req, res) => {
         PesoSinCobroProducto,
       ],
       (error, result) => {
-        if (error) throw error;
+        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
         res.status(200).json("La agencia ha sido asignada con éxito ✨");
       }
     );
@@ -342,12 +347,12 @@ export const DesasignarAgenciaAlProducto = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `DELETE FROM union_agencias_productos WHERE idUnionAgenciasProductos = ?`;
     CONEXION.query(sql, [idUnionAgenciasProductos], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json("La agencia ha sido desasignada con éxito ✨");
     });
   } catch (error) {
@@ -365,9 +370,11 @@ export const ObtenerProductosPorAgencia = async (req, res) => {
     CookieConToken
   );
 
-  if (RespuestaValidacionToken) {
-    try {
-      const sql = `SELECT 
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `SELECT 
       p.NombreProducto,
       p.AnchoProducto,
       p.LargoProducto,
@@ -381,15 +388,12 @@ export const ObtenerProductosPorAgencia = async (req, res) => {
       FROM union_agencias_productos uap
       LEFT JOIN productos p ON uap.idProducto = p.idProducto
       WHERE uap.idAgencia = ? AND p.StatusProducto = ?`;
-      CONEXION.query(sql, [idAgencia, "Activo"], (error, result) => {
-        if (error) throw error;
-        res.send(result);
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json(MENSAJE_DE_ERROR);
-    }
-  } else {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    CONEXION.query(sql, [idAgencia, "Activo"], (error, result) => {
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.send(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
   }
 };

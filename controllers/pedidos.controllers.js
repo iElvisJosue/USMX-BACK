@@ -4,6 +4,7 @@ import { CONEXION } from "../initial/db.js";
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
+  MENSAJE_ERROR_CONSULTA_SQL,
   MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
 import {
@@ -26,50 +27,46 @@ export const GuardarTodaLaInformacion = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
-  if (RespuestaValidacionToken) {
-    try {
-      const CodigoRastreo = CrearCódigoDeRastreo();
-      let ListaDeGuias = [];
 
-      // SI EL REMITENTE NO EXISTE, GUARDAMOS UNO NUEVO
-      // DE LO CONTRARIO, NO LO ALMACENAMOS
-      const idRemitente = remitente.idRemitente
-        ? remitente.idRemitente
-        : await EjecutarConsultaGuardarRemitente(remitente);
-      // SI EL DESTINATARIO NO EXISTE, GUARDAMOS UNO NUEVO
-      // DE LO CONTRARIO, NO LO ALMACENAMOS
-      const idDestinatario = destinatario.idDestinatario
-        ? destinatario.idDestinatario
-        : await EjecutarConsultaGuardarDestinatario(destinatario);
+  if (!RespuestaValidacionToken) res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
-      if (remitente.idRemitente === false)
-        await CrearUnionRemitenteAgencia(idRemitente, pedido[0].idAgencia);
-      if (destinatario.idDestinatario === false)
-        await CrearUnionDestinatarioAgencia(
-          idDestinatario,
-          pedido[0].idAgencia
-        );
-      // Procesamos cada pedido secuencialmente usando un bucle for
-      for (const infoPedido of pedido) {
-        await EjecutarConsultaValidarPedido(
-          remitente,
-          destinatario,
-          infoPedido,
-          idRemitente,
-          idDestinatario,
-          CodigoRastreo,
-          pedido,
-          ListaDeGuias
-        );
-      }
+  try {
+    const CodigoRastreo = CrearCódigoDeRastreo();
+    let ListaDeGuias = [];
 
-      res.status(200).json({ CodigoRastreo });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json(MENSAJE_DE_ERROR);
+    // SI EL REMITENTE NO EXISTE, GUARDAMOS UNO NUEVO
+    // DE LO CONTRARIO, NO LO ALMACENAMOS
+    const idRemitente = remitente.idRemitente
+      ? remitente.idRemitente
+      : await EjecutarConsultaGuardarRemitente(remitente);
+    // SI EL DESTINATARIO NO EXISTE, GUARDAMOS UNO NUEVO
+    // DE LO CONTRARIO, NO LO ALMACENAMOS
+    const idDestinatario = destinatario.idDestinatario
+      ? destinatario.idDestinatario
+      : await EjecutarConsultaGuardarDestinatario(destinatario);
+
+    if (remitente.idRemitente === false)
+      await CrearUnionRemitenteAgencia(idRemitente, pedido[0].idAgencia);
+    if (destinatario.idDestinatario === false)
+      await CrearUnionDestinatarioAgencia(idDestinatario, pedido[0].idAgencia);
+    // Procesamos cada pedido secuencialmente usando un bucle for
+    for (const infoPedido of pedido) {
+      await EjecutarConsultaValidarPedido(
+        remitente,
+        destinatario,
+        infoPedido,
+        idRemitente,
+        idDestinatario,
+        CodigoRastreo,
+        pedido,
+        ListaDeGuias
+      );
     }
-  } else {
-    res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+    res.status(200).json({ CodigoRastreo });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
 const EjecutarConsultaGuardarRemitente = (remitente) => {
@@ -400,7 +397,7 @@ export const BuscarPedidosPorFiltro = async (req, res) => {
   );
 
   if (!RespuestaValidacionToken)
-    return res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   if (tipoDeUsuario === "Administrador") {
     try {
@@ -600,10 +597,14 @@ const BusquedaDePedidosParaElUsuario = async (filtro, idDelUsuario) => {
 // Paquetería  > Pedidos > Detalles del pedido
 export const BuscarPedidosPorPaquete = async (req, res) => {
   const { CookieConToken, CodigoRastreo, GuiaPedido } = req.body;
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
-  if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT 
             r.*,
@@ -625,7 +626,7 @@ export const BuscarPedidosPorPaquete = async (req, res) => {
             ORDER BY p.GuiaPedido = ? DESC`;
 
     CONEXION.query(sql, [CodigoRastreo, GuiaPedido], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -645,7 +646,10 @@ export const BuscarRemitentesPorAgencia = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
-  if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     let sql;
     if (filtro === "") {
@@ -655,7 +659,7 @@ export const BuscarRemitentesPorAgencia = async (req, res) => {
       sql = `SELECT r.* FROM union_remitentes_agencias ura LEFT JOIN remitentes r ON ura.idRemitente = r.idRemitente WHERE ura.idAgencia = ? AND r.NombreRemitente LIKE ?`;
     }
     CONEXION.query(sql, paramsBRPA, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result); // Devuelve un array con los remitentes
     });
   } catch (error) {
@@ -675,7 +679,10 @@ export const BuscarDestinatariosPorAgencia = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
-  if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     let sql;
 
@@ -686,7 +693,7 @@ export const BuscarDestinatariosPorAgencia = async (req, res) => {
       sql = `SELECT d.* FROM union_destinatarios_agencias uda LEFT JOIN destinatarios d ON uda.idDestinatario = d.idDestinatario WHERE uda.idAgencia = ? AND d.NombreDestinatario LIKE ?`;
     }
     CONEXION.query(sql, paramsBDPA, (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result); // Devuelve un array con los destinatarios
     });
   } catch (error) {
@@ -718,7 +725,7 @@ export const BuscarUltimosDiezPedidos = async (req, res) => {
       LIMIT 10;
       `;
     CONEXION.query(sql, ["Activa"], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -731,14 +738,18 @@ export const BuscarUltimosDiezPedidos = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Detalles del pedido > Finalizar
 export const BuscarMovimientosDeUnPedido = async (req, res) => {
   const { CookieConToken, GuiaPedido } = req.body;
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
-  if (!RespuestaValidacionToken) res.status(500).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = `SELECT * FROM movimientos WHERE GuiaPedido = ? ORDER BY idMovimiento DESC;`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -760,7 +771,7 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
     WHERE p.GuiaPedido = ?
     ORDER BY m.idMovimiento DESC`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {
-      if (error) throw error;
+      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
