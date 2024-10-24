@@ -8,6 +8,45 @@ import {
 } from "../helpers/Const.js";
 import { ValidarTokenParaPeticion } from "../helpers/Func.js";
 
+// EN ESTA FUNCION VAMOS REGISTRAR UN NUEVO TIPO DE CARGA
+// SE UTILIZA EN LAS VISTAS: Configuración > Cargas
+export const RegistrarTipoDeCarga = async (req, res) => {
+  const { CookieConToken, TipoCarga, PorcentajeCarga } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `SELECT * FROM tiposcarga WHERE TipoCarga = ?`;
+    CONEXION.query(sql, [TipoCarga], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (result.length > 0) {
+        return res
+          .status(409)
+          .json(
+            `¡Oops! Parece que el tipo de carga ${TipoCarga.toUpperCase()} ya existe, por favor elija otro tipo de carga!`
+          );
+      } else {
+        const sql = `INSERT INTO tiposcarga (TipoCarga, PorcentajeCarga) VALUES (?, ?)`;
+        CONEXION.query(sql, [TipoCarga, PorcentajeCarga], (error, result) => {
+          if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+          res
+            .status(200)
+            .json(
+              `¡La carga ${TipoCarga.toUpperCase()} ha sido registrada correctamente!`
+            );
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS TIPOS DE CARGA
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Realizar Pedido > Detalles del pedido
@@ -24,11 +63,73 @@ export const ObtenerTiposDeCarga = async (req, res) => {
   try {
     const sql = `SELECT * FROM tiposcarga ORDER BY idCarga DESC`;
     CONEXION.query(sql, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCION VAMOS ELIMINAR UN TIPO DE CARGA
+// SE UTILIZA EN LAS VISTAS: Configuración > Cargas
+export const EliminarTipoDeCarga = async (req, res) => {
+  const { CookieConToken, idCarga } = req.params;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `DELETE FROM tiposcarga WHERE idCarga = ?`;
+    CONEXION.query(sql, [idCarga], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json("¡La carga ha sido eliminada correctamente!");
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCION VAMOS REGISTRAR UN NUEVO TIPO DE ENVIO
+// SE UTILIZA EN LAS VISTAS: Configuración > Envios
+export const RegistrarTipoDeEnvio = async (req, res) => {
+  const { CookieConToken, TipoEnvio } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `SELECT * FROM tiposenvio WHERE TipoEnvio = ?`;
+    CONEXION.query(sql, [TipoEnvio], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (result.length > 0) {
+        return res
+          .status(409)
+          .json(
+            `¡Oops! Parece que el tipo de envío ${TipoEnvio.toUpperCase()} ya existe, por favor elija otro tipo de envío!`
+          );
+      } else {
+        const sql = `INSERT INTO tiposenvio (TipoEnvio) VALUES (?)`;
+        CONEXION.query(sql, [TipoEnvio], (error, result) => {
+          if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+          res
+            .status(200)
+            .json(
+              `¡El tipo de envio ${TipoEnvio.toUpperCase()} ha sido registrado correctamente!`
+            );
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
@@ -48,11 +149,36 @@ export const ObtenerTiposDeEnvio = async (req, res) => {
   try {
     const sql = `SELECT * FROM tiposenvio ORDER BY idTipoEnvio DESC`;
     CONEXION.query(sql, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCION VAMOS ELIMINAR UN TIPO DE ENVIO
+// SE UTILIZA EN LAS VISTAS: Configuración > Envios
+export const EliminarTipoDeEnvio = async (req, res) => {
+  const { CookieConToken, idTipoEnvio } = req.params;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `DELETE FROM tiposenvio WHERE idTipoEnvio = ?`;
+    CONEXION.query(sql, [idTipoEnvio], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res
+        .status(200)
+        .json("¡El tipo de envio ha sido eliminado correctamente!");
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
@@ -63,7 +189,7 @@ export const ObtenerModoOscuro = async (req, res) => {
   try {
     const sql = `SELECT ModoOscuro FROM usuarios WHERE idUsuario = ?`;
     CONEXION.query(sql, [idUsuario], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -88,132 +214,10 @@ export const ActualizarModoOscuro = async (req, res) => {
   try {
     const sql = `UPDATE usuarios SET ModoOscuro = ? WHERE idUsuario = ?`;
     CONEXION.query(sql, [ModoOscuro, idUsuario], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res
         .status(200)
-        .json(`El ${TextoRespuesta} ha sido aplicado correctamente ✨`);
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
-// EN ESTA FUNCION VAMOS REGISTRAR UN NUEVO TIPO DE CARGA
-// SE UTILIZA EN LAS VISTAS: Configuración > Cargas
-export const RegistrarTipoDeCarga = async (req, res) => {
-  const { CookieConToken, TipoCarga, PorcentajeCarga } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
-  try {
-    const sql = `SELECT * FROM tiposcarga WHERE TipoCarga = ?`;
-    CONEXION.query(sql, [TipoCarga], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-      if (result.length > 0) {
-        return res
-          .status(500)
-          .json(`El tipo de carga ${TipoCarga.toUpperCase()} ya existe ❌`);
-      } else {
-        const sql = `INSERT INTO tiposcarga (TipoCarga, PorcentajeCarga) VALUES (?, ?)`;
-        CONEXION.query(sql, [TipoCarga, PorcentajeCarga], (error, result) => {
-          if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-          res
-            .status(200)
-            .json(
-              `La carga ${TipoCarga.toUpperCase()} ha sido registrada correctamente ✨`
-            );
-        });
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
-// EN ESTA FUNCION VAMOS ELIMINAR UN TIPO DE CARGA
-// SE UTILIZA EN LAS VISTAS: Configuración > Cargas
-export const EliminarTipoDeCarga = async (req, res) => {
-  const { CookieConToken, idCarga } = req.params;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
-  try {
-    const sql = `DELETE FROM tiposcarga WHERE idCarga = ?`;
-    CONEXION.query(sql, [idCarga], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-      res.status(200).json("La carga ha sido eliminada correctamente ✨");
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
-// EN ESTA FUNCION VAMOS REGISTRAR UN NUEVO TIPO DE ENVIO
-// SE UTILIZA EN LAS VISTAS: Configuración > Envios
-export const RegistrarTipoDeEnvio = async (req, res) => {
-  const { CookieConToken, TipoEnvio } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
-  try {
-    const sql = `SELECT * FROM tiposenvio WHERE TipoEnvio = ?`;
-    CONEXION.query(sql, [TipoEnvio], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-      if (result.length > 0) {
-        return res
-          .status(500)
-          .json(`El tipo de envio ${TipoEnvio.toUpperCase()} ya existe ❌`);
-      } else {
-        const sql = `INSERT INTO tiposenvio (TipoEnvio) VALUES (?)`;
-        CONEXION.query(sql, [TipoEnvio], (error, result) => {
-          if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-          res
-            .status(200)
-            .json(
-              `El tipo de envio ${TipoEnvio.toUpperCase()} ha sido registrado correctamente ✨`
-            );
-        });
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
-// EN ESTA FUNCION VAMOS ELIMINAR UN TIPO DE ENVIO
-// SE UTILIZA EN LAS VISTAS: Configuración > Envios
-export const EliminarTipoDeEnvio = async (req, res) => {
-  const { CookieConToken, idTipoEnvio } = req.params;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
-  try {
-    const sql = `DELETE FROM tiposenvio WHERE idTipoEnvio = ?`;
-    CONEXION.query(sql, [idTipoEnvio], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-      res
-        .status(200)
-        .json("El tipo de envio ha sido eliminado correctamente ✨");
+        .json(`¡El ${TextoRespuesta} ha sido aplicado correctamente!`);
     });
   } catch (error) {
     console.error(error);
@@ -246,7 +250,7 @@ export const BuscarPaisesPorFiltro = async (req, res) => {
       sql = `SELECT * FROM paises WHERE NombrePais LIKE ? OR CodigoPais LIKE ? ORDER BY ActivoPais = ? DESC`;
     }
     CONEXION.query(sql, paramsBPPF, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -280,7 +284,7 @@ export const BuscarEstadosPorFiltro = async (req, res) => {
       sql = `SELECT * FROM estados WHERE NombreEstado LIKE ? OR CodigoPais LIKE ? ORDER BY ActivoEstado = ? DESC`;
     }
     CONEXION.query(sql, paramsBEPF, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -314,7 +318,7 @@ export const BuscarCiudadesPorFiltro = async (req, res) => {
       sql = `SELECT c.*, e.NombreEstado FROM ciudades c JOIN estados e ON c.idEstado = e.idEstado WHERE NombreCiudad LIKE ? ORDER BY ActivaCiudad = ? DESC`;
     }
     CONEXION.query(sql, paramsBCPF, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -348,7 +352,7 @@ export const BuscarColoniasPorFiltro = async (req, res) => {
       sql = `SELECT * FROM colonias WHERE NombreColonia LIKE ? OR NombreRegionUnoColonia LIKE ? ORDER BY ActivaColonia = ? DESC LIMIT 1000`;
     }
     CONEXION.query(sql, paramsBCPF, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {

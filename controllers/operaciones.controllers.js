@@ -35,12 +35,12 @@ export const RegistrarMovimiento = async (req, res) => {
       sql,
       [EstadoMovimiento, OrigenMovimiento, DetallesMovimiento],
       (error, result) => {
-        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
         if (result.length > 0) {
           res
-            .status(500)
+            .status(409)
             .json(
-              `Ya existe un movimiento con estos mismos datos, por favor intente con otros datos ❌`
+              `¡Oops! Parece que ya existe un movimiento con los mismos datos, por favor intente de nuevo con otros datos.`
             );
         } else {
           const sql = `INSERT INTO listamovimientos (EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, PorDefectoMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento) VALUES (?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
@@ -54,10 +54,10 @@ export const RegistrarMovimiento = async (req, res) => {
             ],
             (error, result) => {
               if (error)
-                return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+                return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
               res
                 .status(200)
-                .json(`El movimiento ha sido registrado correctamente ✨`);
+                .json(`¡El movimiento ha sido registrado correctamente!`);
             }
           );
         }
@@ -88,7 +88,7 @@ export const ObtenerTodosLosMovimientos = async (req, res) => {
       sql,
       [`%${filtro}%`, `%${filtro}%`, `%${filtro}%`, `%${filtro}%`],
       (error, result) => {
-        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
         res.status(200).json(result);
       }
     );
@@ -105,6 +105,10 @@ export const ActualizarEstadoDeUnMovimiento = async (req, res) => {
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
+  const TEXTO_ESTADO =
+    ActivoMovimiento === "Activo" ? "ACTIVADO" : "DESACTIVADO";
+
   if (!RespuestaValidacionToken)
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
@@ -114,10 +118,10 @@ export const ActualizarEstadoDeUnMovimiento = async (req, res) => {
       sql,
       [ActivoMovimiento, idListaMovimiento],
       (error, result) => {
-        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
         res
           .status(200)
-          .json("El STATUS del movimiento ha sido actualizado con éxito ✨");
+          .json(`¡El estado del movimiento ha sido ${TEXTO_ESTADO} con éxito!`);
       }
     );
   } catch (error) {
@@ -155,12 +159,12 @@ export const EditarMovimiento = async (req, res) => {
         idListaMovimiento,
       ],
       (error, result) => {
-        if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
         if (result.length > 0) {
           res
-            .status(500)
+            .status(409)
             .json(
-              `Ya existe un movimiento con estos mismos datos, por favor intente con otros datos ❌`
+              `¡Oops! Parece que ya existe un movimiento con los mismos datos, por favor intente de nuevo con otros datos.`
             );
         } else {
           const sql = `UPDATE listamovimientos SET EstadoMovimiento = ?, OrigenMovimiento = ?, DetallesMovimiento = ?, PorDefectoMovimiento = ? WHERE idListaMovimiento = ?`;
@@ -175,10 +179,10 @@ export const EditarMovimiento = async (req, res) => {
             ],
             (error, result) => {
               if (error)
-                return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+                return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
               res
                 .status(200)
-                .json(`El movimiento ha sido editado correctamente ✨`);
+                .json(`¡El movimiento ha sido actualizado con éxito!`);
             }
           );
         }
@@ -204,7 +208,7 @@ export const ObtenerPaisesActivos = async (req, res) => {
   try {
     const sql = `SELECT * FROM paises WHERE ActivoPais = ?`;
     CONEXION.query(sql, ["Activo"], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -227,7 +231,7 @@ export const ObtenerEstadosPorCodigoDelPais = async (req, res) => {
   try {
     const sql = `SELECT * FROM estados WHERE CodigoPais = ? AND ActivoEstado = ? ORDER BY NombreEstado ASC`;
     CONEXION.query(sql, [CodigoPais, "Activo"], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -250,7 +254,7 @@ export const ObtenerCiudadesPorEstado = async (req, res) => {
   try {
     const sql = `SELECT * FROM ciudades WHERE idEstado = ? AND ActivaCiudad = ? ORDER BY NombreCiudad ASC`;
     CONEXION.query(sql, [idEstado, "Activa"], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -274,7 +278,7 @@ export const ObtenerColoniasPorCodigoPostal = async (req, res) => {
   try {
     const sql = `SELECT * FROM colonias WHERE CodigoPostalColonia = ? AND ActivaColonia = ? ORDER BY NombreColonia ASC`;
     CONEXION.query(sql, [CodigoPostal, "Activa"], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {

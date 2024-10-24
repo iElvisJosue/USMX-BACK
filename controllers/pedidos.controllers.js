@@ -28,7 +28,8 @@ export const GuardarTodaLaInformacion = async (req, res) => {
     CookieConToken
   );
 
-  if (!RespuestaValidacionToken) res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const CodigoRastreo = CrearCódigoDeRastreo();
@@ -626,7 +627,7 @@ export const BuscarPedidosPorPaquete = async (req, res) => {
             ORDER BY p.GuiaPedido = ? DESC`;
 
     CONEXION.query(sql, [CodigoRastreo, GuiaPedido], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -659,7 +660,7 @@ export const BuscarRemitentesPorAgencia = async (req, res) => {
       sql = `SELECT r.* FROM union_remitentes_agencias ura LEFT JOIN remitentes r ON ura.idRemitente = r.idRemitente WHERE ura.idAgencia = ? AND r.NombreRemitente LIKE ?`;
     }
     CONEXION.query(sql, paramsBRPA, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result); // Devuelve un array con los remitentes
     });
   } catch (error) {
@@ -693,7 +694,7 @@ export const BuscarDestinatariosPorAgencia = async (req, res) => {
       sql = `SELECT d.* FROM union_destinatarios_agencias uda LEFT JOIN destinatarios d ON uda.idDestinatario = d.idDestinatario WHERE uda.idAgencia = ? AND d.NombreDestinatario LIKE ?`;
     }
     CONEXION.query(sql, paramsBDPA, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result); // Devuelve un array con los destinatarios
     });
   } catch (error) {
@@ -725,7 +726,7 @@ export const BuscarUltimosDiezPedidos = async (req, res) => {
       LIMIT 10;
       `;
     CONEXION.query(sql, ["Activa"], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -749,7 +750,7 @@ export const BuscarMovimientosDeUnPedido = async (req, res) => {
   try {
     const sql = `SELECT * FROM movimientos WHERE GuiaPedido = ? ORDER BY idMovimiento DESC;`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -771,7 +772,7 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
     WHERE p.GuiaPedido = ?
     ORDER BY m.idMovimiento DESC`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {

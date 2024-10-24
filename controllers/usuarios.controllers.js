@@ -15,15 +15,18 @@ import {
 // SE UTILIZA EN LAS VISTAS: Perfil
 export const ObtenerInformacionDeUnUsuario = async (req, res) => {
   const { idUsuario, CookieConToken } = req.body;
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
+
   if (!RespuestaValidacionToken)
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
   try {
     const sql = "SELECT * FROM usuarios WHERE idUsuario = ?";
     CONEXION.query(sql, [idUsuario], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -47,12 +50,12 @@ export const RegistrarUsuario = async (req, res) => {
   try {
     const sql = `SELECT * FROM usuarios WHERE Usuario = ?`;
     CONEXION.query(sql, [Usuario], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         res
-          .status(500)
+          .status(409)
           .json(
-            `El usuario ${Usuario.toUpperCase()} ya existe, por favor intente con otro nombre de usuario ❌`
+            `¡Oops! Parece que el usuario ${Usuario.toUpperCase()} ya existe, por favor intente con otro nombre de usuario.`
           );
       } else {
         const sql = `INSERT INTO usuarios (Usuario, Contraseña, Permisos, FechaCreacionUsuario, HoraCreacionUsuario) VALUES (?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
@@ -64,7 +67,7 @@ export const RegistrarUsuario = async (req, res) => {
             res
               .status(200)
               .json(
-                `El usuario ${Usuario.toUpperCase()} ha sido registrado correctamente ✨`
+                `¡El usuario ${Usuario.toUpperCase()} ha sido registrado con éxito!`
               );
           }
         );
@@ -100,7 +103,7 @@ export const BuscarUsuariosParaAdministrarPorFiltro = async (req, res) => {
       sql = `SELECT * FROM usuarios WHERE idUsuario != ? AND Usuario LIKE ? ORDER BY idUsuario DESC`;
     }
     CONEXION.query(sql, paramBUPAPF, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -118,14 +121,16 @@ export const ActualizarEstadoUsuario = async (req, res) => {
     CookieConToken
   );
 
+  const TEXTO_ESTADO = EstadoUsuario === "Activo" ? "ACTIVADO" : "DESACTIVADO";
+
   if (!RespuestaValidacionToken)
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE usuarios SET EstadoUsuario = ? WHERE idUsuario = ?`;
     CONEXION.query(sql, [EstadoUsuario, idUsuario], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-      res.status(200).json("El usuario ha sido actualizado con éxito ✨");
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(`¡El usuario ha sido ${TEXTO_ESTADO} con éxito!`);
     });
   } catch (error) {
     console.log(error);
@@ -148,12 +153,12 @@ export const ActualizarInformacionDeUnUsuario = async (req, res) => {
   try {
     const sql = `SELECT * FROM usuarios WHERE Usuario = ? AND idUsuario != ?`;
     CONEXION.query(sql, [Usuario, idUsuario], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         res
-          .status(500)
+          .status(409)
           .json(
-            `El usuario ${Usuario.toUpperCase()} ya existe, por favor intente con otro nombre de usuario ❌`
+            `¡Oops! Parece que el usuario ${Usuario.toUpperCase()} ya existe, por favor intente con otro nombre de usuario.`
           );
       } else {
         const sql = `UPDATE usuarios SET Usuario = ?, Permisos = ?, Contraseña = ? WHERE idUsuario = ?`;
@@ -161,12 +166,8 @@ export const ActualizarInformacionDeUnUsuario = async (req, res) => {
           sql,
           [Usuario, Permisos, Contraseña, idUsuario],
           (error, result) => {
-            if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-            res
-              .status(200)
-              .json(
-                `El usuario ${Usuario.toUpperCase()} ha sido actualizado correctamente ✨`
-              );
+            if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+            res.status(200).json(`¡El usuario ha sido actualizado con éxito!`);
           }
         );
       }
@@ -192,7 +193,7 @@ export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
   try {
     const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.idAgencia ASC`;
     CONEXION.query(sql, [idUsuario, "Activa"], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -233,7 +234,7 @@ export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
           ORDER BY idAgencia ASC`;
     }
     CONEXION.query(sql, paramBAQNTEU, (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -257,8 +258,10 @@ export const AsignarAgenciaAlUsuario = async (req, res) => {
   try {
     const sql = `INSERT INTO union_usuarios_agencias (idUsuario, idAgencia) VALUES (?,?)`;
     CONEXION.query(sql, [idUsuario, idAgencia], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-      res.status(200).json("La agencia ha sido asignada con éxito ✨");
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res
+        .status(200)
+        .json("¡La agencia ha sido asignada con éxito al usuario!");
     });
   } catch (error) {
     console.log(error);
@@ -281,8 +284,10 @@ export const DesasignarAgenciaAlUsuario = async (req, res) => {
   try {
     const sql = `DELETE FROM union_usuarios_agencias WHERE idUnionUsuariosAgencias = ?`;
     CONEXION.query(sql, [idUnionAgencia], (error, result) => {
-      if (error) return res.status(500).json(MENSAJE_ERROR_CONSULTA_SQL);
-      res.status(200).json("La agencia ha sido desasignada con éxito ✨");
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res
+        .status(200)
+        .json("¡La agencia ha sido desasignada con éxito del usuario!");
     });
   } catch (error) {
     console.log(error);
