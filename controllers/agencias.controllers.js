@@ -18,15 +18,30 @@ export const RegistrarAgencia = async (req, res) => {
   const {
     CookieConToken,
     NombreAgencia,
-    NombreContacto,
-    TelefonoContacto,
-    CorreoContacto,
+    NombreLegalAgencia,
     PaisAgencia,
     CodigoPaisAgencia,
     EstadoAgencia,
+    CodigoEstadoAgencia,
     CiudadAgencia,
     CodigoPostalAgencia,
     DireccionAgencia,
+    TelefonoAgencia,
+    FaxAgencia,
+    CorreoAgencia,
+    CorreoAgenciaSecundario,
+    RepresentanteVentas,
+    TelefonoRepresentanteVentas,
+    NombreDueno,
+    TelefonoDueno,
+    NombreManager,
+    TelefonoManager,
+    NumeroLicenciaAgencia,
+    NumeroImpuestosVenta,
+    SS,
+    CopiaID,
+    CopiaLicenciaNegocio,
+    CopiaImpuestosVenta,
   } = req.body;
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
@@ -46,28 +61,54 @@ export const RegistrarAgencia = async (req, res) => {
             `¡Oops! Parece que la agencia ${NombreAgencia.toUpperCase()} ya existe, por favor intente con otro nombre de agencia.`
           );
       } else {
-        const sql = `INSERT INTO agencias (NombreAgencia, NombreContactoAgencia, TelefonoContactoAgencia, CorreoContactoAgencia, PaisAgencia, CodigoPaisAgencia, EstadoAgencia, CiudadAgencia, CodigoPostalAgencia, DireccionAgencia, FechaCreacionAgencia, HoraCreacionAgencia) VALUES (?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+        const sql = `INSERT INTO agencias (idEspecial, NombreAgencia, NombreLegalAgencia, PaisAgencia, CodigoPaisAgencia, EstadoAgencia, CodigoEstadoAgencia, CiudadAgencia, CodigoPostalAgencia, DireccionAgencia, TelefonoAgencia, FaxAgencia, CorreoAgencia, CorreoAgenciaSecundario, RepresentanteVentas, TelefonoRepresentanteVentas, NombreDueno, TelefonoDueno, NombreManager, TelefonoManager, NumeroLicenciaAgencia, NumeroImpuestosVenta, SS, CopiaID, CopiaLicenciaNegocio, CopiaImpuestosVenta, FechaCreacionAgencia, HoraCreacionAgencia) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(),'${ObtenerHoraActual()}')`;
         CONEXION.query(
           sql,
           [
-            NombreAgencia,
-            NombreContacto,
-            TelefonoContacto,
-            CorreoContacto,
-            PaisAgencia,
-            CodigoPaisAgencia,
-            EstadoAgencia,
-            CiudadAgencia,
-            CodigoPostalAgencia,
-            DireccionAgencia,
+            "",
+            NombreAgencia || "",
+            NombreLegalAgencia || "",
+            PaisAgencia || "",
+            CodigoPaisAgencia || "",
+            EstadoAgencia || "",
+            CodigoEstadoAgencia || "",
+            CiudadAgencia || "",
+            CodigoPostalAgencia || "",
+            DireccionAgencia || "",
+            TelefonoAgencia || "",
+            FaxAgencia || "",
+            CorreoAgencia || "",
+            CorreoAgenciaSecundario || "",
+            RepresentanteVentas || "",
+            TelefonoRepresentanteVentas || "",
+            NombreDueno || "",
+            TelefonoDueno || "",
+            NombreManager || "",
+            TelefonoManager || "",
+            NumeroLicenciaAgencia || "",
+            NumeroImpuestosVenta || "",
+            SS || "",
+            CopiaID || "",
+            CopiaLicenciaNegocio || "",
+            CopiaImpuestosVenta || "",
           ],
           (error, result) => {
             if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
-            res
-              .status(200)
-              .json(
-                `¡La agencia ${NombreAgencia.toUpperCase()} ha sido registrada correctamente!`
-              );
+            const idAgencia = result.insertId;
+            const sql = `UPDATE agencias SET idEspecial = ? WHERE idAgencia = ?`;
+            CONEXION.query(
+              sql,
+              [`${CodigoEstadoAgencia + idAgencia}`, idAgencia],
+              (error, result) => {
+                if (error)
+                  return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+                res
+                  .status(200)
+                  .json(
+                    `¡La agencia ${NombreAgencia.toUpperCase()} ha sido registrada correctamente!`
+                  );
+              }
+            );
           }
         );
       }
@@ -138,15 +179,30 @@ export const ActualizarInformacionAgencia = async (req, res) => {
     CookieConToken,
     idAgencia,
     NombreAgencia,
-    NombreContacto,
-    TelefonoContacto,
-    CorreoContacto,
+    NombreLegalAgencia,
     PaisAgencia,
     CodigoPaisAgencia,
     EstadoAgencia,
+    CodigoEstadoAgencia,
     CiudadAgencia,
     CodigoPostalAgencia,
     DireccionAgencia,
+    TelefonoAgencia,
+    FaxAgencia,
+    CorreoAgencia,
+    CorreoAgenciaSecundario,
+    RepresentanteVentas,
+    TelefonoRepresentanteVentas,
+    NombreDueno,
+    TelefonoDueno,
+    NombreManager,
+    TelefonoManager,
+    NumeroLicenciaAgencia,
+    NumeroImpuestosVenta,
+    SS,
+    CopiaID,
+    CopiaLicenciaNegocio,
+    CopiaImpuestosVenta,
   } = req.body;
 
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
@@ -167,20 +223,36 @@ export const ActualizarInformacionAgencia = async (req, res) => {
             `¡Oops! Parece que la agencia ${NombreAgencia.toUpperCase()} ya existe, por favor intente con otro nombre de agencia.`
           );
       } else {
-        const sql = `UPDATE agencias SET NombreAgencia = ?, NombreContactoAgencia = ?, TelefonoContactoAgencia = ?, CorreoContactoAgencia = ?, PaisAgencia = ?, CodigoPaisAgencia = ?, EstadoAgencia = ?, CiudadAgencia = ?, CodigoPostalAgencia = ?, DireccionAgencia = ? WHERE idAgencia = ?`;
+        const sql = `UPDATE agencias SET idEspecial = ?, NombreAgencia = ?, NombreLegalAgencia = ?, PaisAgencia = ?, CodigoPaisAgencia = ?, EstadoAgencia = ?, CodigoEstadoAgencia = ?, CiudadAgencia = ?, CodigoPostalAgencia = ?, DireccionAgencia = ?, TelefonoAgencia = ?, FaxAgencia = ?, CorreoAgencia = ?, CorreoAgenciaSecundario = ?, RepresentanteVentas = ?, TelefonoRepresentanteVentas = ?, NombreDueno = ?, TelefonoDueno = ?, NombreManager = ?, TelefonoManager = ?, NumeroLicenciaAgencia = ?, NumeroImpuestosVenta = ?, SS = ?, CopiaID = ?, CopiaLicenciaNegocio = ?, CopiaImpuestosVenta = ? WHERE idAgencia = ?`;
         CONEXION.query(
           sql,
           [
+            `${CodigoEstadoAgencia + idAgencia}`,
             NombreAgencia || "",
-            NombreContacto || "",
-            TelefonoContacto || "",
-            CorreoContacto || "",
+            NombreLegalAgencia || "",
             PaisAgencia || "",
             CodigoPaisAgencia || "",
             EstadoAgencia || "",
+            CodigoEstadoAgencia || "",
             CiudadAgencia || "",
             CodigoPostalAgencia || "",
             DireccionAgencia || "",
+            TelefonoAgencia || "",
+            FaxAgencia || "",
+            CorreoAgencia || "",
+            CorreoAgenciaSecundario || "",
+            RepresentanteVentas || "",
+            TelefonoRepresentanteVentas || "",
+            NombreDueno || "",
+            TelefonoDueno || "",
+            NombreManager || "",
+            TelefonoManager || "",
+            NumeroLicenciaAgencia || "",
+            NumeroImpuestosVenta || "",
+            SS || "",
+            CopiaID || "",
+            CopiaLicenciaNegocio || "",
+            CopiaImpuestosVenta || "",
             idAgencia,
           ],
           (error, result) => {
@@ -188,7 +260,7 @@ export const ActualizarInformacionAgencia = async (req, res) => {
             res
               .status(200)
               .json(
-                `¡La agencia ${NombreAgencia.toUpperCase()} ha sido actualizada con éxito!`
+                `¡La agencia ${NombreAgencia.toUpperCase()} ha sido actualizada con línea.`
               );
           }
         );

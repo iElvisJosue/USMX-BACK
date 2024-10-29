@@ -266,7 +266,7 @@ export const ObtenerCiudadesPorEstado = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS: Agencias > Registrar Agencia
 // SE UTILIZA EN LAS VISTAS: Agencias > Administrar Agencias > Editar Agencia
 export const ObtenerColoniasPorCodigoPostal = async (req, res) => {
-  const { CookieConToken, CodigoPostal } = req.body;
+  const { CookieConToken, CodigoPostal, Pais } = req.body;
 
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
@@ -276,8 +276,8 @@ export const ObtenerColoniasPorCodigoPostal = async (req, res) => {
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `SELECT * FROM colonias WHERE CodigoPostalColonia = ? AND ActivaColonia = ? ORDER BY NombreColonia ASC`;
-    CONEXION.query(sql, [CodigoPostal, "Activa"], (error, result) => {
+    const sql = `SELECT * FROM colonias WHERE CodigoPostalColonia = ? AND PaisColonia = ? AND ActivaColonia = ? ORDER BY NombreColonia ASC`;
+    CONEXION.query(sql, [CodigoPostal, Pais, "Activa"], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
