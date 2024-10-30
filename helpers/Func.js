@@ -24,6 +24,15 @@ export const ObtenerHoraActual = () => {
   return HoraActual;
 };
 
+export const ObtenerFechaActual = () => {
+  const hoy = new Date();
+  const dia = String(hoy.getDate()).padStart(2, "0");
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0"); // Los meses empiezan en 0
+  const año = hoy.getFullYear();
+
+  return `${dia}-${mes}-${año}`;
+};
+
 export const CrearGuia = () => {
   let Guia = "";
   for (let i = 0; i < 7; i++) {

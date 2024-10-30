@@ -1,5 +1,8 @@
 // IMPORTAMOS LA CONEXIÓN A LA DB
 import { CONEXION } from "../initial/db.js";
+// IMPORTAMOS LAS LIBRERías A USAR
+import { fileURLToPath } from "url";
+import path, { dirname } from "path";
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
@@ -10,6 +13,12 @@ import {
   ObtenerHoraActual,
   ValidarTokenParaPeticion,
 } from "../helpers/Func.js";
+import { CrearUnExcelDeLasAgencias } from "../helpers/Excels.js";
+// RUTAS PARA EL EXCEL
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const excelURL = path.join(__dirname, "../public/Excel");
 
 // EN ESTA FUNCIÓN VAMOS A REGISTRAR UNA NUEVA AGENCIA
 // SE UTILIZA EN LAS VISTAS:
@@ -124,6 +133,9 @@ export const RegistrarAgencia = async (req, res) => {
 export const BuscarAgenciasPorFiltro = async (req, res) => {
   const { CookieConToken, filtro } = req.body;
 
+  // CREAMOS EL PARAMETRO DE BUSQUEDA
+  let paramsBAPF = [];
+
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
@@ -133,12 +145,22 @@ export const BuscarAgenciasPorFiltro = async (req, res) => {
   }
 
   try {
-    const sql =
-      filtro === ""
-        ? `SELECT * FROM agencias  ORDER BY idAgencia ASC`
-        : `SELECT * FROM agencias WHERE NombreAgencia LIKE ? ORDER BY idAgencia ASC`;
-    CONEXION.query(sql, [`%${filtro}%`], (error, result) => {
-      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT * FROM agencias ORDER BY idAgencia ASC`;
+    } else {
+      paramsBAPF.push(
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`
+      );
+      sql = `SELECT * FROM agencias WHERE NombreAgencia LIKE ? OR PaisAgencia LIKE ? OR EstadoAgencia LIKE ? OR CiudadAgencia LIKE ? OR CodigoPostalAgencia LIKE ? ORDER BY idAgencia ASC`;
+    }
+    CONEXION.query(sql, paramsBAPF, (error, result) => {
+      if (error) console.log(error);
+      // if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
   } catch (error) {
@@ -457,3 +479,52 @@ export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A CREAR UN ARCHIVO EXCEL DE LAS AGENCIAS Y POSTERIORMENTE DESCARGARLO
+// SE UTILIZA EN LAS VISTAS:
+// Agencias > Administrar Agencias
+export const CrearYDescargarExcelDeAgencias = async (req, res) => {
+  const { CookieConToken, Agencias } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+
+  try {
+    const RutaDelExcel = await CrearUnExcelDeLasAgencias(Agencias);
+    res.download(RutaDelExcel, (err) => {
+      if (err) {
+        return res.status(500).json(MENSAJE_DE_ERROR);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// export const DescargarExcelAgencias = async (req, res) => {
+//   const { CookieConToken, NombreExcel } = req.params;
+
+//   const RutaDelExcel = path.join(excelURL, NombreExcel);
+
+//   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+//     CookieConToken
+//   );
+
+//   if (!RespuestaValidacionToken) {
+//     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+//   }
+//   try {
+//     res.download(RutaDelExcel, (err) => {
+//       if (err) {
+//         console.log(err);
+//         return res.status(500).json(MENSAJE_DE_ERROR);
+//       }
+//     });
+//   } catch (error) {
+//     res.status(500).json(MENSAJE_DE_ERROR);
+//   }
+// };

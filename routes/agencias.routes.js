@@ -11,6 +11,8 @@ import {
   AsignarProductoAgencia,
   DesasignarProductoAgencia,
   BuscarAgenciasPorFiltroYTipoDeUsuario,
+  CrearYDescargarExcelDeAgencias,
+  // DescargarExcelAgencias,
 } from "../controllers/agencias.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -43,6 +45,13 @@ router.post(
   "/BuscarAgenciasPorFiltroYTipoDeUsuario",
   BuscarAgenciasPorFiltroYTipoDeUsuario
 );
+// RUTA PARA CREAR UN EXCEL DE AGENCIAS
+router.post("/CrearYDescargarExcelDeAgencias", CrearYDescargarExcelDeAgencias);
+// RUTA PARA DESCARGAR UN EXCEL DE AGENCIAS
+// router.get(
+//   "/DescargarExcelAgencias/:NombreExcel/:CookieConToken",
+//   DescargarExcelAgencias
+// );
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;
