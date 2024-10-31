@@ -199,17 +199,20 @@ const EjecutarConsultaValidarPedido = async (
 ) => {
   // CREAMOS EL NOMBRE DEL PAQUETE DE TICKETS
   const NombreDelPaqueteDeTickets = `Ticket_Paquete_${CodigoRastreo}.pdf`;
-  let GuiaDuplicada = true;
-  let GuiaPedido;
+  const idEspecialAgencia = await ObtenerIdEspecialAgencia(pedido[0].idAgencia);
+  const idUltimoPedido = await ObtenerIdUltimoPedido();
+  const GuiaPedido = `${idEspecialAgencia}-${idUltimoPedido}`;
+  // let GuiaDuplicada = true;
+  // let GuiaPedido;
 
   // Generar un número de guía único
-  while (GuiaDuplicada) {
-    GuiaPedido = CrearGuia(); // Genera una nueva guía
-    GuiaDuplicada = await VerificarGuiaRepetida(GuiaPedido); // Espera a verificar si está duplicada
-    if (GuiaDuplicada) {
-      console.log("Guía duplicada, generando una nueva...");
-    }
-  }
+  // while (GuiaDuplicada) {
+  //   GuiaPedido = CrearGuia(); // Genera una nueva guía
+  //   GuiaDuplicada = await VerificarGuiaRepetida(GuiaPedido); // Espera a verificar si está duplicada
+  //   if (GuiaDuplicada) {
+  //     console.log("Guía duplicada, generando una nueva...");
+  //   }
+  // }
 
   // GUARDAMOS TODAS LAS GUIAS EN UNA LISTA
   ListaDeGuias.push(GuiaPedido);
@@ -244,15 +247,34 @@ const EjecutarConsultaValidarPedido = async (
     throw error; // Lanza el error para que sea capturado en el bloque que llama a esta función
   }
 };
-const VerificarGuiaRepetida = (GuiaPedido = "") => {
-  const sql = `SELECT * FROM pedidos WHERE GuiaPedido = ?`;
+const ObtenerIdEspecialAgencia = (idAgencia = 0) => {
   return new Promise((resolve, reject) => {
-    CONEXION.query(sql, [GuiaPedido], (error, result) => {
+    const sql = `SELECT idEspecial FROM agencias WHERE idAgencia = ?`;
+    CONEXION.query(sql, [idAgencia], (error, result) => {
       if (error) return reject(error);
-      resolve(result.length > 0); // Devuelve true si la guia está duplicado
+      resolve(result[0].idEspecial);
     });
   });
 };
+const ObtenerIdUltimoPedido = () => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT idPedido FROM pedidos ORDER BY idPedido DESC LIMIT 1`;
+    CONEXION.query(sql, (error, result) => {
+      if (error) return reject(error);
+      const SiguienteID = result.length > 0 ? result[0].idPedido + 1 : 3000;
+      resolve(SiguienteID);
+    });
+  });
+};
+// const VerificarGuiaRepetida = (GuiaPedido = "") => {
+//   const sql = `SELECT * FROM pedidos WHERE GuiaPedido = ?`;
+//   return new Promise((resolve, reject) => {
+//     CONEXION.query(sql, [GuiaPedido], (error, result) => {
+//       if (error) return reject(error);
+//       resolve(result.length > 0); // Devuelve true si la guia está duplicado
+//     });
+//   });
+// };
 const EjecutarConsultaGuardarPedido = (
   remitente,
   destinatario,
