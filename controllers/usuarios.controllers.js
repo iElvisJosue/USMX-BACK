@@ -191,7 +191,7 @@ export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.idAgencia ASC`;
+    const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.NombreAgencia = "USMX Express" DESC, a.idAgencia DESC`;
     CONEXION.query(sql, [idUsuario, "Activa"], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
@@ -223,7 +223,7 @@ export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
       sql = `SELECT * 
           FROM agencias 
           WHERE StatusAgencia = ? AND idAgencia NOT IN (SELECT idAgencia FROM union_usuarios_agencias WHERE idUsuario = ?) 
-          ORDER BY idAgencia ASC`;
+          ORDER BY NombreAgencia = "USMX Express" DESC, idAgencia DESC`;
     } else {
       paramBAQNTEU.unshift(`%${filtro}%`);
       sql = `SELECT * 

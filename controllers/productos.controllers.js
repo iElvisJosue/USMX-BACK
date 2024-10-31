@@ -241,7 +241,7 @@ export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ? AND a.StatusAgencia = ? ORDER BY a.idAgencia ASC`;
+    const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ? AND a.StatusAgencia = ? ORDER BY a.NombreAgencia = "USMX Express" DESC, a.idAgencia ASC`;
     CONEXION.query(sql, [idProducto, "Activa"], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
@@ -273,7 +273,7 @@ export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
       sql = `SELECT *
           FROM agencias
           WHERE StatusAgencia = ? AND idAgencia NOT IN (SELECT idAgencia FROM union_agencias_productos WHERE idProducto = ?)
-          ORDER BY idAgencia DESC`;
+          ORDER BY NombreAgencia = "USMX Express" DESC, idAgencia DESC`;
     } else {
       paramBAQNTUP.unshift(`%${filtro}%`);
       sql = `SELECT *

@@ -147,7 +147,7 @@ export const BuscarAgenciasPorFiltro = async (req, res) => {
   try {
     let sql;
     if (filtro === "") {
-      sql = `SELECT * FROM agencias ORDER BY idAgencia ASC`;
+      sql = `SELECT * FROM agencias ORDER BY NombreAgencia = "USMX Express" DESC, idAgencia DESC`;
     } else {
       paramsBAPF.push(
         `%${filtro}%`,
@@ -156,7 +156,7 @@ export const BuscarAgenciasPorFiltro = async (req, res) => {
         `%${filtro}%`,
         `%${filtro}%`
       );
-      sql = `SELECT * FROM agencias WHERE NombreAgencia LIKE ? OR PaisAgencia LIKE ? OR EstadoAgencia LIKE ? OR CiudadAgencia LIKE ? OR CodigoPostalAgencia LIKE ? ORDER BY idAgencia ASC`;
+      sql = `SELECT * FROM agencias WHERE NombreAgencia LIKE ? OR PaisAgencia LIKE ? OR EstadoAgencia LIKE ? OR CiudadAgencia LIKE ? OR CodigoPostalAgencia LIKE ? ORDER BY idAgencia DESC`;
     }
     CONEXION.query(sql, paramsBAPF, (error, result) => {
       if (error) console.log(error);
@@ -458,10 +458,10 @@ export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
 
     if (tipoDeUsuario === "Administrador") {
       if (filtro === "") {
-        sql = `SELECT * FROM agencias WHERE StatusAgencia = ? ORDER BY idAgencia ASC`;
+        sql = `SELECT * FROM agencias WHERE StatusAgencia = ? ORDER BY NombreAgencia = "USMX Express" DESC, idAgencia DESC`;
       } else {
         paramsBAPFYTU.unshift(`%${filtro}%`);
-        sql = `SELECT * FROM agencias WHERE NombreAgencia LIKE ? AND StatusAgencia = ? ORDER BY idAgencia ASC`;
+        sql = `SELECT * FROM agencias WHERE NombreAgencia LIKE ? AND StatusAgencia = ? ORDER BY idAgencia DESC`;
       }
       CONEXION.query(sql, paramsBAPFYTU, (error, result) => {
         if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
