@@ -20,15 +20,16 @@ export const RegistrarOcurre = async (req, res) => {
     CookieConToken,
     NombreOcurre,
     OperadorLogisticoOcurre,
-    TelefonoOcurre,
+    TelefonoUnoOcurre,
+    TelefonoDosOcurre,
     CorreoOcurre,
     PaisOcurre,
     CodigoPaisOcurre,
     EstadoOcurre,
+    CodigoEstadoOcurre,
     CiudadOcurre,
     CodigoPostalOcurre,
     DireccionOcurre,
-    MunicipioDelegacionOcurre,
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
@@ -51,21 +52,22 @@ export const RegistrarOcurre = async (req, res) => {
             `¡Oops! Parece que la ocurrencia ${NombreOcurre.toUpperCase()} ya existe, por favor intente con otro nombre de ocurrencia.`
           );
       } else {
-        const sql = `INSERT INTO ocurres (NombreOcurre, OperadorLogisticoOcurre, TelefonoOcurre, CorreoOcurre, PaisOcurre, CodigoPaisOcurre, EstadoOcurre, CiudadOcurre, CodigoPostalOcurre, DireccionOcurre, MunicipioDelegacionOcurre, ReferenciaOcurre, ObservacionesOcurre, FechaCreacionOcurre, HoraCreacionOcurre) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(), '${ObtenerHoraActual()}') `;
+        const sql = `INSERT INTO ocurres (NombreOcurre, OperadorLogisticoOcurre, TelefonoUnoOcurre, TelefonoDosOcurre, CorreoOcurre, PaisOcurre, CodigoPaisOcurre, EstadoOcurre, CodigoEstadoOcurre, CiudadOcurre, CodigoPostalOcurre, DireccionOcurre, ReferenciaOcurre, ObservacionesOcurre, FechaCreacionOcurre, HoraCreacionOcurre) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(), '${ObtenerHoraActual()}') `;
         CONEXION.query(
           sql,
           [
             NombreOcurre || "",
             OperadorLogisticoOcurre || "",
-            TelefonoOcurre || "",
+            TelefonoUnoOcurre || "",
+            TelefonoDosOcurre || "",
             CorreoOcurre || "",
             PaisOcurre || "",
             CodigoPaisOcurre || "",
             EstadoOcurre || "",
+            CodigoEstadoOcurre || "",
             CiudadOcurre || "",
             CodigoPostalOcurre || "",
             DireccionOcurre || "",
-            MunicipioDelegacionOcurre || "",
             ReferenciaOcurre || "",
             ObservacionesOcurre || "",
           ],
@@ -146,15 +148,16 @@ export const ActualizarInformacionOcurre = async (req, res) => {
     idOcurre,
     NombreOcurre,
     OperadorLogisticoOcurre,
-    TelefonoOcurre,
+    TelefonoUnoOcurre,
+    TelefonoDosOcurre,
     CorreoOcurre,
     PaisOcurre,
     CodigoPaisOcurre,
     EstadoOcurre,
+    CodigoEstadoOcurre,
     CiudadOcurre,
     CodigoPostalOcurre,
     DireccionOcurre,
-    MunicipioDelegacionOcurre,
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
@@ -177,23 +180,24 @@ export const ActualizarInformacionOcurre = async (req, res) => {
             `¡Oops! Parece que la ocurrencia ${NombreOcurre.toUpperCase()} ya existe, por favor intente con otro nombre de ocurrencia.`
           );
       } else {
-        const sql = `UPDATE ocurres SET NombreOcurre = ?, OperadorLogisticoOcurre = ?, TelefonoOcurre = ?, CorreoOcurre = ?, PaisOcurre = ?, CodigoPaisOcurre = ?, EstadoOcurre = ?, CiudadOcurre = ?, CodigoPostalOcurre = ?, DireccionOcurre = ?,  MunicipioDelegacionOcurre = ?, ReferenciaOcurre = ?, ObservacionesOcurre = ? WHERE idOcurre = ?`;
+        const sql = `UPDATE ocurres SET NombreOcurre = ?, OperadorLogisticoOcurre = ?, TelefonoUnoOcurre = ?, TelefonoDosOcurre = ?, CorreoOcurre = ?, PaisOcurre = ?, CodigoPaisOcurre = ?, EstadoOcurre = ?, CodigoEstadoOcurre = ?, CiudadOcurre = ?, CodigoPostalOcurre = ?, DireccionOcurre = ?, ReferenciaOcurre = ?, ObservacionesOcurre = ? WHERE idOcurre = ?`;
         CONEXION.query(
           sql,
           [
-            NombreOcurre,
-            OperadorLogisticoOcurre,
-            TelefonoOcurre,
-            CorreoOcurre,
-            PaisOcurre,
-            CodigoPaisOcurre,
-            EstadoOcurre,
-            CiudadOcurre,
-            CodigoPostalOcurre,
-            DireccionOcurre,
-            MunicipioDelegacionOcurre,
-            ReferenciaOcurre,
-            ObservacionesOcurre,
+            NombreOcurre || "",
+            OperadorLogisticoOcurre || "",
+            TelefonoUnoOcurre || "",
+            TelefonoDosOcurre || "",
+            CorreoOcurre || "",
+            PaisOcurre || "",
+            CodigoPaisOcurre || "",
+            EstadoOcurre || "",
+            CodigoEstadoOcurre || "",
+            CiudadOcurre || "",
+            CodigoPostalOcurre || "",
+            DireccionOcurre || "",
+            ReferenciaOcurre || "",
+            ObservacionesOcurre || "",
             idOcurre,
           ],
           (error, result) => {
