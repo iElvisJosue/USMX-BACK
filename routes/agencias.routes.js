@@ -9,6 +9,7 @@ import {
   BuscarProductosQueTieneLaAgencia,
   BuscarProductosQueNoTieneLaAgencia,
   AsignarProductoAgencia,
+  ActualizarProductoAgencia,
   DesasignarProductoAgencia,
   BuscarAgenciasPorFiltroYTipoDeUsuario,
   CrearYDescargarExcelDeAgencias,
@@ -38,6 +39,8 @@ router.post(
 );
 // RUTA PARA ASIGNAR UN PRODUCTO A UNA AGENCIA
 router.post("/AsignarProductoAgencia", AsignarProductoAgencia);
+// RUTA PARA ACTUALIZAR EL PRODUCTO DE UNA AGENCIA
+router.put("/ActualizarProductoAgencia", ActualizarProductoAgencia);
 // RUTA PARA DESASIGNAR UN PRODUCTO A UNA AGENCIA
 router.post("/DesasignarProductoAgencia", DesasignarProductoAgencia);
 // RUTA PARA BUSCAR LAS AGENCIAS POR FILTRO Y TIPO DE USUARIO

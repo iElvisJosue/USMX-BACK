@@ -410,6 +410,51 @@ export const AsignarProductoAgencia = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A ACTUALIZAR UN PRODUCTO DE UNA AGENCIA
+// SE UTILIZA EN LAS VISTAS:
+// Agencias > Administrar Agencias > Administrar Productos > Asignar Productos
+export const ActualizarProductoAgencia = async (req, res) => {
+  const {
+    CookieConToken,
+    PrecioProducto,
+    ComisionProducto,
+    LibraExtraProducto,
+    PesoMaximoProducto,
+    PesoSinCobroProducto,
+    idUnionAgenciasProductos,
+  } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `UPDATE union_agencias_productos SET PrecioProducto = ?, ComisionProducto = ?, LibraExtraProducto = ?, PesoSinCobroProducto = ?, PesoMaximoProducto = ? WHERE idUnionAgenciasProductos = ?`;
+    CONEXION.query(
+      sql,
+      [
+        PrecioProducto,
+        ComisionProducto,
+        LibraExtraProducto,
+        PesoSinCobroProducto,
+        PesoMaximoProducto,
+        idUnionAgenciasProductos,
+      ],
+      (error, result) => {
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        res
+          .status(200)
+          .json("¡El producto asignado a la agencia ha sido actualizado!");
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
 // EN ESTA FUNCIÓN VAMOS A DESASIGNAR UN PRODUCTO A UNA AGENCIA
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias > Administrar Productos > Desasignar Productos
