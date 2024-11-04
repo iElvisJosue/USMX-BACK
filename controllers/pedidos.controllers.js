@@ -74,20 +74,21 @@ const EjecutarConsultaGuardarRemitente = (remitente) => {
   const {
     NombreRemitente,
     ApellidosRemitente,
-    TelefonoCasaRemitente,
-    CelularRemitente,
+    TelefonoUnoRemitente,
+    TelefonoDosRemitente,
     CorreoRemitente,
     PaisRemitente,
     CodigoPaisRemitente,
     EstadoRemitente,
+    CodigoEstadoRemitente,
     CiudadRemitente,
     CodigoPostalRemitente,
     DireccionRemitente,
     ReferenciaRemitente,
   } = remitente;
 
-  const sql = `INSERT INTO remitentes (NombreRemitente, ApellidosRemitente, TelefonoCasaRemitente, CelularRemitente, CorreoRemitente, PaisRemitente, CodigoPaisRemitente, EstadoRemitente, CiudadRemitente, CodigoPostalRemitente, DireccionRemitente, ReferenciaRemitente, FechaCreacionRemitente, HoraCreacionRemitente) 
-  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+  const sql = `INSERT INTO remitentes (NombreRemitente, ApellidosRemitente, TelefonoUnoRemitente, TelefonoDosRemitente, CorreoRemitente, PaisRemitente, CodigoPaisRemitente, EstadoRemitente, CodigoEstadoRemitente, CiudadRemitente, CodigoPostalRemitente, DireccionRemitente, ReferenciaRemitente, FechaCreacionRemitente, HoraCreacionRemitente) 
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(),'${ObtenerHoraActual()}')`;
 
   return new Promise((resolve, reject) => {
     CONEXION.query(
@@ -95,12 +96,13 @@ const EjecutarConsultaGuardarRemitente = (remitente) => {
       [
         NombreRemitente || "",
         ApellidosRemitente || "",
-        TelefonoCasaRemitente || "",
-        CelularRemitente || "",
+        TelefonoUnoRemitente || "",
+        TelefonoDosRemitente || "",
         CorreoRemitente || "",
         PaisRemitente || "",
         CodigoPaisRemitente || "",
         EstadoRemitente || "",
+        CodigoEstadoRemitente || "",
         CiudadRemitente || "",
         CodigoPostalRemitente || "",
         DireccionRemitente || "",
@@ -119,40 +121,38 @@ const EjecutarConsultaGuardarRemitente = (remitente) => {
 const EjecutarConsultaGuardarDestinatario = (destinatario) => {
   const {
     NombreDestinatario,
-    ApellidoPaternoDestinatario,
-    ApellidoMaternoDestinatario,
-    TelefonoCasaDestinatario,
-    CelularDestinatario,
+    ApellidosDestinatario,
+    TelefonoUnoDestinatario,
+    TelefonoDosDestinatario,
     CorreoDestinatario,
     PaisDestinatario,
     CodigoPaisDestinatario,
     EstadoDestinatario,
+    CodigoEstadoDestinatario,
     CiudadDestinatario,
     CodigoPostalDestinatario,
     DireccionDestinatario,
-    MunicipioDelegacionDestinatario,
     ReferenciaDestinatario,
   } = destinatario;
 
-  const sql = `INSERT INTO destinatarios (NombreDestinatario, ApellidoPaternoDestinatario, ApellidoMaternoDestinatario, TelefonoCasaDestinatario, CelularDestinatario, CorreoDestinatario, PaisDestinatario, CodigoPaisDestinatario, EstadoDestinatario, CiudadDestinatario, CodigoPostalDestinatario, DireccionDestinatario, MunicipioDelegacionDestinatario, ReferenciaDestinatario, FechaCreacionDestinatario, HoraCreacionDestinatario) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+  const sql = `INSERT INTO destinatarios (NombreDestinatario, ApellidosDestinatario, TelefonoUnoDestinatario, TelefonoDosDestinatario, CorreoDestinatario, PaisDestinatario, CodigoPaisDestinatario, EstadoDestinatario, CodigoEstadoDestinatario, CiudadDestinatario, CodigoPostalDestinatario, DireccionDestinatario, ReferenciaDestinatario, FechaCreacionDestinatario, HoraCreacionDestinatario) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(),'${ObtenerHoraActual()}')`;
 
   return new Promise((resolve, reject) => {
     CONEXION.query(
       sql,
       [
         NombreDestinatario || "",
-        ApellidoPaternoDestinatario || "",
-        ApellidoMaternoDestinatario || "",
-        TelefonoCasaDestinatario || "",
-        CelularDestinatario || "",
+        ApellidosDestinatario || "",
+        TelefonoUnoDestinatario || "",
+        TelefonoDosDestinatario || "",
         CorreoDestinatario || "",
         PaisDestinatario || "",
         CodigoPaisDestinatario || "",
         EstadoDestinatario || "",
+        CodigoEstadoDestinatario || "",
         CiudadDestinatario || "",
         CodigoPostalDestinatario || "",
         DireccionDestinatario || "",
-        MunicipioDelegacionDestinatario || "",
         ReferenciaDestinatario || "",
       ],
       (error, result) => {

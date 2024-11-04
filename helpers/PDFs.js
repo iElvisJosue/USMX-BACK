@@ -156,15 +156,16 @@ export const CrearTicketDelPedido = (
         margin: [0, 1.5],
       },
       {
-        text: `${destinatario.NombreDestinatario} ${destinatario.ApellidoPaternoDestinatario} ${destinatario.ApellidoMaternoDestinatario}`,
+        text: `${destinatario.NombreDestinatario} ${destinatario.ApellidosDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
-      destinatario.CelularDestinatario || destinatario.TelefonoCasaDestinatario
+      destinatario.TelefonoUnoDestinatario ||
+      destinatario.TelefonoDosDestinatario
         ? {
-            text: `Telefono(s): ${destinatario.CelularDestinatario}${
-              destinatario.TelefonoCasaDestinatario &&
-              ` - ${destinatario.TelefonoCasaDestinatario}`
+            text: `Telefono(s): ${destinatario.TelefonoUnoDestinatario}${
+              destinatario.TelefonoDosDestinatario &&
+              ` - ${destinatario.TelefonoDosDestinatario}`
             }`,
             alignment: "left",
             fontSize: TamañoTextoPequeño,
@@ -175,17 +176,12 @@ export const CrearTicketDelPedido = (
             fontSize: TamañoTextoPequeño,
           },
       {
-        text: `${
-          destinatario.MunicipioDelegacionDestinatario &&
-          `${destinatario.MunicipioDelegacionDestinatario}, `
-        }${destinatario.DireccionDestinatario}, CP. ${
-          destinatario.CodigoPostalDestinatario
-        }`,
+        text: `${destinatario.PaisDestinatario} / ${destinatario.EstadoDestinatario} / ${destinatario.CiudadDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
       {
-        text: `${destinatario.PaisDestinatario} / ${destinatario.EstadoDestinatario} / ${destinatario.CiudadDestinatario}`,
+        text: `${destinatario.DireccionDestinatario}, CP. ${destinatario.CodigoPostalDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
@@ -440,7 +436,19 @@ export const CrearEtiquetaDelPedido = (
                           fontSize: TamañoTextoMuyPequeño,
                         },
                         {
-                          text: `${destinatario.NombreDestinatario.toUpperCase()} ${destinatario.ApellidoPaternoDestinatario.toUpperCase()} ${destinatario.ApellidoMaternoDestinatario.toUpperCase()}`,
+                          text: `${destinatario.NombreDestinatario.toUpperCase()} ${destinatario.ApellidosDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.PaisRemitente.toUpperCase()} / ${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${destinatario.PaisDestinatario.toUpperCase()} / ${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -455,23 +463,6 @@ export const CrearEtiquetaDelPedido = (
                         },
                         {
                           text: `${destinatario.DireccionDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
-                          alignment: "center",
-                          fontSize: TamañoTextoMuyPequeño,
-                        },
-                      ],
-                      [
-                        {
-                          text: `${remitente.PaisRemitente.toUpperCase()} / ${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
-                          alignment: "center",
-                          fontSize: TamañoTextoMuyPequeño,
-                        },
-                        {
-                          text: `${
-                            destinatario.MunicipioDelegacionDestinatario.toUpperCase()
-                              ? destinatario.MunicipioDelegacionDestinatario.toUpperCase() +
-                                " / "
-                              : ""
-                          }${destinatario.PaisDestinatario.toUpperCase()} / ${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -608,7 +599,19 @@ export const CrearEtiquetaDelPedido = (
                           fontSize: TamañoTextoMuyPequeño,
                         },
                         {
-                          text: `${destinatario.NombreDestinatario.toUpperCase()} ${destinatario.ApellidoPaternoDestinatario.toUpperCase()} ${destinatario.ApellidoMaternoDestinatario.toUpperCase()}`,
+                          text: `${destinatario.NombreDestinatario.toUpperCase()} ${destinatario.ApellidosDestinatario.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                      ],
+                      [
+                        {
+                          text: `${remitente.PaisRemitente.toUpperCase()} / ${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
+                          alignment: "center",
+                          fontSize: TamañoTextoMuyPequeño,
+                        },
+                        {
+                          text: `${destinatario.PaisDestinatario.toUpperCase()} / ${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -623,23 +626,6 @@ export const CrearEtiquetaDelPedido = (
                         },
                         {
                           text: `${destinatario.DireccionDestinatario.toUpperCase()}, CP. ${destinatario.CodigoPostalDestinatario.toUpperCase()}`,
-                          alignment: "center",
-                          fontSize: TamañoTextoMuyPequeño,
-                        },
-                      ],
-                      [
-                        {
-                          text: `${remitente.PaisRemitente.toUpperCase()} / ${remitente.CiudadRemitente.toUpperCase()} / ${remitente.EstadoRemitente.toUpperCase()}`,
-                          alignment: "center",
-                          fontSize: TamañoTextoMuyPequeño,
-                        },
-                        {
-                          text: `${
-                            destinatario.MunicipioDelegacionDestinatario.toUpperCase()
-                              ? destinatario.MunicipioDelegacionDestinatario.toUpperCase() +
-                                " / "
-                              : ""
-                          }${destinatario.PaisDestinatario.toUpperCase()} / ${destinatario.CiudadDestinatario.toUpperCase()} / ${destinatario.EstadoDestinatario.toUpperCase()}`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
                         },
@@ -711,7 +697,6 @@ export const CrearEtiquetaDelPedido = (
                       return "black"; // Color de las líneas verticales
                     },
                   },
-                  marginTop: 25,
                 },
                 { width: "*", text: "" },
               ],
@@ -874,15 +859,16 @@ export const CrearPaqueteDeTickets = (
         margin: [0, 1.5],
       },
       {
-        text: `${destinatario.NombreDestinatario} ${destinatario.ApellidoPaternoDestinatario} ${destinatario.ApellidoMaternoDestinatario}`,
+        text: `${destinatario.NombreDestinatario} ${destinatario.ApellidosDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
-      destinatario.CelularDestinatario || destinatario.TelefonoCasaDestinatario
+      destinatario.TelefonoUnoDestinatario ||
+      destinatario.TelefonoDosDestinatario
         ? {
-            text: `Telefono(s): ${destinatario.CelularDestinatario}${
-              destinatario.TelefonoCasaDestinatario &&
-              ` - ${destinatario.TelefonoCasaDestinatario}`
+            text: `Telefono(s): ${destinatario.TelefonoUnoDestinatario}${
+              destinatario.TelefonoDosDestinatario &&
+              ` - ${destinatario.TelefonoDosDestinatario}`
             }`,
             alignment: "left",
             fontSize: TamañoTextoPequeño,
@@ -893,17 +879,12 @@ export const CrearPaqueteDeTickets = (
             fontSize: TamañoTextoPequeño,
           },
       {
-        text: `${
-          destinatario.MunicipioDelegacionDestinatario &&
-          `${destinatario.MunicipioDelegacionDestinatario}, `
-        }${destinatario.DireccionDestinatario}, CP. ${
-          destinatario.CodigoPostalDestinatario
-        }`,
+        text: `${destinatario.PaisDestinatario} / ${destinatario.EstadoDestinatario} / ${destinatario.CiudadDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },
       {
-        text: `${destinatario.PaisDestinatario} / ${destinatario.EstadoDestinatario} / ${destinatario.CiudadDestinatario}`,
+        text: `${destinatario.DireccionDestinatario}, CP. ${destinatario.CodigoPostalDestinatario}`,
         alignment: "left",
         fontSize: TamañoTextoPequeño,
       },

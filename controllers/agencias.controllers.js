@@ -1,5 +1,7 @@
 // IMPORTAMOS LA CONEXIÓN A LA DB
 import { CONEXION } from "../initial/db.js";
+// IMPORTAMOS LA LIBRERIA DE EXCEL
+import ExcelJS from "exceljs";
 // IMPORTAMOS LAS LIBRERías A USAR
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
@@ -573,3 +575,245 @@ export const CrearYDescargarExcelDeAgencias = async (req, res) => {
 //     res.status(500).json(MENSAJE_DE_ERROR);
 //   }
 // };
+// EN ESTA FUNCION VAMOS A SUBIR UN ARCHIVO EXCEL DE LOS REMITENTES
+// SE UTILIZA EN LAS VISTAS:
+// Agencias > Administrar Agencias
+export const SubirArchivoRemitentes = async (req, res) => {
+  const { idAgencia, CookieConToken } = req.body;
+  const { ArchivoExcel } = req.files;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+  if (!ArchivoExcel || Object.keys(ArchivoExcel).length === 0) {
+    return res
+      .status(400)
+      .send(
+        "No se ha seleccionado ningún archivo, por favor intente de nuevo."
+      );
+  }
+
+  const ContenidoArchivoExcel = ArchivoExcel.data;
+
+  // Leer el archivo Excel usando exceljs
+  const workbook = new ExcelJS.Workbook();
+
+  try {
+    await workbook.xlsx.load(ContenidoArchivoExcel);
+
+    const worksheet = workbook.worksheets[0]; // Obtener la primera hoja
+    const rows = [];
+
+    // Leer cada fila de la hoja
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        // Ignorar la primera fila si contiene encabezados
+        const rowData = {};
+        row.eachCell((cell, colNumber) => {
+          rowData[worksheet.getRow(1).getCell(colNumber).value] = cell.value; // Asumir que la primera fila son encabezados
+        });
+        rows.push(rowData);
+      }
+    });
+
+    // Insertar datos en la base de datos
+    const InsertarCamposALaTabla = async () => {
+      for (const row of rows) {
+        const idNuevoRemitente = await InsertarRemitenteDesdeExcel(row);
+        CrearUnionRemitenteAgencia(idNuevoRemitente, idAgencia);
+      }
+      console.log("Remitente y Union creados correctamente.");
+    };
+
+    await InsertarCamposALaTabla();
+
+    res
+      .status(200)
+      .send("Se han guardado los datos de los remitentes correctamente.");
+  } catch (error) {
+    res
+      .status(500)
+      .send(
+        "Ocurrió un error inesperado al leer el archivo Excel de los remitentes, intente de nuevo."
+      );
+  }
+};
+const InsertarRemitenteDesdeExcel = (InfRemitente) => {
+  const {
+    NombreRemitente,
+    ApellidosRemitente,
+    TelefonoUnoRemitente,
+    TelefonoDosRemitente,
+    CorreoRemitente,
+    PaisRemitente,
+    CodigoPaisRemitente,
+    EstadoRemitente,
+    CodigoEstadoRemitente,
+    CiudadRemitente,
+    CodigoPostalRemitente,
+    DireccionRemitente,
+    ReferenciaRemitente,
+  } = InfRemitente;
+
+  return new Promise((resolve, reject) => {
+    const sql = `INSERT INTO remitentes (NombreRemitente, ApellidosRemitente, TelefonoUnoRemitente, TelefonoDosRemitente, CorreoRemitente, PaisRemitente, CodigoPaisRemitente, EstadoRemitente, CodigoEstadoRemitente, CiudadRemitente, CodigoPostalRemitente, DireccionRemitente, ReferenciaRemitente, FechaCreacionRemitente, HoraCreacionRemitente) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(),'${ObtenerHoraActual()}')`;
+    CONEXION.query(
+      sql,
+      [
+        NombreRemitente || "",
+        ApellidosRemitente || "",
+        TelefonoUnoRemitente || "",
+        TelefonoDosRemitente || "",
+        CorreoRemitente.text || "",
+        PaisRemitente || "",
+        CodigoPaisRemitente || "",
+        EstadoRemitente || "",
+        CodigoEstadoRemitente || "",
+        CiudadRemitente || "",
+        CodigoPostalRemitente || "",
+        DireccionRemitente || "",
+        ReferenciaRemitente || "",
+      ],
+      (error, result) => {
+        if (error) reject(error);
+        resolve(result.insertId);
+      }
+    );
+  });
+};
+const CrearUnionRemitenteAgencia = (idRemitente = 0, idAgencia = 0) => {
+  return new Promise((resolve, reject) => {
+    const sql = `INSERT INTO union_remitentes_agencias (idRemitente, idAgencia) VALUES (?,?)`;
+    CONEXION.query(sql, [idRemitente, idAgencia], (error, result) => {
+      if (error) {
+        return reject(error); // Rechaza la promesa si hay un error
+      }
+      resolve(true);
+    });
+  });
+};
+// EN ESTA FUNCION VAMOS A SUBIR UN ARCHIVO EXCEL DE LOS DESTINATARIOS
+// SE UTILIZA EN LAS VISTAS:
+// Agencias > Administrar Agencias
+export const SubirArchivoDestinatarios = async (req, res) => {
+  const { idAgencia, CookieConToken } = req.body;
+  const { ArchivoExcel } = req.files;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken) {
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+  }
+  if (!ArchivoExcel || Object.keys(ArchivoExcel).length === 0) {
+    return res
+      .status(400)
+      .send(
+        "No se ha seleccionado ningún archivo, por favor intente de nuevo."
+      );
+  }
+
+  const ContenidoArchivoExcel = ArchivoExcel.data;
+
+  // Leer el archivo Excel usando exceljs
+  const workbook = new ExcelJS.Workbook();
+
+  try {
+    await workbook.xlsx.load(ContenidoArchivoExcel);
+
+    const worksheet = workbook.worksheets[0]; // Obtener la primera hoja
+    const rows = [];
+
+    // Leer cada fila de la hoja
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        // Ignorar la primera fila si contiene encabezados
+        const rowData = {};
+        row.eachCell((cell, colNumber) => {
+          rowData[worksheet.getRow(1).getCell(colNumber).value] = cell.value; // Asumir que la primera fila son encabezados
+        });
+        rows.push(rowData);
+      }
+    });
+
+    // Insertar datos en la base de datos
+    const InsertarCamposALaTabla = async () => {
+      for (const row of rows) {
+        const idNuevoDestinatario = await InsertarDestinatarioDesdeExcel(row);
+        CrearUnionDestinatarioAgencia(idNuevoDestinatario, idAgencia);
+      }
+      console.log("Destinatario y Union creados correctamente.");
+    };
+
+    await InsertarCamposALaTabla();
+
+    res
+      .status(200)
+      .send("Se han guardado los datos de los destinatarios correctamente.");
+  } catch (error) {
+    res
+      .status(500)
+      .send(
+        "Ocurrió un error inesperado al leer el archivo Excel de los destinatarios, intente de nuevo."
+      );
+  }
+};
+const InsertarDestinatarioDesdeExcel = (infDestinatario) => {
+  const {
+    NombreDestinatario,
+    ApellidosDestinatario,
+    TelefonoUnoDestinatario,
+    TelefonoDosDestinatario,
+    CorreoDestinatario,
+    PaisDestinatario,
+    CodigoPaisDestinatario,
+    EstadoDestinatario,
+    CodigoEstadoDestinatario,
+    CiudadDestinatario,
+    CodigoPostalDestinatario,
+    DireccionDestinatario,
+    ReferenciaDestinatario,
+  } = infDestinatario;
+
+  return new Promise((resolve, reject) => {
+    const sql = `INSERT INTO destinatarios (NombreDestinatario, ApellidosDestinatario, TelefonoUnoDestinatario, TelefonoDosDestinatario, CorreoDestinatario, PaisDestinatario, CodigoPaisDestinatario, EstadoDestinatario, CodigoEstadoDestinatario, CiudadDestinatario, CodigoPostalDestinatario, DireccionDestinatario, ReferenciaDestinatario, FechaCreacionDestinatario, HoraCreacionDestinatario) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, CURDATE(),'${ObtenerHoraActual()}')`;
+    CONEXION.query(
+      sql,
+      [
+        NombreDestinatario || "",
+        ApellidosDestinatario || "",
+        TelefonoUnoDestinatario || "",
+        TelefonoDosDestinatario || "",
+        CorreoDestinatario.text || "",
+        PaisDestinatario || "",
+        CodigoPaisDestinatario || "",
+        EstadoDestinatario || "",
+        CodigoEstadoDestinatario || "",
+        CiudadDestinatario || "",
+        CodigoPostalDestinatario || "",
+        DireccionDestinatario || "",
+        ReferenciaDestinatario || "",
+      ],
+      (error, result) => {
+        if (error) reject(error);
+        resolve(result.insertId);
+      }
+    );
+  });
+};
+const CrearUnionDestinatarioAgencia = (idDestinatario = 0, idAgencia = 0) => {
+  return new Promise((resolve, reject) => {
+    const sql = `INSERT INTO union_destinatarios_agencias (idDestinatario, idAgencia) VALUES (?,?)`;
+    CONEXION.query(sql, [idDestinatario, idAgencia], (error, result) => {
+      if (error) {
+        return reject(error); // Rechaza la promesa si hay un error
+      }
+      resolve(true);
+    });
+  });
+};
