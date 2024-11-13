@@ -14,6 +14,7 @@ import {
   BuscarEstadosPorFiltro,
   BuscarCiudadesPorFiltro,
   BuscarColoniasPorFiltro,
+  ObtenerApiGoogleMapsAutoCompletado,
 } from "../controllers/configuracion.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -49,7 +50,11 @@ router.post("/BuscarEstadosPorFiltro", BuscarEstadosPorFiltro);
 router.post("/BuscarCiudadesPorFiltro", BuscarCiudadesPorFiltro);
 // RUTA PARA BUSCAR LAS COLONIAS POR FILTRO
 router.post("/BuscarColoniasPorFiltro", BuscarColoniasPorFiltro);
-//
+// RUTA PARA OBTENER LA API DE GOOGLE MAPS AUTO COMPLETADO
+router.get(
+  "/ObtenerApiGoogleMapsAutoCompletado/:CookieConToken",
+  ObtenerApiGoogleMapsAutoCompletado
+);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;
