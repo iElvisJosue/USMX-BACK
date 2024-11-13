@@ -471,8 +471,9 @@ export const CrearEtiquetaDelPedido = (
                         {
                           marginBottom: 2.5,
                           text: `${
-                            remitente.ReferenciaRemitente &&
-                            `REF. ${remitente.ReferenciaRemitente.toUpperCase()}`
+                            remitente.ReferenciaRemitente
+                              ? `REF. ${remitente.ReferenciaRemitente.toUpperCase()}`
+                              : ""
                           }`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
@@ -480,8 +481,9 @@ export const CrearEtiquetaDelPedido = (
                         {
                           marginBottom: 2.5,
                           text: `${
-                            destinatario.ReferenciaDestinatario &&
-                            `REF. ${destinatario.ReferenciaDestinatario.toUpperCase()}`
+                            destinatario.ReferenciaDestinatario
+                              ? `REF. ${destinatario.ReferenciaDestinatario.toUpperCase()}`
+                              : ""
                           }`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
@@ -538,6 +540,7 @@ export const CrearEtiquetaDelPedido = (
                 { width: "*", text: "" },
               ],
             },
+            { text: "", margin: [0, 10] }, // Espacio entre las tablas
             {
               columns: [
                 { width: "*", text: "" },
@@ -634,8 +637,9 @@ export const CrearEtiquetaDelPedido = (
                         {
                           marginBottom: 2.5,
                           text: `${
-                            remitente.ReferenciaRemitente &&
-                            `REF. ${remitente.ReferenciaRemitente.toUpperCase()}`
+                            remitente.ReferenciaRemitente
+                              ? `REF. ${remitente.ReferenciaRemitente.toUpperCase()}`
+                              : ""
                           }`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
@@ -643,8 +647,9 @@ export const CrearEtiquetaDelPedido = (
                         {
                           marginBottom: 2.5,
                           text: `${
-                            destinatario.ReferenciaDestinatario &&
-                            `REF. ${destinatario.ReferenciaDestinatario.toUpperCase()}`
+                            destinatario.ReferenciaDestinatario
+                              ? `REF. ${destinatario.ReferenciaDestinatario.toUpperCase()}`
+                              : ""
                           }`,
                           alignment: "center",
                           fontSize: TamañoTextoMuyPequeño,
