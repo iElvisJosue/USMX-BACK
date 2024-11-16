@@ -6,6 +6,8 @@ import {
   ObtenerTiposDeEnvio,
   ObtenerModoOscuro,
   ActualizarModoOscuro,
+  ObtenerIdioma,
+  ActualizarIdioma,
   RegistrarTipoDeCarga,
   EliminarTipoDeCarga,
   RegistrarTipoDeEnvio,
@@ -20,14 +22,18 @@ import {
 // ALMACENAMOS EL ENRUTADOR
 const router = Router();
 
-// RUTA PARA BUSCAR LOS TIPOS DE CARGA
-router.post("/ObtenerTiposDeCarga", ObtenerTiposDeCarga);
-// RUTA PARA BUSCAR LOS TIPOS DE ENVÍO
-router.post("/ObtenerTiposDeEnvio", ObtenerTiposDeEnvio);
 // RUTA PARA OBTENER EL MODO OSCURO DEL USUARIO
 router.get("/ObtenerModoOscuro/:idUsuario", ObtenerModoOscuro);
 // RUTA PARA ACTUALIZAR EL MODO OSCURO DEL USUARIO
 router.put("/ActualizarModoOscuro", ActualizarModoOscuro);
+// RUTA PARA OBTENER EL IDIOMA DEL USUARIO
+router.get("/ObtenerIdioma/:idUsuario", ObtenerIdioma);
+// RUTA PARA ACTUALIZAR EL IDIOMA DEL USUARIO
+router.put("/ActualizarIdioma", ActualizarIdioma);
+// RUTA PARA BUSCAR LOS TIPOS DE CARGA
+router.post("/ObtenerTiposDeCarga", ObtenerTiposDeCarga);
+// RUTA PARA BUSCAR LOS TIPOS DE ENVÍO
+router.post("/ObtenerTiposDeEnvio", ObtenerTiposDeEnvio);
 // RUTA PARA REGISTRAR UN NUEVO TIPO DE CARGA
 router.post("/RegistrarTipoDeCarga", RegistrarTipoDeCarga);
 // RUTA PARA ELIMINAR UN TIPO DE CARGA

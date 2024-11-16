@@ -224,6 +224,50 @@ export const ActualizarModoOscuro = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCION VAMOS A OBTENER EL IDIOMA DEL USUARIO
+// SE UTILIZA EN LAS VISTAS: Apariencia
+export const ObtenerIdioma = async (req, res) => {
+  const { idUsuario } = req.params;
+  try {
+    const sql = `SELECT Idioma FROM usuarios WHERE idUsuario = ?`;
+    CONEXION.query(sql, [idUsuario], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCION VAMOS A ACTUALIZAR EL IDIOMA DEL USUARIO
+// SE UTILIZA EN LAS VISTAS: Apariencia
+export const ActualizarIdioma = async (req, res) => {
+  const { CookieConToken, idUsuario, Idioma } = req.body;
+
+  const TextoRespuesta = Idioma === "es" ? "Español" : "Inglés";
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `UPDATE usuarios SET Idioma = ? WHERE idUsuario = ?`;
+    CONEXION.query(sql, [Idioma, idUsuario], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res
+        .status(200)
+        .json(
+          `¡El idioma ${TextoRespuesta.toUpperCase()} ha sido aplicado correctamente!`
+        );
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
 // EN ESTA FUNCIÓN VAMOS A BUSCAR LOS PAISES POR UN FILTRO DETERMINADO
 // SE UTILIZA EN LAS VISTAS:
 // Paises > Administrar Paises
