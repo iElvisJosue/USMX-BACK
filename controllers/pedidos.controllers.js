@@ -23,7 +23,16 @@ import {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Realizar pedido > Detalles del pedido > Finalizar
 export const GuardarTodaLaInformacion = async (req, res) => {
-  const { CookieConToken, remitente, destinatario, pedido } = req.body;
+  const {
+    CookieConToken,
+    remitente,
+    destinatario,
+    idUsuario,
+    NombreUsuario,
+    idAgencia,
+    NombreAgencia,
+    pedido,
+  } = req.body;
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
   );
@@ -47,14 +56,18 @@ export const GuardarTodaLaInformacion = async (req, res) => {
       : await EjecutarConsultaGuardarDestinatario(destinatario);
 
     if (remitente.idRemitente === false)
-      await CrearUnionRemitenteAgencia(idRemitente, pedido[0].idAgencia);
+      await CrearUnionRemitenteAgencia(idRemitente, idAgencia);
     if (destinatario.idDestinatario === false)
-      await CrearUnionDestinatarioAgencia(idDestinatario, pedido[0].idAgencia);
+      await CrearUnionDestinatarioAgencia(idDestinatario, idAgencia);
     // Procesamos cada pedido secuencialmente usando un bucle for
     for (const infoPedido of pedido) {
       await EjecutarConsultaValidarPedido(
         remitente,
         destinatario,
+        idUsuario,
+        NombreUsuario,
+        idAgencia,
+        NombreAgencia,
         infoPedido,
         idRemitente,
         idDestinatario,
@@ -190,6 +203,10 @@ const CrearUnionDestinatarioAgencia = (idDestinatario = 0, idAgencia = 0) => {
 const EjecutarConsultaValidarPedido = async (
   remitente,
   destinatario,
+  idUsuario = 0,
+  NombreUsuario,
+  idAgencia = 0,
+  NombreAgencia,
   infoPedido,
   idRemitente = 0,
   idDestinatario = 0,
@@ -197,11 +214,6 @@ const EjecutarConsultaValidarPedido = async (
   pedido,
   ListaDeGuias
 ) => {
-  // CREAMOS EL NOMBRE DEL PAQUETE DE TICKETS
-  const NombreDelPaqueteDeTickets = `Ticket_Paquete_${CodigoRastreo}.pdf`;
-  const idEspecialAgencia = await ObtenerIdEspecialAgencia(pedido[0].idAgencia);
-  const idUltimoPedido = await ObtenerIdUltimoPedido();
-  const GuiaPedido = `${idEspecialAgencia}-${idUltimoPedido}`;
   // let GuiaDuplicada = true;
   // let GuiaPedido;
 
@@ -213,6 +225,14 @@ const EjecutarConsultaValidarPedido = async (
   //     console.log("Guía duplicada, generando una nueva...");
   //   }
   // }
+  // CREAMOS EL NOMBRE DEL PAQUETE DE TICKETS
+  const NombreDelPaqueteDeTickets = `Ticket_Paquete_${CodigoRastreo}.pdf`;
+  // OBTENEMOS EL ID ESPECIAL DE LA AGENCIA
+  const idEspecialAgencia = await ObtenerIdEspecialAgencia(idAgencia);
+  // OBTENEMOS EL ID DEL ULTIMO PEDIDO
+  const idUltimoPedido = await ObtenerIdUltimoPedido();
+  // CREAMOS EL NÚMERO SU NÚMERO DE GUIA
+  const GuiaPedido = `${idEspecialAgencia}-${idUltimoPedido}`;
 
   // GUARDAMOS TODAS LAS GUIAS EN UNA LISTA
   ListaDeGuias.push(GuiaPedido);
@@ -224,6 +244,8 @@ const EjecutarConsultaValidarPedido = async (
       NombreDelPaqueteDeTickets,
       remitente,
       destinatario,
+      NombreUsuario,
+      NombreAgencia,
       ListaDeGuias,
       pedido
     );
@@ -233,6 +255,10 @@ const EjecutarConsultaValidarPedido = async (
     await EjecutarConsultaGuardarPedido(
       remitente,
       destinatario,
+      idUsuario,
+      NombreUsuario,
+      idAgencia,
+      NombreAgencia,
       infoPedido,
       idRemitente,
       idDestinatario,
@@ -278,6 +304,10 @@ const ObtenerIdUltimoPedido = () => {
 const EjecutarConsultaGuardarPedido = (
   remitente,
   destinatario,
+  idUsuario,
+  NombreUsuario,
+  idAgencia,
+  NombreAgencia,
   infoPedido,
   idRemitente = 0,
   idDestinatario = 0,
@@ -293,7 +323,7 @@ const EjecutarConsultaGuardarPedido = (
     const sql = `
     INSERT INTO pedidos (
       GuiaPedido, ProductoPedido, TipoCargaPedido, TipoEnvioPedido, ContenidoPedido, LargoPedido, AnchoPedido, AltoPedido, PieCubicoPedido, PesoPedido, ValorDeclaradoPedido, ValorAseguradoPedido, CostoSeguroPedido, 
-      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, UsuarioResponsablePedido, TicketPedido, EtiquetaPedido, PaqueteTicketsPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+      CostoEnvioPedido, CostoSobrePesoPedido, TotalPedido, TicketPedido, EtiquetaPedido, PaqueteTicketsPedido, FechaCreacionPedido, HoraCreacionPedido) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
     CONEXION.query(
       sql,
       [
@@ -313,7 +343,6 @@ const EjecutarConsultaGuardarPedido = (
         infoPedido.CostoEnvio || 0,
         infoPedido.CostoSobrePeso || 0,
         infoPedido.Total || 0,
-        infoPedido.UsuarioResponsable || "No definido",
         NombreDelTicket,
         NombreDeLaEtiqueta,
         NombreDelPaqueteDeTickets,
@@ -322,11 +351,13 @@ const EjecutarConsultaGuardarPedido = (
         if (error) {
           return reject(error); // Rechaza la promesa si hay un error
         }
-        CrearMovimientosPorDefecto(GuiaPedido, infoPedido.UsuarioResponsable);
+        CrearMovimientosPorDefecto(GuiaPedido, NombreUsuario);
         CrearTicketDelPedido(
           NombreDelTicket,
           remitente,
           destinatario,
+          NombreUsuario,
+          NombreAgencia,
           infoPedido,
           GuiaPedido
         );
@@ -337,11 +368,12 @@ const EjecutarConsultaGuardarPedido = (
           infoPedido,
           GuiaPedido
         );
-        CrearUnionRemitenteDestinatarioPedido(
+        CrearDetallesDelPedido(
           idRemitente,
           idDestinatario,
           result.insertId,
-          infoPedido.idAgencia,
+          idAgencia,
+          idUsuario,
           CodigoRastreo
         );
         resolve(true);
@@ -388,18 +420,26 @@ const CrearMovimientosPorDefecto = (
     );
   });
 };
-const CrearUnionRemitenteDestinatarioPedido = (
+const CrearDetallesDelPedido = (
   idRemitente = 0,
   idDestinatario = 0,
   idPedido = 0,
   idAgencia = 0,
+  idUsuario = 0,
   CodigoRastreo = ""
 ) => {
-  const sql = `INSERT INTO union_remitentes_destinatarios_pedidos (idRemitente, idDestinatario, idPedido, idAgencia, CodigoRastreo) VALUES (?,?,?,?,?)`;
+  const sql = `INSERT INTO detallespedidos (idRemitente, idDestinatario, idPedido, idAgencia, idUsuario, CodigoRastreo) VALUES (?,?,?,?,?,?)`;
   return new Promise((resolve, reject) => {
     CONEXION.query(
       sql,
-      [idRemitente, idDestinatario, idPedido, idAgencia, CodigoRastreo],
+      [
+        idRemitente,
+        idDestinatario,
+        idPedido,
+        idAgencia,
+        idUsuario,
+        CodigoRastreo,
+      ],
       (error, result) => {
         if (error) {
           return reject(error); // Rechaza la promesa si hay un error
@@ -409,11 +449,77 @@ const CrearUnionRemitenteDestinatarioPedido = (
     );
   });
 };
-// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS PEDIDOS POR FILTROS
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS ULTIMOS 10 PEDIDOS GENERALES
+// SE UTILIZA EN LAS VISTAS: Bienvenida
+export const BuscarUltimosDiezPedidosGenerales = async (req, res) => {
+  try {
+    const sql = `SELECT 
+      p.GuiaPedido, 
+      p.FechaCreacionPedido,
+      p.HoraCreacionPedido,
+      a.NombreAgencia, 
+      dp.CodigoRastreo  
+      FROM 
+          detallespedidos dp
+      LEFT JOIN 
+          pedidos p ON dp.idPedido = p.idPedido
+      LEFT JOIN 
+          agencias a ON dp.idAgencia = a.idAgencia
+      WHERE a.StatusAgencia = ?
+      ORDER BY 
+          p.FechaCreacionPedido DESC, 
+          p.HoraCreacionPedido DESC,
+          p.idPedido DESC 
+      LIMIT 10`;
+    CONEXION.query(sql, ["Activa"], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS ULTIMOS 10 PEDIDOS REALIZADOS DE UN USUARIO
+// SE UTILIZA EN LAS VISTAS: Bienvenida
+export const BuscarUltimosDiezPedidosDeUnUsuario = async (req, res) => {
+  const { idUsuario } = req.params;
+
+  try {
+    const sql = `SELECT 
+      p.GuiaPedido, 
+      p.FechaCreacionPedido,
+      p.HoraCreacionPedido,
+      a.NombreAgencia, 
+      dp.CodigoRastreo  
+      FROM 
+          detallespedidos dp
+      LEFT JOIN 
+          pedidos p ON dp.idPedido = p.idPedido
+      LEFT JOIN 
+          agencias a ON dp.idAgencia = a.idAgencia
+      LEFT JOIN
+          usuarios u ON dp.idUsuario = u.idUsuario
+      WHERE a.StatusAgencia = ? AND dp.idUsuario = ?
+      ORDER BY 
+          p.FechaCreacionPedido DESC, 
+          p.HoraCreacionPedido DESC,
+          p.idPedido DESC 
+      LIMIT 10`;
+    CONEXION.query(sql, ["Activa", idUsuario], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR TODOS LOS PEDIDOS POR FILTRO
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Pedidos > Lista completa de pedidos
-export const BuscarPedidosPorFiltro = async (req, res) => {
-  const { filtro, CookieConToken, tipoDeUsuario, idDelUsuario } = req.body;
+export const BuscarTodosLosPedidosPorFiltro = async (req, res) => {
+  const { filtro, CookieConToken } = req.body;
 
   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
     CookieConToken
@@ -422,197 +528,268 @@ export const BuscarPedidosPorFiltro = async (req, res) => {
   if (!RespuestaValidacionToken)
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
-  if (tipoDeUsuario === "Administrador") {
-    try {
-      const PedidosParaElAdministrador =
-        await BusquedaDePedidosParaElAdministrador(filtro);
-      res.send(PedidosParaElAdministrador);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json(MENSAJE_DE_ERROR);
-    }
-  } else {
-    try {
-      const PedidosParaElUsuario = await BusquedaDePedidosParaElUsuario(
-        filtro,
-        idDelUsuario
+  try {
+    // DEFINIMOS EL ARRAY DE FILTROS
+    let paramsBDPPEU = [];
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT 
+      r.*,
+      d.*,
+      p.*,
+      a.*,
+      u.Usuario,
+      dp.CodigoRastreo
+      FROM 
+          detallespedidos dp
+      LEFT JOIN 
+          remitentes r ON dp.idRemitente = r.idRemitente
+      LEFT JOIN 
+          destinatarios d ON dp.idDestinatario = d.idDestinatario
+      LEFT JOIN 
+          pedidos p ON dp.idPedido = p.idPedido
+      LEFT JOIN 
+          agencias a ON dp.idAgencia = a.idAgencia
+      LEFT JOIN 
+          usuarios u ON dp.idUsuario = u.idUsuario
+      ORDER BY 
+          p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
+    } else {
+      paramsBDPPEU.push(
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`
       );
-      const pedidosOrdenadosPorFecha = (a, b) => {
-        if (a.FechaCreacionPedido > b.FechaCreacionPedido) {
-          return -1;
-        }
-        if (a.FechaCreacionPedido < b.FechaCreacionPedido) {
-          return 1;
-        }
-        return 0;
-      };
-      res.send(PedidosParaElUsuario.sort(pedidosOrdenadosPorFecha));
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(MENSAJE_DE_ERROR);
+      sql = `SELECT 
+      r.*,
+      d.*,
+      p.*,
+      a.*,
+      u.Usuario,
+      dp.CodigoRastreo
+      FROM 
+          detallespedidos dp
+      LEFT JOIN 
+          remitentes r ON dp.idRemitente = r.idRemitente
+      LEFT JOIN 
+          destinatarios d ON dp.idDestinatario = d.idDestinatario
+      LEFT JOIN 
+          pedidos p ON dp.idPedido = p.idPedido
+      LEFT JOIN 
+          agencias a ON dp.idAgencia = a.idAgencia
+      LEFT JOIN 
+          usuarios u ON dp.idUsuario = u.idUsuario
+      WHERE 
+          p.GuiaPedido LIKE ?
+          OR u.Usuario LIKE ?
+          OR r.NombreRemitente LIKE ?
+          OR d.NombreDestinatario LIKE ?
+          OR a.NombreAgencia LIKE ?
+      ORDER BY 
+          p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
     }
+
+    CONEXION.query(sql, paramsBDPPEU, (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(MENSAJE_DE_ERROR);
   }
 };
-const BusquedaDePedidosParaElAdministrador = (filtro) => {
-  const sql =
-    filtro === ""
-      ? `SELECT 
-            urdp.idRemitente,
-            urdp.idDestinatario,
-            urdp.idPedido,
-            urdp.idAgencia,
-            urdp.CodigoRastreo,
-            r.*,
-            d.*,
-            p.*,
-            a.*
-            FROM 
-                union_remitentes_destinatarios_pedidos urdp
-            LEFT JOIN 
-                remitentes r ON urdp.idRemitente = r.idRemitente
-            LEFT JOIN 
-                destinatarios d ON urdp.idDestinatario = d.idDestinatario
-            LEFT JOIN 
-                pedidos p ON urdp.idPedido = p.idPedido
-            LEFT JOIN 
-                agencias a ON urdp.idAgencia = a.idAgencia
-            ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`
-      : `SELECT 
-            urdp.idRemitente,
-            urdp.idDestinatario,
-            urdp.idPedido,
-            urdp.idAgencia,
-            urdp.CodigoRastreo,
-            r.*,
-            d.*,
-            p.*,
-            a.*
-            FROM 
-                union_remitentes_destinatarios_pedidos urdp
-            LEFT JOIN 
-                remitentes r ON urdp.idRemitente = r.idRemitente
-            LEFT JOIN 
-                destinatarios d ON urdp.idDestinatario = d.idDestinatario
-            LEFT JOIN 
-                pedidos p ON urdp.idPedido = p.idPedido
-            LEFT JOIN 
-                agencias a ON urdp.idAgencia = a.idAgencia
-            WHERE 
-                p.GuiaPedido LIKE ?
-                OR p.UsuarioResponsablePedido LIKE ?
-                OR r.NombreRemitente LIKE ?
-                OR d.NombreDestinatario LIKE ?
-                OR a.NombreAgencia LIKE ?
-            ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
-  return new Promise((resolve, reject) => {
+// EN ESTA FUNCIÓN VAMOS A BUSCAR TODOS LOS PEDIDOS POR FECHAS
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería > Pedidos > Lista de pedidos por fechas
+export const BuscarTodosLosPedidosPorFecha = async (req, res) => {
+  const { CookieConToken, primeraFecha, segundaFecha } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `SELECT
+    r.*, 
+    d.*, 
+    p.*, 
+    a.*,
+    u.Usuario,
+    u.idUsuario,
+    dp.CodigoRastreo
+    FROM
+      detallespedidos dp
+    INNER JOIN
+      remitentes r ON dp.idRemitente = r.idRemitente
+    INNER JOIN
+      destinatarios d ON dp.idDestinatario = d.idDestinatario
+    INNER JOIN
+      pedidos p ON dp.idPedido = p.idPedido
+    INNER JOIN
+      agencias a ON dp.idAgencia = a.idAgencia
+    INNER JOIN
+      usuarios u ON dp.idUsuario = u.idUsuario
+    WHERE
+      p.FechaCreacionPedido BETWEEN ? AND ?
+    ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
     CONEXION.query(
       sql,
-      [
-        `%${filtro}%`,
-        `%${filtro}%`,
-        `%${filtro}%`,
-        `%${filtro}%`,
-        `%${filtro}%`,
-      ],
+      [primeraFecha, segundaFecha, "Activa"],
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        res.status(200).json(result);
       }
     );
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
 };
-const BusquedaDePedidosParaElUsuario = async (filtro, idDelUsuario) => {
-  const sqlObtenerAgencias = `SELECT uua.idAgencia FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.idAgencia DESC`;
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS PEDIDOS DE UN USUARIO POR FILTROS
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería > Pedidos > Lista completa de pedidos
+export const BuscarPedidosDeUnUsuarioPorFiltro = async (req, res) => {
+  const { filtro, CookieConToken, idUsuario } = req.body;
 
-  return new Promise((resolve, reject) => {
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    // DEFINIMOS EL ARRAY DE FILTROS
+    let paramsBDPPEU = [idUsuario];
+    let sql;
+    if (filtro === "") {
+      sql = `SELECT 
+      r.*,
+      d.*,
+      p.*,
+      a.*,
+      u.Usuario,
+      dp.CodigoRastreo
+      FROM 
+          detallespedidos dp
+      LEFT JOIN 
+          remitentes r ON dp.idRemitente = r.idRemitente
+      LEFT JOIN 
+          destinatarios d ON dp.idDestinatario = d.idDestinatario
+      LEFT JOIN 
+          pedidos p ON dp.idPedido = p.idPedido
+      LEFT JOIN 
+          agencias a ON dp.idAgencia = a.idAgencia
+      LEFT JOIN 
+          usuarios u ON dp.idUsuario = u.idUsuario
+      WHERE 
+          dp.idUsuario = ?
+      ORDER BY 
+          p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
+    } else {
+      paramsBDPPEU.push(
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`,
+        `%${filtro}%`
+      );
+      sql = `SELECT 
+      r.*,
+      d.*,
+      p.*,
+      a.*,
+      u.Usuario,
+      dp.CodigoRastreo
+      FROM 
+          detallespedidos dp
+      LEFT JOIN 
+          remitentes r ON dp.idRemitente = r.idRemitente
+      LEFT JOIN 
+          destinatarios d ON dp.idDestinatario = d.idDestinatario
+      LEFT JOIN 
+          pedidos p ON dp.idPedido = p.idPedido
+      LEFT JOIN 
+          agencias a ON dp.idAgencia = a.idAgencia
+      LEFT JOIN 
+          usuarios u ON dp.idUsuario = u.idUsuario
+      WHERE 
+          dp.idUsuario = ?
+          AND (
+              p.GuiaPedido LIKE ?
+              OR u.Usuario LIKE ?
+              OR r.NombreRemitente LIKE ?
+              OR d.NombreDestinatario LIKE ?
+              OR a.NombreAgencia LIKE ?
+          )
+      ORDER BY 
+          p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
+    }
+
+    CONEXION.query(sql, paramsBDPPEU, (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A BUSCAR LOS PEDIDOS POR FILTROS
+// SE UTILIZA EN LAS VISTAS:
+// Paquetería > Pedidos > Lista de pedidos por fechas
+export const BuscarPedidosDeUnUsuarioPorFecha = async (req, res) => {
+  const { CookieConToken, idUsuario, primeraFecha, segundaFecha } = req.body;
+
+  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+    CookieConToken
+  );
+
+  if (!RespuestaValidacionToken)
+    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+
+  try {
+    const sql = `SELECT
+    r.*, 
+    d.*, 
+    p.*, 
+    a.*,
+    u.Usuario,
+    u.idUsuario,
+    dp.CodigoRastreo
+    FROM
+      detallespedidos dp
+    INNER JOIN
+      remitentes r ON dp.idRemitente = r.idRemitente
+    INNER JOIN
+      destinatarios d ON dp.idDestinatario = d.idDestinatario
+    INNER JOIN
+      pedidos p ON dp.idPedido = p.idPedido
+    INNER JOIN
+      agencias a ON dp.idAgencia = a.idAgencia
+    INNER JOIN
+      usuarios u ON dp.idUsuario = u.idUsuario
+    WHERE
+      dp.idUsuario = ?
+      AND p.FechaCreacionPedido BETWEEN ? AND ?
+    ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
     CONEXION.query(
-      sqlObtenerAgencias,
-      [idDelUsuario, "Activa"],
+      sql,
+      [idUsuario, primeraFecha, segundaFecha, "Activa"],
       (error, result) => {
-        if (error) return reject(error);
-
-        const promesasDeBusqueda = result.map(({ idAgencia }) => {
-          let paramsBDPPEU = [idAgencia];
-          let sql;
-          if (filtro === "") {
-            sql = `SELECT 
-                urdp.idRemitente,
-                urdp.idDestinatario,
-                urdp.idPedido,
-                urdp.idAgencia,
-                urdp.CodigoRastreo,
-                r.*,
-                d.*,
-                p.*,
-                a.*
-                FROM 
-                    union_remitentes_destinatarios_pedidos urdp
-                LEFT JOIN 
-                    remitentes r ON urdp.idRemitente = r.idRemitente
-                LEFT JOIN 
-                    destinatarios d ON urdp.idDestinatario = d.idDestinatario
-                LEFT JOIN 
-                    pedidos p ON urdp.idPedido = p.idPedido
-                LEFT JOIN 
-                    agencias a ON urdp.idAgencia = a.idAgencia
-                WHERE 
-                    urdp.idAgencia = ?
-                ORDER BY 
-                    p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
-          } else {
-            paramsBDPPEU.push(
-              `%${filtro}%`,
-              `%${filtro}%`,
-              `%${filtro}%`,
-              `%${filtro}%`,
-              `%${filtro}%`
-            );
-            sql = `SELECT 
-                urdp.idRemitente,
-                urdp.idDestinatario,
-                urdp.idPedido,
-                urdp.idAgencia,
-                urdp.CodigoRastreo,
-                r.*,
-                d.*,
-                p.*,
-                a.*
-                FROM 
-                    union_remitentes_destinatarios_pedidos urdp
-                LEFT JOIN 
-                    remitentes r ON urdp.idRemitente = r.idRemitente
-                LEFT JOIN 
-                    destinatarios d ON urdp.idDestinatario = d.idDestinatario
-                LEFT JOIN 
-                    pedidos p ON urdp.idPedido = p.idPedido
-                LEFT JOIN 
-                    agencias a ON urdp.idAgencia = a.idAgencia
-                WHERE 
-                    urdp.idAgencia = ?
-                    AND (
-                        p.GuiaPedido LIKE ?
-                        OR p.UsuarioResponsablePedido LIKE ?
-                        OR r.NombreRemitente LIKE ?
-                        OR d.NombreDestinatario LIKE ?
-                        OR a.NombreAgencia LIKE ?
-                    )
-                ORDER BY 
-                    p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
-          }
-          return new Promise((resolve, reject) => {
-            CONEXION.query(sql, paramsBDPPEU, (error, result) => {
-              if (error) return reject(error);
-              resolve(result);
-            });
-          });
-        });
-
-        Promise.all(promesasDeBusqueda)
-          .then((results) => resolve(results.flat()))
-          .catch((error) => reject(error));
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        res.status(200).json(result);
       }
     );
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
 };
 // EN ESTA FUNCIÓN VAMOS A OBTENER TODOS LOS PEDIDOS QUE SE REALIZARON POR "PAQUETES"
 // SE UTILIZA EN LAS VISTAS:
@@ -629,24 +806,28 @@ export const BuscarPedidosPorPaquete = async (req, res) => {
     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
-    const sql = `SELECT 
-            r.*,
-            d.*,
-            p.*,
-            a.*
-            FROM 
-                union_remitentes_destinatarios_pedidos urdp
-            LEFT JOIN 
-                remitentes r ON urdp.idRemitente = r.idRemitente
-            LEFT JOIN 
-                destinatarios d ON urdp.idDestinatario = d.idDestinatario
-            LEFT JOIN 
-                pedidos p ON urdp.idPedido = p.idPedido
-            LEFT JOIN 
-                agencias a ON urdp.idAgencia = a.idAgencia
-            WHERE 
-            	urdp.CodigoRastreo = ?
-            ORDER BY p.GuiaPedido = ? DESC`;
+    const sql = `
+    SELECT 
+    r.*,
+    d.*,
+    p.*,
+    a.*,
+    u.Usuario
+    FROM 
+        detallespedidos dp
+    LEFT JOIN 
+        remitentes r ON dp.idRemitente = r.idRemitente
+    LEFT JOIN 
+        destinatarios d ON dp.idDestinatario = d.idDestinatario
+    LEFT JOIN 
+        pedidos p ON dp.idPedido = p.idPedido
+    LEFT JOIN 
+        agencias a ON dp.idAgencia = a.idAgencia
+    LEFT JOIN 
+        usuarios u ON dp.idUsuario = u.idUsuario
+    WHERE 
+      dp.CodigoRastreo = ?
+    ORDER BY p.GuiaPedido = ? DESC`;
 
     CONEXION.query(sql, [CodigoRastreo, GuiaPedido], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
@@ -724,38 +905,6 @@ export const BuscarDestinatariosPorAgencia = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
-// EN ESTA FUNCIÓN VAMOS A OBTENER LOS ULTIMOS 10 PEDIDOS REALIZADOS
-// SE UTILIZA EN LAS VISTAS: Bienvenida
-export const BuscarUltimosDiezPedidos = async (req, res) => {
-  try {
-    const sql = `SELECT 
-      p.GuiaPedido, 
-      p.FechaCreacionPedido,
-      p.HoraCreacionPedido,
-      a.NombreAgencia, 
-      urdp.CodigoRastreo  
-      FROM 
-          union_remitentes_destinatarios_pedidos urdp
-      LEFT JOIN 
-          pedidos p ON urdp.idPedido = p.idPedido
-      LEFT JOIN 
-          agencias a ON urdp.idAgencia = a.idAgencia
-      WHERE a.StatusAgencia = ?
-      ORDER BY 
-          p.FechaCreacionPedido DESC, 
-          p.HoraCreacionPedido DESC,
-          p.idPedido DESC 
-      LIMIT 10;
-      `;
-    CONEXION.query(sql, ["Activa"], (error, result) => {
-      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
-      res.status(200).json(result);
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
 // EN ESTA FUNCIÓN VAMOS A OBTENER LOS MOVIMIENTOS DE UN PEDIDO
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Detalles del pedido
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Detalles del pedido > Finalizar
@@ -785,168 +934,31 @@ export const BuscarMovimientosDeUnPedido = async (req, res) => {
 export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
   const { GuiaPedido } = req.params;
   try {
-    const sql = `SELECT r.*, d.*, p.*, m.* 
-    FROM union_remitentes_destinatarios_pedidos urdp 
-    LEFT JOIN remitentes r ON urdp.idRemitente = r.idRemitente 
-    LEFT JOIN destinatarios d ON urdp.idDestinatario = d.idDestinatario 
-    LEFT JOIN pedidos p ON urdp.idPedido = p.idPedido 
-    LEFT JOIN movimientos m ON p.GuiaPedido = m.GuiaPedido 
-    WHERE p.GuiaPedido = ?
-    ORDER BY m.idMovimiento DESC`;
+    const sql = `SELECT 
+    r.*, 
+    d.*, 
+    p.*, 
+    m.* 
+    FROM 
+      detallespedidos dp 
+    LEFT JOIN 
+      remitentes r ON dp.idRemitente = r.idRemitente 
+    LEFT JOIN 
+      destinatarios d ON dp.idDestinatario = d.idDestinatario 
+    LEFT JOIN 
+      pedidos p ON dp.idPedido = p.idPedido 
+    LEFT JOIN 
+      movimientos m ON p.GuiaPedido = m.GuiaPedido 
+    WHERE 
+      p.GuiaPedido = ?
+    ORDER BY 
+      m.idMovimiento DESC`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
-// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS POR FECHA
-// SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Pedidos por fecha
-export const BuscarPedidosPorFecha = async (req, res) => {
-  const {
-    CookieConToken,
-    primeraFecha,
-    segundaFecha,
-    idDelUsuario,
-    permisosUsuario,
-  } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
-  try {
-    const pedidosPorFecha =
-      permisosUsuario === "Administrador"
-        ? await BuscarPedidosPorFechaParaElAdministrador(
-            primeraFecha,
-            segundaFecha
-          )
-        : await BuscarPedidosPorFechaParaLosEmpleados(
-            primeraFecha,
-            segundaFecha,
-            idDelUsuario
-          );
-
-    res.status(200).json(pedidosPorFecha);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
-const BuscarPedidosPorFechaParaElAdministrador = (
-  primeraFecha,
-  segundaFecha
-) => {
-  const sql = `SELECT
-                urdp.idRemitente,
-                urdp.idDestinatario,
-                urdp.idPedido,
-                urdp.idAgencia,
-                urdp.CodigoRastreo,
-                r.*, d.*, p.*, a.*
-              FROM
-                union_remitentes_destinatarios_pedidos urdp
-              INNER JOIN
-                remitentes r ON urdp.idRemitente = r.idRemitente
-              INNER JOIN
-                destinatarios d ON urdp.idDestinatario = d.idDestinatario
-              INNER JOIN
-                pedidos p ON urdp.idPedido = p.idPedido
-              INNER JOIN
-                agencias a ON urdp.idAgencia = a.idAgencia
-              WHERE
-                p.FechaCreacionPedido BETWEEN ? AND ?
-              ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
-  return new Promise((resolve, reject) => {
-    CONEXION.query(sql, [primeraFecha, segundaFecha], (error, result) => {
-      if (error) {
-        reject(error); // Si hay error, rechaza la promesa
-      } else {
-        resolve(result.flat()); // Si todo va bien, resuelve con el insertId
-      }
-    });
-  });
-};
-const BuscarPedidosPorFechaParaLosEmpleados = async (
-  primeraFecha,
-  segundaFecha,
-  idDelUsuario
-) => {
-  const sqlObtenerAgencias = `SELECT uua.idAgencia
-            FROM union_usuarios_agencias uua
-            LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia
-            WHERE uua.idUsuario = ?
-            AND a.StatusAgencia = ?
-            ORDER BY a.idAgencia DESC`;
-  try {
-    // Obtener agencias activas del usuario
-    const agenciasResult = await new Promise((resolve, reject) => {
-      CONEXION.query(
-        sqlObtenerAgencias,
-        [idDelUsuario, "Activa"],
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
-      );
-    });
-    // Mapear las agencias para obtener los pedidos
-    const promesasDeBusqueda = agenciasResult.map(({ idAgencia }) => {
-      const sql = `SELECT
-                    urdp.idRemitente,
-                    urdp.idDestinatario,
-                    urdp.idPedido,
-                    urdp.idAgencia,
-                    urdp.CodigoRastreo, 
-                    r.*, d.*, p.*, a.*
-                  FROM
-                    union_remitentes_destinatarios_pedidos urdp
-                  INNER JOIN
-                    remitentes r ON urdp.idRemitente = r.idRemitente
-                  INNER JOIN
-                    destinatarios d ON urdp.idDestinatario = d.idDestinatario
-                  INNER JOIN
-                    pedidos p ON urdp.idPedido = p.idPedido
-                  INNER JOIN
-                    agencias a ON urdp.idAgencia = a.idAgencia
-                  WHERE
-                    urdp.idAgencia = ?
-                    AND p.FechaCreacionPedido BETWEEN ? AND ?
-                    AND a.StatusAgencia = ?
-                  ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC;
-  `;
-      return new Promise((resolve, reject) => {
-        CONEXION.query(
-          sql,
-          [idAgencia, primeraFecha, segundaFecha, "Activa"],
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          }
-        );
-      });
-    });
-    // Esperar a que todas las promesas de búsqueda se resuelvan
-    const resultadosPedidos = await Promise.all(promesasDeBusqueda);
-
-    const pedidosOrdenadosPorFecha = (a, b) => {
-      if (a.FechaCreacionPedido > b.FechaCreacionPedido) {
-        return -1;
-      }
-      if (a.FechaCreacionPedido < b.FechaCreacionPedido) {
-        return 1;
-      }
-      return 0;
-    };
-    return resultadosPedidos.flat().sort(pedidosOrdenadosPorFecha);
-  } catch (error) {
-    // Manejar errores
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };

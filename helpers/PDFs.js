@@ -28,6 +28,8 @@ export const CrearTicketDelPedido = (
   NombreDelTicket,
   remitente,
   destinatario,
+  NombreUsuario,
+  NombreAgencia,
   infoPedido,
   GuiaPedido
 ) => {
@@ -297,7 +299,7 @@ export const CrearTicketDelPedido = (
         marginTop: 7.5,
       },
       {
-        text: infoPedido.NombreAgencia.toUpperCase(),
+        text: NombreAgencia.toUpperCase(),
         alignment: "center",
         fontSize: TamañoTextoPequeño,
         marginBottom: 7.5,
@@ -308,7 +310,7 @@ export const CrearTicketDelPedido = (
         fontSize: TamañoTextoPequeño,
       },
       {
-        text: infoPedido.UsuarioResponsable.toUpperCase(),
+        text: NombreUsuario.toUpperCase(),
         alignment: "center",
         fontSize: TamañoTextoPequeño,
       },
@@ -732,6 +734,8 @@ export const CrearPaqueteDeTickets = (
   NombreDelPaqueteDeTickets,
   remitente,
   destinatario,
+  NombreUsuario,
+  NombreAgencia,
   ListaDeGuias,
   pedido
 ) => {
@@ -1010,7 +1014,7 @@ export const CrearPaqueteDeTickets = (
         marginTop: 7.5,
       },
       {
-        text: infoPedido.NombreAgencia.toUpperCase(),
+        text: NombreAgencia.toUpperCase(),
         alignment: "center",
         fontSize: TamañoTextoPequeño,
         marginBottom: 7.5,
@@ -1021,7 +1025,7 @@ export const CrearPaqueteDeTickets = (
         fontSize: TamañoTextoPequeño,
       },
       {
-        text: infoPedido.UsuarioResponsable.toUpperCase(),
+        text: NombreUsuario.toUpperCase(),
         alignment: "center",
         fontSize: TamañoTextoPequeño,
       },
