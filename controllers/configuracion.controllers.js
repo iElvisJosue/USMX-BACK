@@ -4,22 +4,12 @@ import { CONEXION } from "../initial/db.js";
 import {
   MENSAJE_DE_ERROR,
   MENSAJE_ERROR_CONSULTA_SQL,
-  MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
-import { ValidarTokenParaPeticion } from "../helpers/Func.js";
 
 // EN ESTA FUNCION VAMOS REGISTRAR UN NUEVO TIPO DE CARGA
 // SE UTILIZA EN LAS VISTAS: Configuración > Cargas
 export const RegistrarTipoDeCarga = async (req, res) => {
-  const { CookieConToken, TipoCarga, PorcentajeCarga } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { TipoCarga, PorcentajeCarga } = req.body;
   try {
     const sql = `SELECT * FROM tiposcarga WHERE TipoCarga = ?`;
     CONEXION.query(sql, [TipoCarga], (error, result) => {
@@ -51,15 +41,6 @@ export const RegistrarTipoDeCarga = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Realizar Pedido > Detalles del pedido
 export const ObtenerTiposDeCarga = async (req, res) => {
-  const { CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
   try {
     const sql = `SELECT * FROM tiposcarga ORDER BY idCarga DESC`;
     CONEXION.query(sql, (error, result) => {
@@ -74,15 +55,7 @@ export const ObtenerTiposDeCarga = async (req, res) => {
 // EN ESTA FUNCION VAMOS ELIMINAR UN TIPO DE CARGA
 // SE UTILIZA EN LAS VISTAS: Configuración > Cargas
 export const EliminarTipoDeCarga = async (req, res) => {
-  const { CookieConToken, idCarga } = req.params;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idCarga } = req.params;
   try {
     const sql = `DELETE FROM tiposcarga WHERE idCarga = ?`;
     CONEXION.query(sql, [idCarga], (error, result) => {
@@ -97,15 +70,7 @@ export const EliminarTipoDeCarga = async (req, res) => {
 // EN ESTA FUNCION VAMOS REGISTRAR UN NUEVO TIPO DE ENVIO
 // SE UTILIZA EN LAS VISTAS: Configuración > Envios
 export const RegistrarTipoDeEnvio = async (req, res) => {
-  const { CookieConToken, TipoEnvio } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { TipoEnvio } = req.body;
   try {
     const sql = `SELECT * FROM tiposenvio WHERE TipoEnvio = ?`;
     CONEXION.query(sql, [TipoEnvio], (error, result) => {
@@ -137,15 +102,6 @@ export const RegistrarTipoDeEnvio = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Realizar Pedido > Detalles del pedido
 export const ObtenerTiposDeEnvio = async (req, res) => {
-  const { CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
   try {
     const sql = `SELECT * FROM tiposenvio ORDER BY idTipoEnvio DESC`;
     CONEXION.query(sql, (error, result) => {
@@ -160,15 +116,7 @@ export const ObtenerTiposDeEnvio = async (req, res) => {
 // EN ESTA FUNCION VAMOS ELIMINAR UN TIPO DE ENVIO
 // SE UTILIZA EN LAS VISTAS: Configuración > Envios
 export const EliminarTipoDeEnvio = async (req, res) => {
-  const { CookieConToken, idTipoEnvio } = req.params;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idTipoEnvio } = req.params;
   try {
     const sql = `DELETE FROM tiposenvio WHERE idTipoEnvio = ?`;
     CONEXION.query(sql, [idTipoEnvio], (error, result) => {
@@ -200,16 +148,9 @@ export const ObtenerModoOscuro = async (req, res) => {
 // EN ESTA FUNCION VAMOS A ACTUALIZAR EL MODO OSCURO DEL USUARIO
 // SE UTILIZA EN LAS VISTAS: Apariencia
 export const ActualizarModoOscuro = async (req, res) => {
-  const { CookieConToken, idUsuario, ModoOscuro } = req.body;
+  const { idUsuario, ModoOscuro } = req.body;
 
   const TextoRespuesta = ModoOscuro ? "MODO OSCURO" : "MODO CLARO";
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE usuarios SET ModoOscuro = ? WHERE idUsuario = ?`;
@@ -242,16 +183,9 @@ export const ObtenerIdioma = async (req, res) => {
 // EN ESTA FUNCION VAMOS A ACTUALIZAR EL IDIOMA DEL USUARIO
 // SE UTILIZA EN LAS VISTAS: Apariencia
 export const ActualizarIdioma = async (req, res) => {
-  const { CookieConToken, idUsuario, Idioma } = req.body;
+  const { idUsuario, Idioma } = req.body;
 
   const TextoRespuesta = Idioma === "es" ? "Español" : "Inglés";
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE usuarios SET Idioma = ? WHERE idUsuario = ?`;
@@ -272,18 +206,10 @@ export const ActualizarIdioma = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paises > Administrar Paises
 export const BuscarPaisesPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
+  const { filtro } = req.body;
 
   // INICIALIZAMOS LOS PARAMETROS
   let paramsBPPF = ["Activo"];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
 
   try {
     let sql;
@@ -306,18 +232,10 @@ export const BuscarPaisesPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Estados > Administrar Estados
 export const BuscarEstadosPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
+  const { filtro } = req.body;
 
   // INICIALIZAMOS LOS PARAMETROS
   let paramsBEPF = ["Activo"];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
 
   try {
     let sql;
@@ -340,18 +258,10 @@ export const BuscarEstadosPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Ciudades > Administrar Ciudades
 export const BuscarCiudadesPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
+  const { filtro } = req.body;
 
   // INICIALIZAMOS LOS PARAMETROS
   let paramsBCPF = ["Activa"];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
 
   try {
     let sql;
@@ -374,18 +284,10 @@ export const BuscarCiudadesPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Colonias > Administrar Colonias
 export const BuscarColoniasPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
+  const { filtro } = req.body;
 
   // INICIALIZAMOS LOS PARAMETROS
   let paramsBCPF = ["Activa"];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
 
   try {
     let sql;
@@ -407,15 +309,6 @@ export const BuscarColoniasPorFiltro = async (req, res) => {
 // EN ESTA FUNCION VAMOS A OBTENER EL MODO OSCURO DEL USUARIO
 // SE UTILIZA EN LAS VISTAS: Realizar Pedido > Remitente
 export const ObtenerApiGoogleMapsAutoCompletado = async (req, res) => {
-  const { CookieConToken } = req.params;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
   try {
     const sql = `SELECT LlaveApi FROM apis WHERE NombreApi = ?`;
     CONEXION.query(sql, ["Google Maps Autocompletado"], (error, result) => {

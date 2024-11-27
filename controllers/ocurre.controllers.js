@@ -5,19 +5,14 @@ import { CONEXION } from "../initial/db.js";
 import {
   MENSAJE_DE_ERROR,
   MENSAJE_ERROR_CONSULTA_SQL,
-  MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
-import {
-  ValidarTokenParaPeticion,
-  ObtenerHoraActual,
-} from "../helpers/Func.js";
+import { ObtenerHoraActual } from "../helpers/Func.js";
 
 // EN ESTA FUNCIÓN VAMOS A REGISTRAR UNA OCURRE
 // SE UTILIZA EN LAS VISTAS:
 // Ocurres > Registrar Ocurre
 export const RegistrarOcurre = async (req, res) => {
   const {
-    CookieConToken,
     NombreOcurre,
     OperadorLogisticoOcurre,
     TelefonoUnoOcurre,
@@ -33,13 +28,6 @@ export const RegistrarOcurre = async (req, res) => {
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sqlVerificar = `SELECT * FROM ocurres WHERE NombreOcurre = ?;`;
@@ -91,15 +79,7 @@ export const RegistrarOcurre = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Ocurres > Administrar Ocurres
 export const BuscarOcurresPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
-
+  const { filtro } = req.body;
   try {
     const sql =
       filtro === ""
@@ -118,15 +98,9 @@ export const BuscarOcurresPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Ocurres > Administrar Ocurres
 export const ActualizarEstadoOcurre = async (req, res) => {
-  const { CookieConToken, idOcurre, StatusOcurre } = req.body;
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
+  const { idOcurre, StatusOcurre } = req.body;
 
   const TEXTO_ESTADO = StatusOcurre === "Activa" ? "ACTIVADA" : "DESACTIVADA";
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE ocurres SET StatusOcurre = ? WHERE idOcurre = ?`;
@@ -144,7 +118,6 @@ export const ActualizarEstadoOcurre = async (req, res) => {
 // Ocurres > Administrar Ocurres > Editar Ocurre
 export const ActualizarInformacionOcurre = async (req, res) => {
   const {
-    CookieConToken,
     idOcurre,
     NombreOcurre,
     OperadorLogisticoOcurre,
@@ -161,13 +134,6 @@ export const ActualizarInformacionOcurre = async (req, res) => {
     ReferenciaOcurre,
     ObservacionesOcurre,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sqlValidar = `SELECT * FROM ocurres WHERE NombreOcurre = ? AND idOcurre != ?`;
@@ -220,17 +186,11 @@ export const ActualizarInformacionOcurre = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Realizar Pedido > Destinatario > Seleccionar Ocurre
 export const BuscarOcurresActivosPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
+  const { filtro } = req.body;
 
   // INICIALIZAMOS LOS PARAMETROS
   let paramsBOAPF = ["Activa"];
 
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-  if (!RespuestaValidacionToken) {
-    res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
   try {
     let sql;
     if (filtro === "") {

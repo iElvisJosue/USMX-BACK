@@ -2,32 +2,24 @@
 import { CONEXION } from "../initial/db.js";
 // IMPORTAMOS LA LIBRERIA DE EXCEL
 import ExcelJS from "exceljs";
-// IMPORTAMOS LAS LIBRERías A USAR
-import { fileURLToPath } from "url";
-import path, { dirname } from "path";
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
   MENSAJE_ERROR_CONSULTA_SQL,
-  MENSAJE_DE_NO_AUTORIZADO,
+  // MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
 import {
   ObtenerHoraActual,
-  ValidarTokenParaPeticion,
+  // ValidarTokenParaPeticion,
 } from "../helpers/Func.js";
 import { CrearUnExcelDeLasAgencias } from "../helpers/Excels.js";
-// RUTAS PARA EL EXCEL
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const excelURL = path.join(__dirname, "../public/Excel");
 
 // EN ESTA FUNCIÓN VAMOS A REGISTRAR UNA NUEVA AGENCIA
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Registrar Agencia
 export const RegistrarAgencia = async (req, res) => {
   const {
-    CookieConToken,
+    // CookieConToken,
     NombreAgencia,
     NombreLegalAgencia,
     PaisAgencia,
@@ -54,12 +46,12 @@ export const RegistrarAgencia = async (req, res) => {
     CopiaLicenciaNegocio,
     CopiaImpuestosVenta,
   } = req.body;
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
+  // const RespuestaValidacionToken = await ValidarTokenParaPeticion(
+  //   CookieConToken
+  // );
 
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+  // if (!RespuestaValidacionToken)
+  //   return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `SELECT * FROM agencias WHERE NombreAgencia = ?`;
@@ -133,18 +125,10 @@ export const RegistrarAgencia = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias
 export const BuscarAgenciasPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
+  const { filtro } = req.body;
 
   // CREAMOS EL PARAMETRO DE BUSQUEDA
   let paramsBAPF = [];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
 
   try {
     let sql;
@@ -174,15 +158,9 @@ export const BuscarAgenciasPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias
 export const ActualizarEstadoAgencia = async (req, res) => {
-  const { idAgencia, StatusAgencia, CookieConToken } = req.body;
+  const { idAgencia, StatusAgencia } = req.body;
 
   const TEXTO_ESTADO = StatusAgencia === "Activa" ? "ACTIVADA" : "DESACTIVADA";
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE agencias SET StatusAgencia = ? WHERE idAgencia = ?`;
@@ -200,7 +178,6 @@ export const ActualizarEstadoAgencia = async (req, res) => {
 // Agencias > Administrar Agencias > Editar Agencia
 export const ActualizarInformacionAgencia = async (req, res) => {
   const {
-    CookieConToken,
     idAgencia,
     NombreAgencia,
     NombreLegalAgencia,
@@ -228,13 +205,6 @@ export const ActualizarInformacionAgencia = async (req, res) => {
     CopiaLicenciaNegocio,
     CopiaImpuestosVenta,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `SELECT * FROM agencias WHERE NombreAgencia = ? AND idAgencia != ?`;
@@ -299,14 +269,7 @@ export const ActualizarInformacionAgencia = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias > Administrar Productos
 export const BuscarProductosQueTieneLaAgencia = async (req, res) => {
-  const { CookieConToken, idAgencia } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
+  const { idAgencia } = req.body;
 
   try {
     const sql = `SELECT 
@@ -336,17 +299,10 @@ export const BuscarProductosQueTieneLaAgencia = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias > Administrar Productos
 export const BuscarProductosQueNoTieneLaAgencia = async (req, res) => {
-  const { CookieConToken, filtro, idAgencia } = req.body;
+  const { filtro, idAgencia } = req.body;
 
   // INICIA CON EL ID AGENCIA PORQUE ESE SÍ O SÍ VENDRÁ EN LA PETICIÓN
   let paramsBPQNTLA = [idAgencia, "Activo"];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     let sql;
@@ -370,7 +326,6 @@ export const BuscarProductosQueNoTieneLaAgencia = async (req, res) => {
 // Agencias > Administrar Agencias > Administrar Productos > Asignar Productos
 export const AsignarProductoAgencia = async (req, res) => {
   const {
-    CookieConToken,
     idAgencia,
     idProducto,
     PrecioProducto,
@@ -379,13 +334,6 @@ export const AsignarProductoAgencia = async (req, res) => {
     PesoMaximoProducto,
     PesoSinCobroProducto,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `INSERT INTO union_agencias_productos (idAgencia, idProducto, PrecioProducto, ComisionProducto, LibraExtraProducto, PesoMaximoProducto, PesoSinCobroProducto) VALUES (?,?,?,?,?,?,?)`;
@@ -417,7 +365,6 @@ export const AsignarProductoAgencia = async (req, res) => {
 // Agencias > Administrar Agencias > Administrar Productos > Asignar Productos
 export const ActualizarProductoAgencia = async (req, res) => {
   const {
-    CookieConToken,
     PrecioProducto,
     ComisionProducto,
     LibraExtraProducto,
@@ -425,13 +372,6 @@ export const ActualizarProductoAgencia = async (req, res) => {
     PesoSinCobroProducto,
     idUnionAgenciasProductos,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE union_agencias_productos SET PrecioProducto = ?, ComisionProducto = ?, LibraExtraProducto = ?, PesoSinCobroProducto = ?, PesoMaximoProducto = ? WHERE idUnionAgenciasProductos = ?`;
@@ -461,15 +401,7 @@ export const ActualizarProductoAgencia = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias > Administrar Productos > Desasignar Productos
 export const DesasignarProductoAgencia = async (req, res) => {
-  const { CookieConToken, idUnionAgenciasProductos } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUnionAgenciasProductos } = req.body;
   try {
     const sql = `DELETE FROM union_agencias_productos WHERE idUnionAgenciasProductos = ?`;
     CONEXION.query(sql, [idUnionAgenciasProductos], (error, result) => {
@@ -487,18 +419,10 @@ export const DesasignarProductoAgencia = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Realizar pedido > Seleccionar Agencia
 export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
-  const { CookieConToken, filtro, tipoDeUsuario, idDelUsuario } = req.body;
+  const { filtro, tipoDeUsuario, idDelUsuario } = req.body;
 
   // INICIALIZAMOS EL ARRAY DE PARAMETROS
   let paramsBAPFYTU = ["Activa"];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
 
   try {
     let sql;
@@ -530,16 +454,7 @@ export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias
 export const CrearYDescargarExcelDeAgencias = async (req, res) => {
-  const { CookieConToken, Agencias } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
-
+  const { Agencias } = req.body;
   try {
     const RutaDelExcel = await CrearUnExcelDeLasAgencias(Agencias);
     res.download(RutaDelExcel, (err) => {
@@ -552,43 +467,12 @@ export const CrearYDescargarExcelDeAgencias = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
-// export const DescargarExcelAgencias = async (req, res) => {
-//   const { CookieConToken, NombreExcel } = req.params;
-
-//   const RutaDelExcel = path.join(excelURL, NombreExcel);
-
-//   const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-//     CookieConToken
-//   );
-
-//   if (!RespuestaValidacionToken) {
-//     return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-//   }
-//   try {
-//     res.download(RutaDelExcel, (err) => {
-//       if (err) {
-//         console.log(err);
-//         return res.status(500).json(MENSAJE_DE_ERROR);
-//       }
-//     });
-//   } catch (error) {
-//     res.status(500).json(MENSAJE_DE_ERROR);
-//   }
-// };
 // EN ESTA FUNCION VAMOS A SUBIR UN ARCHIVO EXCEL DE LOS REMITENTES
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias
 export const SubirArchivoRemitentes = async (req, res) => {
-  const { idAgencia, CookieConToken } = req.body;
+  const { idAgencia } = req.body;
   const { ArchivoExcel } = req.files;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
   if (!ArchivoExcel || Object.keys(ArchivoExcel).length === 0) {
     return res
       .status(400)
@@ -700,16 +584,8 @@ const CrearUnionRemitenteAgencia = (idRemitente = 0, idAgencia = 0) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias
 export const SubirArchivoDestinatarios = async (req, res) => {
-  const { idAgencia, CookieConToken } = req.body;
+  const { idAgencia } = req.body;
   const { ArchivoExcel } = req.files;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
   if (!ArchivoExcel || Object.keys(ArchivoExcel).length === 0) {
     return res
       .status(400)

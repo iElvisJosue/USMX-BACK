@@ -5,10 +5,8 @@ import { CONEXION } from "../initial/db.js";
 import {
   MENSAJE_DE_ERROR,
   MENSAJE_ERROR_CONSULTA_SQL,
-  MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
 import {
-  ValidarTokenParaPeticion,
   ObtenerHoraActual,
   CrearGuia,
   CrearCódigoDeRastreo,
@@ -24,7 +22,6 @@ import {
 // Paquetería > Realizar pedido > Detalles del pedido > Finalizar
 export const GuardarTodaLaInformacion = async (req, res) => {
   const {
-    CookieConToken,
     remitente,
     destinatario,
     idUsuario,
@@ -33,12 +30,6 @@ export const GuardarTodaLaInformacion = async (req, res) => {
     NombreAgencia,
     pedido,
   } = req.body;
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const CodigoRastreo = CrearCódigoDeRastreo();
@@ -484,7 +475,6 @@ export const BuscarUltimosDiezPedidosGenerales = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS: Bienvenida
 export const BuscarUltimosDiezPedidosDeUnUsuario = async (req, res) => {
   const { idUsuario } = req.params;
-
   try {
     const sql = `SELECT 
       p.GuiaPedido, 
@@ -519,15 +509,7 @@ export const BuscarUltimosDiezPedidosDeUnUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Pedidos > Lista completa de pedidos
 export const BuscarTodosLosPedidosPorFiltro = async (req, res) => {
-  const { filtro, CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { filtro } = req.body;
   try {
     // DEFINIMOS EL ARRAY DE FILTROS
     let paramsBDPPEU = [];
@@ -604,15 +586,7 @@ export const BuscarTodosLosPedidosPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Pedidos > Lista de pedidos por fechas
 export const BuscarTodosLosPedidosPorFecha = async (req, res) => {
-  const { CookieConToken, primeraFecha, segundaFecha } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { primeraFecha, segundaFecha } = req.body;
   try {
     const sql = `SELECT
     r.*, 
@@ -654,15 +628,7 @@ export const BuscarTodosLosPedidosPorFecha = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Pedidos > Lista completa de pedidos
 export const BuscarPedidosDeUnUsuarioPorFiltro = async (req, res) => {
-  const { filtro, CookieConToken, idUsuario } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { filtro, idUsuario } = req.body;
   try {
     // DEFINIMOS EL ARRAY DE FILTROS
     let paramsBDPPEU = [idUsuario];
@@ -744,15 +710,7 @@ export const BuscarPedidosDeUnUsuarioPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería > Pedidos > Lista de pedidos por fechas
 export const BuscarPedidosDeUnUsuarioPorFecha = async (req, res) => {
-  const { CookieConToken, idUsuario, primeraFecha, segundaFecha } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUsuario, primeraFecha, segundaFecha } = req.body;
   try {
     const sql = `SELECT
     r.*, 
@@ -796,15 +754,7 @@ export const BuscarPedidosDeUnUsuarioPorFecha = async (req, res) => {
 // Paquetería  > Realizar pedido > Detalles del pedido > Finalizar
 // Paquetería  > Pedidos > Detalles del pedido
 export const BuscarPedidosPorPaquete = async (req, res) => {
-  const { CookieConToken, CodigoRastreo, GuiaPedido } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { CodigoRastreo, GuiaPedido } = req.body;
   try {
     const sql = `
     SELECT 
@@ -842,17 +792,10 @@ export const BuscarPedidosPorPaquete = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería  > Realizar pedido > Seleccionar Remitente
 export const BuscarRemitentesPorAgencia = async (req, res) => {
-  const { CookieConToken, filtro, idAgencia } = req.body;
+  const { filtro, idAgencia } = req.body;
 
   // INICIA CON EL ID AGENCIA PORQUE ESE SÍ O SÍ VENDRÁ EN LA PETICIÓN
   let paramsBRPA = [idAgencia];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     let sql;
@@ -875,17 +818,10 @@ export const BuscarRemitentesPorAgencia = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Paquetería  > Realizar pedido > Seleccionar Destinatario
 export const BuscarDestinatariosPorAgencia = async (req, res) => {
-  const { CookieConToken, filtro, idAgencia } = req.body;
+  const { filtro, idAgencia } = req.body;
 
   // INICIA CON EL ID AGENCIA PORQUE ESE SÍ O SÍ VENDRÁ EN LA PETICIÓN
   let paramsBDPA = [idAgencia];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     let sql;
@@ -909,15 +845,7 @@ export const BuscarDestinatariosPorAgencia = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Pedidos > Detalles del pedido
 // SE UTILIZA EN LAS VISTAS: Paquetería  > Realizar pedido > Detalles del pedido > Finalizar
 export const BuscarMovimientosDeUnPedido = async (req, res) => {
-  const { CookieConToken, GuiaPedido } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { GuiaPedido } = req.body;
   try {
     const sql = `SELECT * FROM movimientos WHERE GuiaPedido = ? ORDER BY idMovimiento DESC;`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {

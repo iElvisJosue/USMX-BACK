@@ -4,25 +4,13 @@ import { CONEXION } from "../initial/db.js";
 import {
   MENSAJE_DE_ERROR,
   MENSAJE_ERROR_CONSULTA_SQL,
-  MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
-import {
-  ObtenerHoraActual,
-  ValidarTokenParaPeticion,
-} from "../helpers/Func.js";
+import { ObtenerHoraActual } from "../helpers/Func.js";
 
 // EN ESTA FUNCIÓN VAMOS A OBTENER LA INFORMACION DE UN USUARIO
 // SE UTILIZA EN LAS VISTAS: Perfil
 export const ObtenerInformacionDeUnUsuario = async (req, res) => {
-  const { idUsuario, CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUsuario } = req.body;
   try {
     const sql = "SELECT * FROM usuarios WHERE idUsuario = ?";
     CONEXION.query(sql, [idUsuario], (error, result) => {
@@ -38,15 +26,7 @@ export const ObtenerInformacionDeUnUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Registrar Usuario
 export const RegistrarUsuario = async (req, res) => {
-  const { Usuario, Permisos, Contraseña, CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { Usuario, Permisos, Contraseña } = req.body;
   try {
     const sql = `SELECT * FROM usuarios WHERE Usuario = ?`;
     CONEXION.query(sql, [Usuario], (error, result) => {
@@ -82,17 +62,10 @@ export const RegistrarUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios
 export const BuscarUsuariosParaAdministrarPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro, idUsuario } = req.body;
+  const { filtro, idUsuario } = req.body;
 
   // INICIALIZAMOS LOS PARAMETROS
   let paramBUPAPF = [idUsuario];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     let sql;
@@ -115,16 +88,9 @@ export const BuscarUsuariosParaAdministrarPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios
 export const ActualizarEstadoUsuario = async (req, res) => {
-  const { idUsuario, EstadoUsuario, CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
+  const { idUsuario, EstadoUsuario } = req.body;
 
   const TEXTO_ESTADO = EstadoUsuario === "Activo" ? "ACTIVADO" : "DESACTIVADO";
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE usuarios SET EstadoUsuario = ? WHERE idUsuario = ?`;
@@ -141,15 +107,7 @@ export const ActualizarEstadoUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios > Editar Usuario
 export const ActualizarInformacionDeUnUsuario = async (req, res) => {
-  const { idUsuario, Usuario, Permisos, Contraseña, CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUsuario, Usuario, Permisos, Contraseña } = req.body;
   try {
     const sql = `SELECT * FROM usuarios WHERE Usuario = ? AND idUsuario != ?`;
     CONEXION.query(sql, [Usuario, idUsuario], (error, result) => {
@@ -181,15 +139,7 @@ export const ActualizarInformacionDeUnUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios > Administrar Agencias
 export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
-  const { CookieConToken, idUsuario } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUsuario } = req.body;
   try {
     const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.NombreAgencia = "USMX Express" DESC, a.idAgencia DESC`;
     CONEXION.query(sql, [idUsuario, "Activa"], (error, result) => {
@@ -205,17 +155,10 @@ export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios > Administrar Agencias
 export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
-  const { CookieConToken, filtro, idUsuario } = req.body;
+  const { filtro, idUsuario } = req.body;
 
   // INICIALIZAMOS PARAMETROS
   let paramBAQNTEU = ["Activa", idUsuario];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     let sql;
@@ -246,15 +189,7 @@ export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios > Administrar Agencias
 export const AsignarAgenciaAlUsuario = async (req, res) => {
-  const { CookieConToken, idUsuario, idAgencia } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUsuario, idAgencia } = req.body;
   try {
     const sql = `INSERT INTO union_usuarios_agencias (idUsuario, idAgencia) VALUES (?,?)`;
     CONEXION.query(sql, [idUsuario, idAgencia], (error, result) => {
@@ -272,15 +207,7 @@ export const AsignarAgenciaAlUsuario = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios > Administrar Agencias
 export const DesasignarAgenciaAlUsuario = async (req, res) => {
-  const { CookieConToken, idUnionAgencia } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUnionAgencia } = req.body;
   try {
     const sql = `DELETE FROM union_usuarios_agencias WHERE idUnionUsuariosAgencias = ?`;
     CONEXION.query(sql, [idUnionAgencia], (error, result) => {

@@ -4,12 +4,8 @@ import { CONEXION } from "../initial/db.js";
 import {
   MENSAJE_DE_ERROR,
   MENSAJE_ERROR_CONSULTA_SQL,
-  MENSAJE_DE_NO_AUTORIZADO,
 } from "../helpers/Const.js";
-import {
-  ObtenerHoraActual,
-  ValidarTokenParaPeticion,
-} from "../helpers/Func.js";
+import { ObtenerHoraActual } from "../helpers/Func.js";
 
 // EN ESTA FUNCIÓN VAMOS A REGISTRAR UN PRODUCTO
 // SE UTILIZA EN LAS VISTAS:
@@ -25,16 +21,7 @@ export const RegistrarProducto = async (req, res) => {
     PesoSinCobroProducto,
     PesoMaximoProducto,
     ComisionProducto,
-    CookieConToken,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
   try {
     const sql = `SELECT * FROM productos WHERE NombreProducto = ?`;
     CONEXION.query(sql, [NombreProducto], (error, result) => {
@@ -107,16 +94,7 @@ const CrearUnionAgenciaProducto = (idProducto, DetallesProducto) => {
 // SE UTILIZA EN LAS VISTAS:
 // Productos > Administrar Productos
 export const BuscarProductosPorFiltro = async (req, res) => {
-  const { CookieConToken, filtro } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken) {
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-  }
-
+  const { filtro } = req.body;
   try {
     const sql =
       filtro === ""
@@ -135,16 +113,9 @@ export const BuscarProductosPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Productos > Administrar Productos
 export const ActualizarEstadoProducto = async (req, res) => {
-  const { idProducto, StatusProducto, CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
+  const { idProducto, StatusProducto } = req.body;
 
   const TEXTO_ESTADO = StatusProducto === "Activo" ? "ACTIVADO" : "DESACTIVADO";
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `UPDATE productos SET StatusProducto = ? WHERE idProducto = ?`;
@@ -162,7 +133,6 @@ export const ActualizarEstadoProducto = async (req, res) => {
 // Productos > Administrar Productos > Editar Producto
 export const ActualizarInformacionDeUnProducto = async (req, res) => {
   const {
-    CookieConToken,
     idProducto,
     NombreProducto,
     AnchoProducto,
@@ -174,13 +144,6 @@ export const ActualizarInformacionDeUnProducto = async (req, res) => {
     PesoMaximoProducto,
     ComisionProducto,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sqlValidar = `SELECT * FROM productos WHERE NombreProducto = ? AND idProducto != ?`;
@@ -231,15 +194,7 @@ export const ActualizarInformacionDeUnProducto = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Productos > Administrar Productos > Administrar Agencias
 export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
-  const { CookieConToken, idProducto } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idProducto } = req.body;
   try {
     const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ? AND a.StatusAgencia = ? ORDER BY a.NombreAgencia = "USMX Express" DESC, a.idAgencia ASC`;
     CONEXION.query(sql, [idProducto, "Activa"], (error, result) => {
@@ -255,17 +210,10 @@ export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Productos > Administrar Productos > Administrar Agencias
 export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
-  const { CookieConToken, filtro, idProducto } = req.body;
+  const { filtro, idProducto } = req.body;
 
   // INICIALIZAR PARAMETROS
   let paramBAQNTUP = ["Activa", idProducto];
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     let sql;
@@ -297,7 +245,6 @@ export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
 // Productos > Administrar Productos > Administrar Agencias
 export const AsignarAgenciaAlProducto = async (req, res) => {
   const {
-    CookieConToken,
     idAgencia,
     idProducto,
     PrecioProducto,
@@ -306,13 +253,6 @@ export const AsignarAgenciaAlProducto = async (req, res) => {
     PesoMaximoProducto,
     PesoSinCobroProducto,
   } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
 
   try {
     const sql = `INSERT INTO union_agencias_productos (idAgencia, idProducto, PrecioProducto, ComisionProducto, LibraExtraProducto, PesoMaximoProducto, PesoSinCobroProducto) VALUES (?,?,?,?,?,?,?)`;
@@ -343,15 +283,7 @@ export const AsignarAgenciaAlProducto = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Productos > Administrar Productos > Administrar Agencias
 export const DesasignarAgenciaAlProducto = async (req, res) => {
-  const { CookieConToken, idUnionAgenciasProductos } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idUnionAgenciasProductos } = req.body;
   try {
     const sql = `DELETE FROM union_agencias_productos WHERE idUnionAgenciasProductos = ?`;
     CONEXION.query(sql, [idUnionAgenciasProductos], (error, result) => {
@@ -369,15 +301,7 @@ export const DesasignarAgenciaAlProducto = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Realizar Pedido > Detalles del pedido > Seleccionar Producto
 export const ObtenerProductosPorAgencia = async (req, res) => {
-  const { idAgencia, CookieConToken } = req.body;
-
-  const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-    CookieConToken
-  );
-
-  if (!RespuestaValidacionToken)
-    return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
+  const { idAgencia } = req.body;
   try {
     const sql = `SELECT 
       p.NombreProducto,
