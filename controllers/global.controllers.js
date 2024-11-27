@@ -18,15 +18,15 @@ export const IniciarSesion = (req, res) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         // CREAMOS EL ID EN UN TOKEN
-        const TokenDeAcceso = await CrearTokenDeAcceso({
+        const TOKEN_DE_ACCESO_USMX = await CrearTokenDeAcceso({
           idUsuario: result[0].idUsuario,
           Usuario: result[0].Usuario,
           Permisos: result[0].Permisos,
           ModoOscuro: result[0].ModoOscuro,
         });
         // ALMACENAMOS EL TOKEN EN UN COOKIE
-        // res.cookie("TokenDeAcceso", TokenDeAcceso);
-        res.cookie("TokenDeAcceso", TokenDeAcceso, {
+        // res.cookie("TOKEN_DE_ACCESO_USMX", TOKEN_DE_ACCESO_USMX);
+        res.cookie("TOKEN_DE_ACCESO_USMX", TOKEN_DE_ACCESO_USMX, {
           secure: true,
           sameSite: "none",
           expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 horas
@@ -36,7 +36,7 @@ export const IniciarSesion = (req, res) => {
           Usuario: result[0].Usuario,
           Permisos: result[0].Permisos,
           ModoOscuro: result[0].ModoOscuro,
-          TokenDeAcceso,
+          TOKEN_DE_ACCESO_USMX,
         };
         // ENVIAMOS EL TOKEN AL CLIENTE
         res.status(200).json(InformacionDelUsuario);
@@ -54,22 +54,27 @@ export const IniciarSesion = (req, res) => {
 };
 
 export const VerificarToken = async (req, res) => {
-  const { cookie } = req.body;
+  const { TOKEN_DE_ACCESO_USMX } = req.body;
 
-  jwt.verify(cookie, TOKEN_SECRETO, async (err, InformacionDelToken) => {
-    if (err) {
-      console.log("HUBO UN ERROR Y ES:", err);
-      return res.status(400).json(["TU TOKEN NO ESTA AUTORIZADO"]);
+  jwt.verify(
+    TOKEN_DE_ACCESO_USMX,
+    TOKEN_SECRETO,
+    async (err, InformacionDelToken) => {
+      if (err) {
+        return res
+          .status(400)
+          .json("¡Oops! Parece que tú TOKEN DE ACCESO no es válido.");
+      }
+      return res.status(200).json(InformacionDelToken);
     }
-    return res.json(InformacionDelToken);
-  });
+  );
 };
 export const CerrarSesion = async (req, res) => {
   try {
-    res.cookie("TokenDeAcceso", "", {
+    res.cookie("TOKEN_DE_ACCESO_USMX", "", {
       expires: new Date(0),
     });
-    res.send("SESIÓN FINALIZADA");
+    res.status(200).json("¡Tu sesión se ha sido finalizada correctamente!");
   } catch (error) {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
