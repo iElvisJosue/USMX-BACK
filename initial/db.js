@@ -1,7 +1,7 @@
 import mysql from "mysql";
 
 export const CONEXION = mysql.createConnection({
-  port: 3307,
+  port: 3306,
   host: "localhost",
   user: "root",
   password: "",

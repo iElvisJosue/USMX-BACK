@@ -14,6 +14,10 @@ import globalRoutes from "../routes/global.routes.js";
 import pedidosRoutes from "../routes/pedidos.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE AGENCIAS
 import agenciasRoutes from "../routes/agencias.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE BODEGA
+import bodegaRoutes from "../routes/bodega.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE RECOLECCIONES
+import recoleccionesRoutes from "../routes/recolecciones.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE PRODUCTOS
 import productosRoutes from "../routes/productos.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE USUARIOS
@@ -63,6 +67,8 @@ app.use(fileUpload());
 app.use("/api/global", globalRoutes);
 app.use("/api/pedidos", pedidosRoutes);
 app.use("/api/agencias", agenciasRoutes);
+app.use("/api/bodega", bodegaRoutes);
+app.use("/api/recolecciones", recoleccionesRoutes);
 app.use("/api/productos", productosRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/operaciones", operacionesRoutes);

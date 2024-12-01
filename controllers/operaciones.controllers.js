@@ -15,11 +15,11 @@ export const RegistrarMovimiento = async (req, res) => {
     EstadoMovimiento,
     OrigenMovimiento,
     DetallesMovimiento,
-    PorDefectoMovimiento,
+    CategoriaMovimiento,
   } = req.body;
 
   try {
-    const sql = `SELECT * FROM listamovimientos WHERE EstadoMovimiento = ? AND OrigenMovimiento = ? AND DetallesMovimiento = ?`;
+    const sql = `SELECT * FROM movimientos WHERE EstadoMovimiento = ? AND OrigenMovimiento = ? AND DetallesMovimiento = ?`;
     CONEXION.query(
       sql,
       [EstadoMovimiento, OrigenMovimiento, DetallesMovimiento],
@@ -32,14 +32,14 @@ export const RegistrarMovimiento = async (req, res) => {
               `¡Oops! Parece que ya existe un movimiento con los mismos datos, por favor intente de nuevo con otros datos.`
             );
         } else {
-          const sql = `INSERT INTO listamovimientos (EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, PorDefectoMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento) VALUES (?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
+          const sql = `INSERT INTO movimientos (EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, CategoriaMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento) VALUES (?,?,?,?,CURDATE(),'${ObtenerHoraActual()}')`;
           CONEXION.query(
             sql,
             [
               EstadoMovimiento || "",
               DetallesMovimiento || "",
               OrigenMovimiento || "",
-              PorDefectoMovimiento || "No",
+              CategoriaMovimiento || "No",
             ],
             (error, result) => {
               if (error)
@@ -64,8 +64,8 @@ export const ObtenerTodosLosMovimientos = async (req, res) => {
   try {
     const sql =
       filtro === ""
-        ? `SELECT * FROM listamovimientos ORDER BY idListaMovimiento DESC`
-        : `SELECT * FROM listamovimientos WHERE DetallesMovimiento LIKE ? OR EstadoMovimiento LIKE ? OR OrigenMovimiento LIKE ? OR ActivoMovimiento LIKE ? ORDER BY idListaMovimiento DESC`;
+        ? `SELECT * FROM movimientos ORDER BY idMovimiento DESC`
+        : `SELECT * FROM movimientos WHERE DetallesMovimiento LIKE ? OR EstadoMovimiento LIKE ? OR OrigenMovimiento LIKE ? OR ActivoMovimiento LIKE ? ORDER BY idMovimiento DESC`;
     CONEXION.query(
       sql,
       [`%${filtro}%`, `%${filtro}%`, `%${filtro}%`, `%${filtro}%`],
@@ -82,23 +82,19 @@ export const ObtenerTodosLosMovimientos = async (req, res) => {
 // EN ESTA FUNCIÓN VAMOS A ACTUALIZAR EL ESTADO DE UN MOVIMIENTO
 // SE UTILIZA EN LAS VISTAS: Movimientos
 export const ActualizarEstadoDeUnMovimiento = async (req, res) => {
-  const { idListaMovimiento, ActivoMovimiento } = req.body;
+  const { idMovimiento, ActivoMovimiento } = req.body;
 
   const TEXTO_ESTADO =
     ActivoMovimiento === "Activo" ? "ACTIVADO" : "DESACTIVADO";
 
   try {
-    const sql = `UPDATE listamovimientos SET ActivoMovimiento = ? WHERE idListaMovimiento = ?`;
-    CONEXION.query(
-      sql,
-      [ActivoMovimiento, idListaMovimiento],
-      (error, result) => {
-        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
-        res
-          .status(200)
-          .json(`¡El estado del movimiento ha sido ${TEXTO_ESTADO} con éxito!`);
-      }
-    );
+    const sql = `UPDATE movimientos SET ActivoMovimiento = ? WHERE idMovimiento = ?`;
+    CONEXION.query(sql, [ActivoMovimiento, idMovimiento], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res
+        .status(200)
+        .json(`¡El estado del movimiento ha sido ${TEXTO_ESTADO} con éxito!`);
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json(MENSAJE_DE_ERROR);
@@ -108,23 +104,18 @@ export const ActualizarEstadoDeUnMovimiento = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS: Movimientos > Editar Movimiento
 export const EditarMovimiento = async (req, res) => {
   const {
-    idListaMovimiento,
+    idMovimiento,
     EstadoMovimiento,
     OrigenMovimiento,
     DetallesMovimiento,
-    PorDefectoMovimiento,
+    CategoriaMovimiento,
   } = req.body;
 
   try {
-    const sql = `SELECT * FROM listamovimientos WHERE EstadoMovimiento = ? AND OrigenMovimiento = ? AND DetallesMovimiento = ? AND idListaMovimiento != ?`;
+    const sql = `SELECT * FROM movimientos WHERE EstadoMovimiento = ? AND OrigenMovimiento = ? AND DetallesMovimiento = ? AND idMovimiento != ?`;
     CONEXION.query(
       sql,
-      [
-        EstadoMovimiento,
-        OrigenMovimiento,
-        DetallesMovimiento,
-        idListaMovimiento,
-      ],
+      [EstadoMovimiento, OrigenMovimiento, DetallesMovimiento, idMovimiento],
       (error, result) => {
         if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
         if (result.length > 0) {
@@ -134,15 +125,15 @@ export const EditarMovimiento = async (req, res) => {
               `¡Oops! Parece que ya existe un movimiento con los mismos datos, por favor intente de nuevo con otros datos.`
             );
         } else {
-          const sql = `UPDATE listamovimientos SET EstadoMovimiento = ?, OrigenMovimiento = ?, DetallesMovimiento = ?, PorDefectoMovimiento = ? WHERE idListaMovimiento = ?`;
+          const sql = `UPDATE movimientos SET EstadoMovimiento = ?, OrigenMovimiento = ?, DetallesMovimiento = ?, CategoriaMovimiento = ? WHERE idMovimiento = ?`;
           CONEXION.query(
             sql,
             [
               EstadoMovimiento,
               OrigenMovimiento,
               DetallesMovimiento,
-              PorDefectoMovimiento,
-              idListaMovimiento,
+              CategoriaMovimiento,
+              idMovimiento,
             ],
             (error, result) => {
               if (error)

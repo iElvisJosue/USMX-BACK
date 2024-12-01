@@ -338,11 +338,11 @@ const EjecutarConsultaGuardarPedido = (
         NombreDeLaEtiqueta,
         NombreDelPaqueteDeTickets,
       ],
-      (error, result) => {
+      async (error, result) => {
         if (error) {
           return reject(error); // Rechaza la promesa si hay un error
         }
-        CrearMovimientosPorDefecto(GuiaPedido, NombreUsuario);
+        await CrearMovimientosPorDefecto(result.insertId, idUsuario);
         CrearTicketDelPedido(
           NombreDelTicket,
           remitente,
@@ -372,41 +372,66 @@ const EjecutarConsultaGuardarPedido = (
     );
   });
 };
-const CrearMovimientosPorDefecto = (
-  GuiaPedido = "",
-  UsuarioResponsable = "No definido"
-) => {
-  let valores = [];
-
-  const sqlMovimientos = `SELECT * FROM listamovimientos WHERE PorDefectoMovimiento = ? AND ActivoMovimiento = ? ORDER BY EstadoMovimiento = ? DESC`;
+const CrearMovimientosPorDefecto = (idPedido = 0, idUsuario = 0) => {
+  const sqlMovimientos = `SELECT * FROM movimientos WHERE CategoriaMovimiento = ? AND ActivoMovimiento = ? ORDER BY EstadoMovimiento = ? DESC`;
   return new Promise((resolve, reject) => {
     CONEXION.query(
       sqlMovimientos,
-      ["Si", "Activo", "Creado"],
-      (error, movimientos) => {
+      ["Inicial", "Activo", "Creado"],
+      async (error, movimientos) => {
         if (error) {
           return reject(error); // Rechaza la promesa si hay un error
         }
         if (movimientos.length === 0) {
-          return reject("No hay movimientos por defecto");
+          movimientos = await CrearMovimientoPorDefecto();
         }
-        movimientos.forEach((movimiento, index) => {
-          const { EstadoMovimiento, DetallesMovimiento, OrigenMovimiento } =
-            movimiento;
-          valores.push(
-            `('${GuiaPedido}', '${EstadoMovimiento}', '${DetallesMovimiento}', '${OrigenMovimiento}', '${UsuarioResponsable}', CURDATE(), '${ObtenerHoraActual()}')`
+        for (const infMovimiento of movimientos) {
+          await CrearUnionPedidoMovimientoUsuario(
+            idPedido,
+            infMovimiento.idMovimiento,
+            idUsuario
           );
-        });
-        // HACEMOS LA INSERCIÓN
-        const sql = `INSERT INTO movimientos (GuiaPedido, EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, UsuarioResponsableMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento)
-      VALUES ${valores.join(",\n")};`;
-        // Ejecutamos la consulta de inserción
-        CONEXION.query(sql, (error, result) => {
-          if (error) {
-            return reject(error); // Rechaza la promesa si hay un error en la inserción
-          }
-          resolve(true); // Resuelve la promesa si todo sale bien
-        });
+        }
+        resolve(true);
+      }
+    );
+  });
+};
+const CrearMovimientoPorDefecto = () => {
+  const sql = `INSERT INTO movimientos (EstadoMovimiento, DetallesMovimiento, OrigenMovimiento, CategoriaMovimiento, FechaCreacionMovimiento, HoraCreacionMovimiento) VALUES (?,?,?,?, CURDATE(), '${ObtenerHoraActual()}')`;
+  return new Promise((resolve, reject) => {
+    CONEXION.query(
+      sql,
+      [
+        "Creado",
+        "El pedido ha sido creado en el sistema",
+        "Sistema USMX",
+        "Inicial",
+      ],
+      (error, result) => {
+        if (error) {
+          return reject(error); // Rechaza la promesa si hay un error
+        }
+        resolve([{ idMovimiento: result.insertId }]);
+      }
+    );
+  });
+};
+const CrearUnionPedidoMovimientoUsuario = (
+  idPedido = 0,
+  idMovimiento = 0,
+  idUsuario = 0
+) => {
+  const sql = `INSERT INTO union_pedidos_movimientos (idPedido, idMovimiento, idUsuario, FechaCreacionUnion, HoraCreacionUnion) VALUES (?,?,?, CURDATE(), '${ObtenerHoraActual()}')`;
+  return new Promise((resolve, reject) => {
+    CONEXION.query(
+      sql,
+      [idPedido, idMovimiento, idUsuario],
+      (error, result) => {
+        if (error) {
+          return reject(error); // Rechaza la promesa si hay un error
+        }
+        resolve(true);
       }
     );
   });
@@ -611,14 +636,10 @@ export const BuscarTodosLosPedidosPorFecha = async (req, res) => {
     WHERE
       p.FechaCreacionPedido BETWEEN ? AND ?
     ORDER BY p.FechaCreacionPedido DESC, p.HoraCreacionPedido DESC`;
-    CONEXION.query(
-      sql,
-      [primeraFecha, segundaFecha, "Activa"],
-      (error, result) => {
-        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
-        res.status(200).json(result);
-      }
-    );
+    CONEXION.query(sql, [primeraFecha, segundaFecha], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json(MENSAJE_DE_ERROR);
@@ -847,7 +868,18 @@ export const BuscarDestinatariosPorAgencia = async (req, res) => {
 export const BuscarMovimientosDeUnPedido = async (req, res) => {
   const { GuiaPedido } = req.body;
   try {
-    const sql = `SELECT * FROM movimientos WHERE GuiaPedido = ? ORDER BY idMovimiento DESC;`;
+    const sql = `SELECT 
+                  upm.FechaCreacionUnion,
+                  upm.HoraCreacionUnion,
+                  m.* 
+                FROM 
+                  union_pedidos_movimientos upm
+                LEFT JOIN 
+                  movimientos m ON upm.idMovimiento = m.idMovimiento
+                LEFT JOIN
+                  pedidos p ON upm.idPedido = p.idPedido
+                WHERE 
+                  p.GuiaPedido = ? ORDER BY upm.idUnionPedidosMovimientos DESC`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
@@ -866,9 +898,13 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
     r.*, 
     d.*, 
     p.*, 
-    m.* 
+    m.*,
+    upm.FechaCreacionUnion,
+    upm.HoraCreacionUnion
     FROM 
-      detallespedidos dp 
+      detallespedidos dp
+    JOIN
+      union_pedidos_movimientos upm ON dp.idPedido = upm.idPedido
     LEFT JOIN 
       remitentes r ON dp.idRemitente = r.idRemitente 
     LEFT JOIN 
@@ -876,11 +912,11 @@ export const BuscarPedidoPorNumeroDeGuia = async (req, res) => {
     LEFT JOIN 
       pedidos p ON dp.idPedido = p.idPedido 
     LEFT JOIN 
-      movimientos m ON p.GuiaPedido = m.GuiaPedido 
+      movimientos m ON upm.idMovimiento = m.idMovimiento 
     WHERE 
       p.GuiaPedido = ?
     ORDER BY 
-      m.idMovimiento DESC`;
+      upm.idUnionPedidosMovimientos DESC`;
     CONEXION.query(sql, [GuiaPedido], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
