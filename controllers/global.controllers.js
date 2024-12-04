@@ -79,3 +79,106 @@ export const CerrarSesion = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
+
+// SE UTILIZA EN LAS VISTAS:
+// BIENVEDIDA
+export const ObtenerResumenDiario = async (req, res) => {
+  const { FechaDeHoy } = req.params;
+  try {
+    const PedidosDeHoy = await PedidosHechosHoy(FechaDeHoy);
+    const RecoleccionesDeHoy = await RecoleccionesHechasHoy(FechaDeHoy);
+    const EntradasDeHoy = await EntradasHechasHoy(FechaDeHoy);
+    const MovimientosDeHoy = await MovimientosHechosHoy(FechaDeHoy);
+    const SalidasDeHoy = await SalidasHechasHoy(FechaDeHoy);
+    const DevolucionesDeHoy = await DevolucionesHechasHoy(FechaDeHoy);
+    res.status(200).json({
+      PedidosDeHoy,
+      RecoleccionesDeHoy,
+      EntradasDeHoy,
+      MovimientosDeHoy,
+      SalidasDeHoy,
+      DevolucionesDeHoy,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+const PedidosHechosHoy = async (FechaDeHoy) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const sql = `SELECT * FROM pedidos WHERE FechaCreacionPedido BETWEEN ? AND ?`;
+      CONEXION.query(sql, [FechaDeHoy, FechaDeHoy], (error, result) => {
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        resolve(result.length);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const RecoleccionesHechasHoy = async (FechaDeHoy) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const sql = `SELECT * FROM recolecciones WHERE FechaCreacionRecoleccion BETWEEN ? AND ?`;
+      CONEXION.query(sql, [FechaDeHoy, FechaDeHoy], (error, result) => {
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        resolve(result.length);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const EntradasHechasHoy = async (FechaDeHoy) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const sql = `SELECT * FROM entradasbodega WHERE FechaCreacionEntrada BETWEEN ? AND ?`;
+      CONEXION.query(sql, [FechaDeHoy, FechaDeHoy], (error, result) => {
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        resolve(result.length);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const MovimientosHechosHoy = async (FechaDeHoy) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const sql = `SELECT * FROM movimientosbodega WHERE FechaCreacionMovimientoBodega BETWEEN ? AND ?`;
+      CONEXION.query(sql, [FechaDeHoy, FechaDeHoy], (error, result) => {
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        resolve(result.length);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const SalidasHechasHoy = async (FechaDeHoy) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const sql = `SELECT * FROM salidasbodega WHERE FechaCreacionSalida BETWEEN ? AND ?`;
+      CONEXION.query(sql, [FechaDeHoy, FechaDeHoy], (error, result) => {
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        resolve(result.length);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const DevolucionesHechasHoy = async (FechaDeHoy) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const sql = `SELECT * FROM devoluciones WHERE FechaCreacionDevolucion BETWEEN ? AND ?`;
+      CONEXION.query(sql, [FechaDeHoy, FechaDeHoy], (error, result) => {
+        if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+        resolve(result.length);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
