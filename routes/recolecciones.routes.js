@@ -8,6 +8,7 @@ import {
   BuscarTodasLasRecoleccionesPorFecha,
   BuscarRecoleccionesDeUnChoferPorFiltro,
   BuscarRecoleccionesDeUnChoferPorFecha,
+  ObtenerPedidosDeUnaRecoleccion,
 } from "../controllers/recolecciones.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
 import { ValidarToken } from "../middlewares/ValidarToken.js";
@@ -46,6 +47,12 @@ router.post(
   "/BuscarRecoleccionesDeUnChoferPorFecha",
   ValidarToken,
   BuscarRecoleccionesDeUnChoferPorFecha
+);
+// RUTA PARA OBTENER LOS PEDIDOS DE UNA RECOLECCION
+router.get(
+  "/ObtenerPedidosDeUnaRecoleccion/:CookieConToken/:idRecoleccion",
+  ValidarToken,
+  ObtenerPedidosDeUnaRecoleccion
 );
 // EXPORTAMOS EL ENRUTADOR
 export default router;

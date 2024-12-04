@@ -1530,3 +1530,101 @@ export const BuscarTodasLasSalidasABodegaDeUnBodegueroPorFecha = async (
     res.status(500).send(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS DE UNA ENTRADA
+// SE UTILIZA EN LAS VISTAS:
+// ENTRADAS > LISTA DE ENTRADAS > DETALLES DE ENTRADA
+export const ObtenerPedidosDeUnaEntrada = async (req, res) => {
+  const { idEntradaBodega } = req.params;
+  try {
+    const sql = `SELECT
+          p.*,
+          eb.*
+        FROM
+          union_entradas_pedidos uep
+        LEFT JOIN
+          pedidos p ON uep.idPedido = p.idPedido
+        LEFT JOIN
+          entradasbodega eb ON uep.idEntradaBodega = eb.idEntradaBodega
+        WHERE
+          uep.idEntradaBodega = ?`;
+    CONEXION.query(sql, [idEntradaBodega], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS DE UN MOVIMIENTO EN BODEGA
+// SE UTILIZA EN LAS VISTAS:
+// MOVIMIENTOS > LISTA DE MOVIMIENTOS > DETALLES DE MOVIMIENTO
+export const ObtenerPedidosDeUnMovimientoEnBodega = async (req, res) => {
+  const { idMovimientoBodega } = req.params;
+  try {
+    const sql = `SELECT
+          p.*
+        FROM
+          union_movimientosbodega_pedidos umbp
+        LEFT JOIN
+          pedidos p ON umbp.idPedido = p.idPedido
+        WHERE
+          umbp.idMovimientoBodega = ?`;
+    CONEXION.query(sql, [idMovimientoBodega], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS DE UNA SALIDA
+// SE UTILIZA EN LAS VISTAS:
+// SALIDAS > LISTA DE SALIDAS > DETALLES DE SALIDA
+export const ObtenerPedidosDeUnaSalida = async (req, res) => {
+  const { idSalidaBodega } = req.params;
+  try {
+    const sql = `SELECT
+          p.*,
+          sb.*
+        FROM
+          union_salidas_pedidos usp
+        LEFT JOIN
+          pedidos p ON usp.idPedido = p.idPedido
+        LEFT JOIN
+          salidasbodega sb ON usp.idSalidaBodega = sb.idSalidaBodega
+        WHERE
+          usp.idSalidaBodega = ?`;
+    CONEXION.query(sql, [idSalidaBodega], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(MENSAJE_DE_ERROR);
+  }
+};
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS DE UNA DEVOLUCION
+// SE UTILIZA EN LAS VISTAS:
+// DEVOLUCIONS > LISTA DE DEVOLUCIONS > DETALLES DE DEVOLUCION
+export const ObtenerPedidosDeUnaDevolucion = async (req, res) => {
+  const { idDevolucion } = req.params;
+  try {
+    const sql = `SELECT
+          p.*
+        FROM
+          union_devoluciones_pedidos dp
+        LEFT JOIN
+          pedidos p ON dp.idPedido = p.idPedido
+        WHERE
+          dp.idDevolucion = ?`;
+    CONEXION.query(sql, [idDevolucion], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(MENSAJE_DE_ERROR);
+  }
+};

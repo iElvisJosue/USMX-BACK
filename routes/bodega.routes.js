@@ -28,6 +28,10 @@ import {
   BuscarTodasLasSalidasABodegaPorFecha,
   BuscarTodasLasSalidasABodegaDeUnBodegueroPorFiltro,
   BuscarTodasLasSalidasABodegaDeUnBodegueroPorFecha,
+  ObtenerPedidosDeUnaEntrada,
+  ObtenerPedidosDeUnMovimientoEnBodega,
+  ObtenerPedidosDeUnaSalida,
+  ObtenerPedidosDeUnaDevolucion,
 } from "../controllers/bodega.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
 import { ValidarToken } from "../middlewares/ValidarToken.js";
@@ -174,6 +178,30 @@ router.post(
   "/BuscarTodasLasSalidasABodegaDeUnBodegueroPorFecha",
   ValidarToken,
   BuscarTodasLasSalidasABodegaDeUnBodegueroPorFecha
+);
+// RUTA PARA OBTENER LOS PEDIDOS DE UNA ENTRADA
+router.get(
+  "/ObtenerPedidosDeUnaEntrada/:CookieConToken/:idEntradaBodega",
+  ValidarToken,
+  ObtenerPedidosDeUnaEntrada
+);
+// RUTA PARA OBTENER LOS PEDIDOS DE UN MOVIMIENTO EN BODEGA
+router.get(
+  "/ObtenerPedidosDeUnMovimientoEnBodega/:CookieConToken/:idMovimientoBodega",
+  ValidarToken,
+  ObtenerPedidosDeUnMovimientoEnBodega
+);
+// RUTA PARA OBTENER LOS PEDIDOS DE UNA SALIDA DE BODEGA
+router.get(
+  "/ObtenerPedidosDeUnaSalida/:CookieConToken/:idSalidaBodega",
+  ValidarToken,
+  ObtenerPedidosDeUnaSalida
+);
+// RUTA PARA OBTENER LOS PEDIDOS DE UNA DEVOLUCION
+router.get(
+  "/ObtenerPedidosDeUnaDevolucion/:CookieConToken/:idDevolucion",
+  ValidarToken,
+  ObtenerPedidosDeUnaDevolucion
 );
 // EXPORTAMOS EL ENRUTADOR
 export default router;

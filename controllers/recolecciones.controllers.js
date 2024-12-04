@@ -407,3 +407,26 @@ export const BuscarRecoleccionesDeUnChoferPorFecha = async (req, res) => {
     res.status(500).send(MENSAJE_DE_ERROR);
   }
 };
+// EN ESTA FUNCIÓN VAMOS A OBTENER LOS PEDIDOS DE UNA RECOLECCION
+// SE UTILIZA EN LAS VISTAS:
+// Recolecciones > LISTA DE RECOLECCIONES > DETALLES DE RECOLECCION
+export const ObtenerPedidosDeUnaRecoleccion = async (req, res) => {
+  const { idRecoleccion } = req.params;
+  try {
+    const sql = `SELECT
+          p.*
+        FROM
+          union_recolecciones_pedidos urp
+        LEFT JOIN
+          pedidos p ON urp.idPedido = p.idPedido
+        WHERE
+          urp.idRecoleccion = ?`;
+    CONEXION.query(sql, [idRecoleccion], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(MENSAJE_DE_ERROR);
+  }
+};
