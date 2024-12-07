@@ -8,6 +8,7 @@ import {
   VerificarToken,
   CerrarSesion,
   ObtenerResumenDiario,
+  EnviarCorreo,
 } from "../controllers/global.controllers.js";
 
 // ALMACENAMOS EL ENRUTADOR
@@ -21,6 +22,8 @@ router.post("/VerificarToken", VerificarToken);
 router.post("/CerrarSesion", CerrarSesion);
 // RUTA PARA OBTENER EL RESUMEN DIARIO
 router.get("/ObtenerResumenDiario/:FechaDeHoy", ObtenerResumenDiario);
+// RUTA PARA ENVIAR UN CORREO
+router.post("/EnviarCorreo", EnviarCorreo);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

@@ -44,6 +44,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://usmx.vercel.app",
   "https://www.usmxxpress.net",
+  "http://127.0.0.1:5500",
 ];
 
 // APLICAMOS CORS

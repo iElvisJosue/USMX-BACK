@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+// IMPORTAMOS EL TRANSPORTER DEL NODEMAILER
+import TRANSPORTADOR from "../helpers/Correo.js";
 // IMPORTAMOS EL TOKEN CREADO
 import { CrearTokenDeAcceso } from "../libs/jwt.js";
 import { TOKEN_SECRETO } from "../initial/config.js";
@@ -9,6 +11,9 @@ import {
   MENSAJE_ERROR_CONSULTA_SQL,
   MENSAJE_DE_ERROR,
 } from "../helpers/Const.js";
+// IMPORTAMOS EL DISEÑO DEL CORREO
+import { DiseñoCorreo } from "../helpers/DiseñoCorreo.js";
+import { CORREO_PARA_EMAILS } from "../initial/config.js";
 
 export const IniciarSesion = (req, res) => {
   try {
@@ -52,7 +57,6 @@ export const IniciarSesion = (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
-
 export const VerificarToken = async (req, res) => {
   const { TOKEN_DE_ACCESO_USMX } = req.body;
 
@@ -79,7 +83,6 @@ export const CerrarSesion = async (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
-
 // SE UTILIZA EN LAS VISTAS:
 // BIENVEDIDA
 export const ObtenerResumenDiario = async (req, res) => {
@@ -181,4 +184,29 @@ const DevolucionesHechasHoy = async (FechaDeHoy) => {
       reject(error);
     }
   });
+};
+
+// SE UTILIZA EN EL SITIO WEB DE USMX
+export const EnviarCorreo = async (req, res) => {
+  const { NOMBRE, APELLIDOS, CORREO, TELEFONO, MENSAJE } = req.body;
+  try {
+    await TRANSPORTADOR.sendMail({
+      from: `"${NOMBRE} ${APELLIDOS}" <${CORREO}>`,
+      to: CORREO_PARA_EMAILS,
+      subject: "¡Nuevo mensaje desde el sitio web de USMX! 🦅",
+      html: DiseñoCorreo(NOMBRE, APELLIDOS, CORREO, TELEFONO, MENSAJE),
+      attachments: [
+        {
+          filename: "Logo-USMX.png",
+          path: "./public/Logo-USMX.png",
+          cid: "Logo-USMX",
+        },
+      ],
+    });
+    console.log("¡El correo se ha enviado correctamente!");
+    res.status(200).json("¡El correo se ha enviado correctamente!");
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
 };

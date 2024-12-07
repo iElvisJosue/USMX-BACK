@@ -1,5 +1,7 @@
 export const TOKEN_SECRETO = "Token-Secreto-Para-USMX-XPRESS";
 export const HOST = "http://www.usmxxpress.online:4000/api";
+export const CORREO_PARA_EMAILS = "usmxexpress@gmail.com";
+export const CONTRASENA_PARA_EMAILS = "mwyrwlttdcfqyqdp";
 export const serverKey =
   "/home/usmxxpressonline/ssl/keys/d455b_d3c37_7209e8cdc9537557b197ee57620000bb.key";
 export const serverCert =
