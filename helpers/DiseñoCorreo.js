@@ -1,4 +1,11 @@
-export const DiseñoCorreo = (Nombre, Apellidos, Correo, Telefono, Mensaje) => {
+export const DiseñoCorreo = (
+  Nombre,
+  Apellidos,
+  Correo,
+  Telefono,
+  Mensaje,
+  NombreSistema
+) => {
   return `
         <!DOCTYPE html>
     <html
@@ -70,10 +77,6 @@ export const DiseñoCorreo = (Nombre, Apellidos, Correo, Telefono, Mensaje) => {
               margin: 0 auto;
             }
     
-            .mobile_hide {
-              display: none;
-            }
-    
             .row-content {
               width: 100% !important;
             }
@@ -81,14 +84,6 @@ export const DiseñoCorreo = (Nombre, Apellidos, Correo, Telefono, Mensaje) => {
             .stack .column {
               width: 100%;
               display: block;
-            }
-    
-            .mobile_hide {
-              min-height: 0;
-              max-height: 0;
-              max-width: 0;
-              overflow: hidden;
-              font-size: 0px;
             }
     
             .desktop_hide,
@@ -113,19 +108,7 @@ export const DiseñoCorreo = (Nombre, Apellidos, Correo, Telefono, Mensaje) => {
           text-size-adjust: none;
         "
       >
-        <table
-          border="0"
-          cellpadding="0"
-          cellspacing="0"
-          class="nl-container"
-          role="presentation"
-          style="
-            mso-table-lspace: 0pt;
-            mso-table-rspace: 0pt;
-            background-color: #ffffff;
-          "
-          width="100%"
-        >
+        <table style="width: 100%; max-width: 700px; margin: 0 auto;">
           <tbody>
             <tr>
               <td>
@@ -134,7 +117,7 @@ export const DiseñoCorreo = (Nombre, Apellidos, Correo, Telefono, Mensaje) => {
                   border="0"
                   cellpadding="0"
                   cellspacing="0"
-                  class="row row-1 mobile_hide"
+                  class="row row-1"
                   role="presentation"
                   style="
                     mso-table-lspace: 0pt;
@@ -214,19 +197,12 @@ export const DiseñoCorreo = (Nombre, Apellidos, Correo, Telefono, Mensaje) => {
                                         style="line-height: 10px"
                                       >
                                         <div style="max-width: 140px">
-                                          <img
-                                            alt=""
-                                            height="auto"
-                                            src="cid:Logo-USMX"
-                                            style="
-                                              display: block;
-                                              height: auto;
-                                              border: 0;
-                                              width: 100%;
-                                            "
-                                            title=""
-                                            width="140"
-                                          />
+                                         <img
+    src="cid:Logo-${NombreSistema}"
+    style="width: 100%; max-width: 140px; height: 140px;"
+    alt=""
+/>
+
                                         </div>
                                       </div>
                                     </td>
@@ -313,40 +289,14 @@ export const DiseñoCorreo = (Nombre, Apellidos, Correo, Telefono, Mensaje) => {
                                               word-break: break-word;
                                               color: #000000;
                                             "
-                                            >Estimados miembros del equipo de</span
+                                            >Estimados miembros del equipo de </span
                                           ><strong
                                             ><span
-                                              style="
-                                                word-break: break-word;
-                                                color: #1800ff;
-                                              "
-                                              ><span
                                                 style="
                                                   word-break: break-word;
                                                   color: #000000;
                                                 "
-                                                > </span
-                                              >U<span
-                                                style="
-                                                  word-break: break-word;
-                                                  color: #f50000;
-                                                "
-                                                >S</span
-                                              ></span
-                                            ><span
-                                              style="
-                                                word-break: break-word;
-                                                color: #27943d;
-                                              "
-                                              >M</span
-                                            ><span
-                                              style="
-                                                word-break: break-word;
-                                                color: #f50000;
-                                              "
-                                              >X</span
-                                            ></strong
-                                          >, 
+                                                >${NombreSistema}</span></strong>,
                                         </p>
                                         <p style="margin: 0; margin-bottom: 16px">
                                           Espero que este mensaje los encuentre

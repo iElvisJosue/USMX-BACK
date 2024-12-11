@@ -6,6 +6,7 @@ export const CONEXION = mysql.createConnection({
   user: "root",
   password: "",
   database: "db_usmx",
+  charset: "utf8mb4",
 });
 
 // PARA PRODUCCIÓN

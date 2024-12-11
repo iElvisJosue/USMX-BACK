@@ -2,6 +2,8 @@
 import { Router } from "express";
 // IMPORTAMOS LAS CONSULTAS
 import {
+  IniciarSesionUsuario,
+  VerificarTokenUsuario,
   ObtenerInformacionDeUnUsuario,
   RegistrarUsuario,
   BuscarUsuariosParaAdministrarPorFiltro,
@@ -11,6 +13,7 @@ import {
   BuscarAgenciasQueNoTieneElUsuario,
   DesasignarAgenciaAlUsuario,
   AsignarAgenciaAlUsuario,
+  CerrarSesionUsuario,
 } from "../controllers/usuarios.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
 import { ValidarToken } from "../middlewares/ValidarToken.js";
@@ -18,6 +21,10 @@ import { ValidarToken } from "../middlewares/ValidarToken.js";
 // ALMACENAMOS EL ENRUTADOR
 const router = Router();
 
+// RUTA PARA INICIAR SESION
+router.post("/IniciarSesionUsuario", IniciarSesionUsuario);
+// RUTA PARA VERIFICAR EL TOKEN DE ACCESO DE UN USUARIO
+router.post("/VerificarTokenUsuario", VerificarTokenUsuario);
 // RUTA PARA OBTENER LA INFORMACION DE UN USUARIO
 router.post(
   "/ObtenerInformacionDeUnUsuario",
@@ -60,6 +67,8 @@ router.post(
   ValidarToken,
   DesasignarAgenciaAlUsuario
 );
+// RUTA PARA CERRAR SESION DE UN USUARIO
+router.post("/CerrarSesionUsuario", CerrarSesionUsuario);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

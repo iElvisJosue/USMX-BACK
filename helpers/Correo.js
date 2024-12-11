@@ -1,15 +1,23 @@
 import nodemailer from "nodemailer";
-import {
-  CORREO_PARA_EMAILS,
-  CONTRASENA_PARA_EMAILS,
-} from "../initial/config.js";
+// IMPORTAMOS LAS AYUDAS
+import { ObtenerInformacionDelSistema } from "./InformacionDelSistema.js";
 
-const TRANSPORTADOR = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: CORREO_PARA_EMAILS,
-    pass: CONTRASENA_PARA_EMAILS,
-  },
-});
-
-export default TRANSPORTADOR;
+export const TransportadorCorreo = async () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { CorreoSistema, ContrasenaCorreoSistema } =
+        await ObtenerInformacionDelSistema();
+      const TRANSPORTADOR = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: CorreoSistema,
+          pass: ContrasenaCorreoSistema,
+        },
+      });
+      resolve(TRANSPORTADOR);
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};

@@ -1,8 +1,4 @@
-export const TOKEN_SECRETO = "Token-Secreto-Para-USMX-XPRESS";
-export const HOST = "http://www.usmxxpress.online:4000/api";
-export const CORREO_PARA_EMAILS = "usmxexpress@gmail.com";
-export const CONTRASENA_PARA_EMAILS = "mwyrwlttdcfqyqdp";
 export const serverKey =
-  "/home/usmxxpressonline/ssl/keys/d455b_d3c37_7209e8cdc9537557b197ee57620000bb.key";
+  "/home/usmxxpressonline/ssl/keys/ac224_7134b_945f9b87024ea6da812028f34c51f828.key";
 export const serverCert =
-  "/home/usmxxpressonline/ssl/certs/usmxxpress_online_d455b_d3c37_1731369599_ab93a4b78e1737e3effba96746e69d38.crt";
+  "/home/usmxxpressonline/ssl/certs/usmxxpress_online_ac224_7134b_1737935999_a14584cde6b4132e3be07d779a02243f.crt";

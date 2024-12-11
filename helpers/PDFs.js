@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const FuenteURL = path.join(__dirname, "../public/Fuentes");
 const PdfURL = path.join(__dirname, "../public/PDF");
-const imgURL = path.join(__dirname, "../public");
+const imgURL = path.join(__dirname, "../public/Imagenes");
 
 // DEFINIMOS PARÁMETROS DEL TICKET
 const TamañoTextoTitulo = 16;

@@ -1,12 +1,14 @@
 import jwt from "jsonwebtoken";
-import { TOKEN_SECRETO } from "../initial/config.js";
-
+// IMPORTAMOS LAS AYUDAS
+import { ObtenerInformacionDelSistema } from "../helpers/InformacionDelSistema.js";
 import { MENSAJE_DE_NO_AUTORIZADO } from "../helpers/Const.js";
 
-export const ValidarToken = (req, res, next) => {
+export const ValidarToken = async (req, res, next) => {
   const CookieConToken = req.body.CookieConToken || req.params.CookieConToken;
 
-  const TokenValido = jwt.verify(CookieConToken, TOKEN_SECRETO, (err) => {
+  const { TokenSistema } = await ObtenerInformacionDelSistema();
+
+  const TokenValido = jwt.verify(CookieConToken, TokenSistema, (err) => {
     if (err) return false;
     return true;
   });

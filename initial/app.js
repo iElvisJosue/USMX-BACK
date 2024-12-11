@@ -8,8 +8,8 @@ import fileUpload from "express-fileupload";
 import cors from "cors";
 // IMPORTAMOS COOKIE PARSER
 import cookieParser from "cookie-parser";
-// IMPORTAMOS LAS RUTAS PARA PROCESOS GLOBALES
-import globalRoutes from "../routes/global.routes.js";
+// IMPORTAMOS LAS RUTAS PARA PROCESOS DE SISTEMA
+import sistemaRoutes from "../routes/sistema.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE PEDIDOS
 import pedidosRoutes from "../routes/pedidos.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE AGENCIAS
@@ -65,7 +65,7 @@ app.use(cookieParser());
 app.use(fileUpload());
 // app.use(multerConfig);
 
-app.use("/api/global", globalRoutes);
+app.use("/api/sistema", sistemaRoutes);
 app.use("/api/pedidos", pedidosRoutes);
 app.use("/api/agencias", agenciasRoutes);
 app.use("/api/bodega", bodegaRoutes);

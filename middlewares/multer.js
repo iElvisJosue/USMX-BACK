@@ -5,7 +5,7 @@ import path, { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const uploadDir = path.join(__dirname, "../public");
+const uploadDir = path.join(__dirname, "../public/Imagenes");
 
 const generateFileName = (TituloImagen = "Default", fileName) => {
   let code = "";
