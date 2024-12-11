@@ -1,5 +1,7 @@
 // IMPORTAMOS EL ENRUTADOR
 import { Router } from "express";
+// IMPORTAMOS MANEJADO DE ARCHIVOS
+import fileUpload from "express-fileupload";
 // IMPORTAMOS LAS CONSULTAS
 import {
   RegistrarAgencia,
@@ -79,10 +81,16 @@ router.post(
 //   DescargarExcelAgencias
 // );
 // RUTA PARA SUBIR ARCHIVOS DE REMITENTES
-router.post("/SubirArchivoRemitentes", ValidarToken, SubirArchivoRemitentes);
+router.post(
+  "/SubirArchivoRemitentes",
+  fileUpload(),
+  ValidarToken,
+  SubirArchivoRemitentes
+);
 // RUTA PARA SUBIR ARCHIVOS DE DESTINATARIOS
 router.post(
   "/SubirArchivoDestinatarios",
+  fileUpload(),
   ValidarToken,
   SubirArchivoDestinatarios
 );

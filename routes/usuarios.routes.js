@@ -5,6 +5,9 @@ import {
   IniciarSesionUsuario,
   VerificarTokenUsuario,
   RegistrarUsuario,
+  ActualizarFotoUsuario,
+  ActualizarInformacionPersonalUsuario,
+  ActualizarContrasenaUsuario,
   BuscarUsuariosParaAdministrarPorFiltro,
   ActualizarEstadoUsuario,
   ActualizarInformacionDeUnUsuario,
@@ -16,6 +19,7 @@ import {
 } from "../controllers/usuarios.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
 import { ValidarToken } from "../middlewares/ValidarToken.js";
+import { ValidarFotoUsuario } from "../middlewares/ValidarFotoUsuario.js";
 
 // ALMACENAMOS EL ENRUTADOR
 const router = Router();
@@ -29,6 +33,20 @@ router.put(
   "/ActualizarInformacionDeUnUsuario",
   ValidarToken,
   ActualizarInformacionDeUnUsuario
+);
+// RUTA PARA ACTUALIZAR LA FOTO DE UN AGENTE
+router.put("/ActualizarFotoUsuario", ValidarFotoUsuario, ActualizarFotoUsuario);
+// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
+router.put(
+  "/ActualizarInformacionPersonalUsuario",
+  ValidarToken,
+  ActualizarInformacionPersonalUsuario
+);
+// RUTA PARA ACTUALIZAR LA CONTRASEÑA DE UN USUARIO
+router.put(
+  "/ActualizarContrasenaUsuario",
+  ValidarToken,
+  ActualizarContrasenaUsuario
 );
 // RUTA PARA REGISTRAR UN USUARIO
 router.post("/RegistrarUsuario", ValidarToken, RegistrarUsuario);

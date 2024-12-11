@@ -3,6 +3,13 @@ import { CONEXION } from "../initial/db.js";
 // IMPORTAMOS JWT
 import jwt from "jsonwebtoken";
 import { CrearTokenDeAcceso } from "../libs/jwt.js";
+// IMPORTAMOS LA CONFIGURACIÓN PARA RUTAS
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path, { dirname } from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const RutaDeLasImagenes = path.join(__dirname, "../public/Imagenes");
 // IMPORTAMOS LAS AYUDAS
 import {
   MENSAJE_DE_ERROR,
@@ -27,9 +34,20 @@ export const VerificarTokenUsuario = async (req, res) => {
           .status(400)
           .json("¡Oops! Parece que tú TOKEN DE ACCESO no es válido.");
       }
-      return res.status(200).json(InformacionDelToken);
+      const { idUsuario } = InformacionDelToken;
+      const InformacionUsuario = await ObtenerInformacionDelUsuario(idUsuario);
+      return res.status(200).json(InformacionUsuario);
     }
   );
+};
+const ObtenerInformacionDelUsuario = async (idUsuario) => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT * FROM usuarios WHERE idUsuario = ?`;
+    CONEXION.query(sql, [idUsuario], (error, result) => {
+      if (error) return reject(error);
+      return resolve(result[0]);
+    });
+  });
 };
 // EN ESTA FUNCIÓN VAMOS A INICIAR SESIÓN DE UN USUARIO
 // SE UTILIZA EN LAS VISTAS: Iniciar Sesión
@@ -72,6 +90,146 @@ export const IniciarSesionUsuario = (req, res) => {
       }
     });
   } catch (error) {
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// SE UTILIZA EN LA VISTA:
+// PERFIL > ACTUALIZAR FOTO USUARIO
+export const ActualizarFotoUsuario = async (req, res) => {
+  const { idUsuario, FotoActual } = req.body;
+  const { originalname } = req.file;
+  const NuevoNombreFotoUsuario = GenerarNuevoNombreDeFoto(
+    idUsuario,
+    originalname
+  );
+
+  const Destino = path.join(RutaDeLasImagenes, NuevoNombreFotoUsuario);
+
+  // PRIMERO ELIMINAMOS LA ANTIGUA IMAGEN SOLO SI NO ES LA "DEFAULT"
+  if (FotoActual !== "Default.png") {
+    await EliminarFotoActualUsuario(FotoActual, RutaDeLasImagenes);
+  }
+
+  fs.access(Destino, fs.constants.F_OK, function (existe) {
+    if (!existe) {
+      res
+        .status(400)
+        .json(
+          "¡Vaya! Parece que ya existe una imagen con ese nombre, por favor intente con otra imagen o cambiando el nombre de la imagen."
+        );
+    } else {
+      fs.writeFile(Destino, req.file.buffer, async function (err) {
+        if (err) {
+          res.status(500).json(MENSAJE_DE_ERROR);
+        } else {
+          const resImagen = await GuardarEnBDLaFotoDelUsuario(
+            NuevoNombreFotoUsuario,
+            idUsuario
+          );
+          if (resImagen) {
+            res
+              .status(200)
+              .json("¡Tu foto de perfil ha sido actualizada con éxito!");
+          } else {
+            res.status(500).json(MENSAJE_DE_ERROR);
+          }
+        }
+      });
+    }
+  });
+};
+const EliminarFotoActualUsuario = (FotoActual, RutaDeLasImagenes) => {
+  const RutaFotoActual = path.join(RutaDeLasImagenes, FotoActual);
+  return new Promise((resolve, reject) => {
+    fs.unlink(RutaFotoActual, (error) => {
+      if (error) return reject(error);
+      resolve(true);
+    });
+  });
+};
+const GuardarEnBDLaFotoDelUsuario = (NuevoNombreFotoUsuario, idUsuario) => {
+  return new Promise((resolve, reject) => {
+    const sql = `UPDATE usuarios SET Foto = ? WHERE idUsuario = ?`;
+    CONEXION.query(
+      sql,
+      [NuevoNombreFotoUsuario, idUsuario],
+      async (error, result) => {
+        if (error) return reject(error);
+        resolve(true);
+      }
+    );
+  });
+};
+const GenerarNuevoNombreDeFoto = (idUsuario, originalname) => {
+  let Codigo = "";
+  for (let i = 0; i < 10; i++) {
+    Codigo += Math.floor(Math.random() * 10);
+  }
+  return `FotoUsuario${idUsuario}_Codigo_${Codigo}_${originalname}`;
+};
+// SE UTILIZA EN LA VISTA:
+// PERFIL > ACTUALIZAR INFORMACIÓN PERSONAL
+export const ActualizarInformacionPersonalUsuario = async (req, res) => {
+  const { idUsuario, Usuario, Correo, Telefono } = req.body;
+  try {
+    const sql = `SELECT * FROM usuarios WHERE Usuario = ? AND idUsuario != ?`;
+    CONEXION.query(sql, [Usuario, idUsuario], (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      if (result.length > 0) {
+        res
+          .status(409)
+          .json(
+            `¡Oops! Parece que el usuario ${Usuario.toUpperCase()} ya existe, por favor intente con otro nombre de usuario.`
+          );
+      } else {
+        const sql = `UPDATE usuarios SET Usuario = ?, Correo = ?, Telefono = ? WHERE idUsuario = ?`;
+        CONEXION.query(
+          sql,
+          [Usuario, Correo, Telefono, idUsuario],
+          (error, result) => {
+            if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+            res
+              .status(200)
+              .json("¡Tu información personal ha sido actualizada con éxito!");
+          }
+        );
+      }
+    });
+  } catch (error) {
+    res.status(500).json(MENSAJE_DE_ERROR);
+  }
+};
+// SE UTILIZA EN LA VISTA:
+// PERFIL > ACTUALIZAR CONTRASEÑA
+export const ActualizarContrasenaUsuario = async (req, res) => {
+  const { idUsuario, ContraseñaActual, ContraseñaNuevaUsuario } = req.body;
+  try {
+    const sql = `SELECT Contraseña FROM usuarios WHERE idUsuario = ?`;
+    CONEXION.query(sql, [idUsuario], async (error, result) => {
+      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+      const SonIguales = ContraseñaActual === result[0].Contraseña;
+      if (SonIguales) {
+        const sql = `UPDATE usuarios SET Contraseña = ? WHERE idUsuario = ?`;
+        CONEXION.query(
+          sql,
+          [ContraseñaNuevaUsuario, idUsuario],
+          (error, result) => {
+            if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
+            res
+              .status(200)
+              .json(`¡La contraseña ha sido actualizada con éxito!`);
+          }
+        );
+      } else {
+        res
+          .status(401)
+          .json(
+            `¡La contraseña actual es incorrecta, por favor inténtelo de nuevo!`
+          );
+      }
+    });
+  } catch (error) {
+    console.log(error);
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };

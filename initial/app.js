@@ -2,8 +2,6 @@
 import "dotenv/config";
 // IMPORTAMOS EXPRESS
 import express from "express";
-// IMPORTAMOS MANEJADO DE ARCHIVOS
-import fileUpload from "express-fileupload";
 // IMPORTAMOS POLÍTICAS DE CORS
 import cors from "cors";
 // IMPORTAMOS COOKIE PARSER
@@ -28,9 +26,6 @@ import operacionesRoutes from "../routes/operaciones.routes.js";
 import ocurreRoutes from "../routes/ocurre.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE CONFIGURACIÓN
 import configuracionRoutes from "../routes/configuracion.routes.js";
-
-// IMPORTAMOS LA CONFIGURACIÓN DE MULTER
-// import { multerConfig } from "../middlewares/multer.js";
 
 // CONFIGURAMOS EL PATH
 import { fileURLToPath } from "url";
@@ -60,10 +55,6 @@ app.use(express.json());
 
 // APLICAMOS EL VISUALIZADO DE COOKIES
 app.use(cookieParser());
-
-// APLICAMOS MANEJADO DE ARCHIVOS
-app.use(fileUpload());
-// app.use(multerConfig);
 
 app.use("/api/sistema", sistemaRoutes);
 app.use("/api/pedidos", pedidosRoutes);
