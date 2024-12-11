@@ -6,10 +6,6 @@ import {
   ObtenerTodosLosMovimientos,
   ActualizarEstadoDeUnMovimiento,
   EditarMovimiento,
-  ObtenerPaisesActivos,
-  ObtenerEstadosPorCodigoDelPais,
-  ObtenerCiudadesPorEstado,
-  ObtenerColoniasPorCodigoPostal,
 } from "../controllers/operaciones.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
 import { ValidarToken } from "../middlewares/ValidarToken.js";
@@ -33,30 +29,6 @@ router.put(
 );
 // RUTA PARA EDITAR UN MOVIMIENTO
 router.put("/EditarMovimiento", ValidarToken, EditarMovimiento);
-// RUTA PARA OBTENER LOS PAISES ACTIVOS
-router.get(
-  "/ObtenerPaisesActivos/:CookieConToken",
-  ValidarToken,
-  ObtenerPaisesActivos
-);
-// RUTA PARA OBTENER LOS ESTADOS POR CODIGO DEL PAIS
-router.post(
-  "/ObtenerEstadosPorCodigoDelPais",
-  ValidarToken,
-  ObtenerEstadosPorCodigoDelPais
-);
-// RUTA PARA OBTENER LAS CIUDADES POR ESTADO
-router.post(
-  "/ObtenerCiudadesPorEstado",
-  ValidarToken,
-  ObtenerCiudadesPorEstado
-);
-// RUTA PARA OBTENER LAS COLONIAS POR CODIGO POSTAL
-router.post(
-  "/ObtenerColoniasPorCodigoPostal",
-  ValidarToken,
-  ObtenerColoniasPorCodigoPostal
-);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

@@ -13,10 +13,6 @@ import {
   ObtenerIdioma,
   ActualizarIdioma,
   ObtenerApiGoogleMapsAutoCompletado,
-  BuscarPaisesPorFiltro,
-  BuscarEstadosPorFiltro,
-  BuscarCiudadesPorFiltro,
-  BuscarColoniasPorFiltro,
 } from "../controllers/configuracion.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
 import { ValidarToken } from "../middlewares/ValidarToken.js";
@@ -58,14 +54,6 @@ router.get(
   ValidarToken,
   ObtenerApiGoogleMapsAutoCompletado
 );
-// RUTA PARA BUSCAR LOS PAISES POR FILTRO
-router.post("/BuscarPaisesPorFiltro", ValidarToken, BuscarPaisesPorFiltro);
-// RUTA PARA BUSCAR LOS ESTADOS POR FILTRO
-router.post("/BuscarEstadosPorFiltro", ValidarToken, BuscarEstadosPorFiltro);
-// RUTA PARA BUSCAR LAS CIUDADES POR FILTRO
-router.post("/BuscarCiudadesPorFiltro", ValidarToken, BuscarCiudadesPorFiltro);
-// RUTA PARA BUSCAR LAS COLONIAS POR FILTRO
-router.post("/BuscarColoniasPorFiltro", ValidarToken, BuscarColoniasPorFiltro);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

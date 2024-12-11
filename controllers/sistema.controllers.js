@@ -15,14 +15,14 @@ export const InformacionDelSistema = async (req, res) => {
     const {
       LogoSistema,
       NombreSistema,
-      CorreoSistema,
-      ContrasenaCorreoSistema,
+      // CorreoSistema,
+      // ContrasenaCorreoSistema,
     } = await ObtenerInformacionDelSistema();
     return res.status(200).json({
       LogoSistema,
       NombreSistema,
-      CorreoSistema,
-      ContrasenaCorreoSistema,
+      // CorreoSistema,
+      // ContrasenaCorreoSistema,
     });
   } catch (error) {
     return res.status(500).json(error);

@@ -31,6 +31,12 @@ router.post(
   ValidarToken,
   ObtenerInformacionDeUnUsuario
 );
+// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
+router.put(
+  "/ActualizarInformacionDeUnUsuario",
+  ValidarToken,
+  ActualizarInformacionDeUnUsuario
+);
 // RUTA PARA REGISTRAR UN USUARIO
 router.post("/RegistrarUsuario", ValidarToken, RegistrarUsuario);
 // RUTA PARA BUSCAR LOS USUARIOS A ADMINISTRAR POR FILTRO
@@ -41,12 +47,6 @@ router.post(
 );
 // RUTA PARA ACTUALIZAR EL ESTADO DE UN USUARIO
 router.put("/ActualizarEstadoUsuario", ValidarToken, ActualizarEstadoUsuario);
-// RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
-router.put(
-  "/ActualizarInformacionDeUnUsuario",
-  ValidarToken,
-  ActualizarInformacionDeUnUsuario
-);
 // RUTA PARA BUSCAR LAS AGENCIAS QUE TIENE EL USUARIO
 router.post(
   "/BuscarAgenciasQueTieneElUsuario",
