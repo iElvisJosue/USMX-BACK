@@ -4,7 +4,6 @@ import { Router } from "express";
 import {
   IniciarSesionUsuario,
   VerificarTokenUsuario,
-  ObtenerInformacionDeUnUsuario,
   RegistrarUsuario,
   BuscarUsuariosParaAdministrarPorFiltro,
   ActualizarEstadoUsuario,
@@ -25,12 +24,6 @@ const router = Router();
 router.post("/IniciarSesionUsuario", IniciarSesionUsuario);
 // RUTA PARA VERIFICAR EL TOKEN DE ACCESO DE UN USUARIO
 router.post("/VerificarTokenUsuario", VerificarTokenUsuario);
-// RUTA PARA OBTENER LA INFORMACION DE UN USUARIO
-router.post(
-  "/ObtenerInformacionDeUnUsuario",
-  ValidarToken,
-  ObtenerInformacionDeUnUsuario
-);
 // RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
 router.put(
   "/ActualizarInformacionDeUnUsuario",

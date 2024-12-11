@@ -75,21 +75,6 @@ export const IniciarSesionUsuario = (req, res) => {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };
-// EN ESTA FUNCIÓN VAMOS A OBTENER LA INFORMACION DE UN USUARIO
-// SE UTILIZA EN LAS VISTAS: Perfil
-export const ObtenerInformacionDeUnUsuario = async (req, res) => {
-  const { idUsuario } = req.body;
-  try {
-    const sql = "SELECT * FROM usuarios WHERE idUsuario = ?";
-    CONEXION.query(sql, [idUsuario], (error, result) => {
-      if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
-      res.send(result);
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
 // EN ESTA FUNCIÓN VAMOS A REGISTRAR UN USUARIO
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Registrar Usuario
