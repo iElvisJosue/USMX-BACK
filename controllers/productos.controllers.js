@@ -113,13 +113,13 @@ export const BuscarProductosPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Productos > Administrar Productos
 export const ActualizarEstadoProducto = async (req, res) => {
-  const { idProducto, StatusProducto } = req.body;
+  const { idRegistro, StatusParaBD } = req.body;
 
-  const TEXTO_ESTADO = StatusProducto === "Activo" ? "ACTIVADO" : "DESACTIVADO";
+  const TEXTO_ESTADO = StatusParaBD === 1 ? "ACTIVADO" : "DESACTIVADO";
 
   try {
     const sql = `UPDATE productos SET StatusProducto = ? WHERE idProducto = ?`;
-    CONEXION.query(sql, [StatusProducto, idProducto], (error, result) => {
+    CONEXION.query(sql, [StatusParaBD, idRegistro], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(`¡El producto ha sido ${TEXTO_ESTADO} con éxito!`);
     });
@@ -197,7 +197,7 @@ export const BuscarAgenciasQueTieneUnProducto = async (req, res) => {
   const { idProducto } = req.body;
   try {
     const sql = `SELECT * FROM union_agencias_productos uap LEFT JOIN agencias a ON uap.idAgencia = a.idAgencia WHERE uap.idProducto = ? AND a.StatusAgencia = ? ORDER BY a.NombreAgencia = "USMX Express" DESC, a.idAgencia ASC`;
-    CONEXION.query(sql, [idProducto, "Activa"], (error, result) => {
+    CONEXION.query(sql, [idProducto, 1], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
@@ -213,7 +213,7 @@ export const BuscarAgenciasQueNoTieneUnProducto = async (req, res) => {
   const { filtro, idProducto } = req.body;
 
   // INICIALIZAR PARAMETROS
-  let paramBAQNTUP = ["Activa", idProducto];
+  let paramBAQNTUP = [1, idProducto];
 
   try {
     let sql;
@@ -317,7 +317,7 @@ export const ObtenerProductosPorAgencia = async (req, res) => {
       FROM union_agencias_productos uap
       LEFT JOIN productos p ON uap.idProducto = p.idProducto
       WHERE uap.idAgencia = ? AND p.StatusProducto = ?`;
-    CONEXION.query(sql, [idAgencia, "Activo"], (error, result) => {
+    CONEXION.query(sql, [idAgencia, 1], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });

@@ -487,7 +487,7 @@ export const BuscarUltimosDiezPedidosGenerales = async (req, res) => {
           p.HoraCreacionPedido DESC,
           p.idPedido DESC 
       LIMIT 10`;
-    CONEXION.query(sql, ["Activa"], (error, result) => {
+    CONEXION.query(sql, [1], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });
@@ -521,7 +521,7 @@ export const BuscarUltimosDiezPedidosDeUnUsuario = async (req, res) => {
           p.HoraCreacionPedido DESC,
           p.idPedido DESC 
       LIMIT 10`;
-    CONEXION.query(sql, ["Activa", idUsuario], (error, result) => {
+    CONEXION.query(sql, [1, idUsuario], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(result);
     });

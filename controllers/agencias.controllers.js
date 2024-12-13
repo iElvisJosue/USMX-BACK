@@ -19,7 +19,6 @@ import { CrearUnExcelDeLasAgencias } from "../helpers/Excels.js";
 // Agencias > Registrar Agencia
 export const RegistrarAgencia = async (req, res) => {
   const {
-    // CookieConToken,
     NombreAgencia,
     NombreLegalAgencia,
     PaisAgencia,
@@ -46,13 +45,6 @@ export const RegistrarAgencia = async (req, res) => {
     CopiaLicenciaNegocio,
     CopiaImpuestosVenta,
   } = req.body;
-  // const RespuestaValidacionToken = await ValidarTokenParaPeticion(
-  //   CookieConToken
-  // );
-
-  // if (!RespuestaValidacionToken)
-  //   return res.status(401).json(MENSAJE_DE_NO_AUTORIZADO);
-
   try {
     const sql = `SELECT * FROM agencias WHERE NombreAgencia = ?`;
     CONEXION.query(sql, [NombreAgencia], (error, result) => {
@@ -158,13 +150,13 @@ export const BuscarAgenciasPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Agencias > Administrar Agencias
 export const ActualizarEstadoAgencia = async (req, res) => {
-  const { idAgencia, StatusAgencia } = req.body;
+  const { idRegistro, StatusParaBD } = req.body;
 
-  const TEXTO_ESTADO = StatusAgencia === "Activa" ? "ACTIVADA" : "DESACTIVADA";
+  const TEXTO_ESTADO = StatusParaBD === 1 ? "ACTIVADA" : "DESACTIVADA";
 
   try {
     const sql = `UPDATE agencias SET StatusAgencia = ? WHERE idAgencia = ?`;
-    CONEXION.query(sql, [StatusAgencia, idAgencia], (error, result) => {
+    CONEXION.query(sql, [StatusParaBD, idRegistro], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(`¡La agencia ha sido ${TEXTO_ESTADO} con éxito!`);
     });
@@ -286,7 +278,7 @@ export const BuscarProductosQueTieneLaAgencia = async (req, res) => {
     FROM union_agencias_productos uap 
     LEFT JOIN productos p ON uap.idProducto = p.idProducto 
     WHERE uap.idAgencia = ? AND p.StatusProducto = ?`;
-    CONEXION.query(sql, [idAgencia, "Activo"], (error, result) => {
+    CONEXION.query(sql, [idAgencia, 1], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
@@ -302,7 +294,7 @@ export const BuscarProductosQueNoTieneLaAgencia = async (req, res) => {
   const { filtro, idAgencia } = req.body;
 
   // INICIA CON EL ID AGENCIA PORQUE ESE SÍ O SÍ VENDRÁ EN LA PETICIÓN
-  let paramsBPQNTLA = [idAgencia, "Activo"];
+  let paramsBPQNTLA = [idAgencia, 1];
 
   try {
     let sql;
@@ -422,7 +414,7 @@ export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
   const { filtro, tipoDeUsuario, idDelUsuario } = req.body;
 
   // INICIALIZAMOS EL ARRAY DE PARAMETROS
-  let paramsBAPFYTU = ["Activa"];
+  let paramsBAPFYTU = [1];
 
   try {
     let sql;
@@ -440,7 +432,7 @@ export const BuscarAgenciasPorFiltroYTipoDeUsuario = async (req, res) => {
       });
     } else {
       const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.idAgencia ASC`;
-      CONEXION.query(sql, [idDelUsuario, "Activa"], (error, result) => {
+      CONEXION.query(sql, [idDelUsuario, 1], (error, result) => {
         if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
         res.send(result);
       });

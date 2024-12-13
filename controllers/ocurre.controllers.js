@@ -98,13 +98,13 @@ export const BuscarOcurresPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Ocurres > Administrar Ocurres
 export const ActualizarEstadoOcurre = async (req, res) => {
-  const { idOcurre, StatusOcurre } = req.body;
+  const { idRegistro, StatusParaBD } = req.body;
 
-  const TEXTO_ESTADO = StatusOcurre === "Activa" ? "ACTIVADA" : "DESACTIVADA";
+  const TEXTO_ESTADO = StatusParaBD === 1 ? "ACTIVADA" : "DESACTIVADA";
 
   try {
     const sql = `UPDATE ocurres SET StatusOcurre = ? WHERE idOcurre = ?`;
-    CONEXION.query(sql, [StatusOcurre, idOcurre], (error, result) => {
+    CONEXION.query(sql, [StatusParaBD, idRegistro], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(`¡La ocurrencia ha sido ${TEXTO_ESTADO} con éxito!`);
     });
@@ -189,7 +189,7 @@ export const BuscarOcurresActivosPorFiltro = async (req, res) => {
   const { filtro } = req.body;
 
   // INICIALIZAMOS LOS PARAMETROS
-  let paramsBOAPF = ["Activa"];
+  let paramsBOAPF = [1];
 
   try {
     let sql;

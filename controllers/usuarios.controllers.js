@@ -20,8 +20,8 @@ import { ObtenerHoraActual } from "../helpers/Func.js";
 export const IniciarSesionUsuario = (req, res) => {
   try {
     const { Usuario, Contraseña } = req.body;
-    const sql = `SELECT * FROM usuarios WHERE Usuario = ? AND Contraseña = ? AND EstadoUsuario = 'Activo'`;
-    CONEXION.query(sql, [Usuario, Contraseña], async (error, result) => {
+    const sql = `SELECT * FROM usuarios WHERE Usuario = ? AND Contraseña = ? AND StatusUsuario = ?`;
+    CONEXION.query(sql, [Usuario, Contraseña, 1], async (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
         // CREAMOS EL ID EN UN TOKEN
@@ -254,13 +254,13 @@ export const BuscarUsuariosParaAdministrarPorFiltro = async (req, res) => {
 // SE UTILIZA EN LAS VISTAS:
 // Usuarios > Administrar Usuarios
 export const ActualizarEstadoUsuario = async (req, res) => {
-  const { idUsuario, EstadoUsuario } = req.body;
+  const { idRegistro, StatusParaBD } = req.body;
 
-  const TEXTO_ESTADO = EstadoUsuario === "Activo" ? "ACTIVADO" : "DESACTIVADO";
+  const TEXTO_ESTADO = StatusParaBD === 1 ? "ACTIVADO" : "DESACTIVADO";
 
   try {
-    const sql = `UPDATE usuarios SET EstadoUsuario = ? WHERE idUsuario = ?`;
-    CONEXION.query(sql, [EstadoUsuario, idUsuario], (error, result) => {
+    const sql = `UPDATE usuarios SET StatusUsuario = ? WHERE idUsuario = ?`;
+    CONEXION.query(sql, [StatusParaBD, idRegistro], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.status(200).json(`¡El usuario ha sido ${TEXTO_ESTADO} con éxito!`);
     });
@@ -308,7 +308,7 @@ export const BuscarAgenciasQueTieneElUsuario = async (req, res) => {
   const { idUsuario } = req.body;
   try {
     const sql = `SELECT * FROM union_usuarios_agencias uua LEFT JOIN agencias a ON uua.idAgencia = a.idAgencia WHERE uua.idUsuario = ? AND a.StatusAgencia = ? ORDER BY a.NombreAgencia = "USMX Express" DESC, a.idAgencia DESC`;
-    CONEXION.query(sql, [idUsuario, "Activa"], (error, result) => {
+    CONEXION.query(sql, [idUsuario, 1], (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       res.send(result);
     });
@@ -324,7 +324,7 @@ export const BuscarAgenciasQueNoTieneElUsuario = async (req, res) => {
   const { filtro, idUsuario } = req.body;
 
   // INICIALIZAMOS PARAMETROS
-  let paramBAQNTEU = ["Activa", idUsuario];
+  let paramBAQNTEU = [1, idUsuario];
 
   try {
     let sql;
