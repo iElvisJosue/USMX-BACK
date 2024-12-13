@@ -3,7 +3,6 @@ import { Router } from "express";
 // IMPORTAMOS LAS CONSULTAS
 import {
   IniciarSesionUsuario,
-  VerificarTokenUsuario,
   RegistrarUsuario,
   ActualizarFotoUsuario,
   ActualizarInformacionPersonalUsuario,
@@ -15,19 +14,16 @@ import {
   BuscarAgenciasQueNoTieneElUsuario,
   DesasignarAgenciaAlUsuario,
   AsignarAgenciaAlUsuario,
-  CerrarSesionUsuario,
 } from "../controllers/usuarios.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
 import { ValidarToken } from "../middlewares/ValidarToken.js";
-import { ValidarFotoUsuario } from "../middlewares/ValidarFotoUsuario.js";
+import { ValidarFotoUnica } from "../middlewares/ValidarFotoUnica.js";
 
 // ALMACENAMOS EL ENRUTADOR
 const router = Router();
 
 // RUTA PARA INICIAR SESION
 router.post("/IniciarSesionUsuario", IniciarSesionUsuario);
-// RUTA PARA VERIFICAR EL TOKEN DE ACCESO DE UN USUARIO
-router.post("/VerificarTokenUsuario", VerificarTokenUsuario);
 // RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
 router.put(
   "/ActualizarInformacionDeUnUsuario",
@@ -35,7 +31,7 @@ router.put(
   ActualizarInformacionDeUnUsuario
 );
 // RUTA PARA ACTUALIZAR LA FOTO DE UN AGENTE
-router.put("/ActualizarFotoUsuario", ValidarFotoUsuario, ActualizarFotoUsuario);
+router.put("/ActualizarFotoUsuario", ValidarFotoUnica, ActualizarFotoUsuario);
 // RUTA PARA ACTUALIZAR LA INFORMACIÓN DE UN USUARIO
 router.put(
   "/ActualizarInformacionPersonalUsuario",
@@ -78,8 +74,6 @@ router.post(
   ValidarToken,
   DesasignarAgenciaAlUsuario
 );
-// RUTA PARA CERRAR SESION DE UN USUARIO
-router.post("/CerrarSesionUsuario", CerrarSesionUsuario);
 
 // EXPORTAMOS EL ENRUTADOR
 export default router;

@@ -198,7 +198,7 @@ export const DiseñoCorreo = (
                                       >
                                         <div style="max-width: 140px">
                                          <img
-    src="cid:Logo-${NombreSistema}"
+    src="cid:LogoSistema"
     style="width: 100%; max-width: 140px; height: 140px;"
     alt=""
 />

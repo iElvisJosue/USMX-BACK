@@ -1,7 +1,5 @@
 // IMPORTAMOS LA CONEXIÓN A LA DB
 import { CONEXION } from "../initial/db.js";
-// IMPORTAMOS JWT
-import jwt from "jsonwebtoken";
 import { CrearTokenDeAcceso } from "../libs/jwt.js";
 // IMPORTAMOS LA CONFIGURACIÓN PARA RUTAS
 import fs from "fs";
@@ -16,39 +14,7 @@ import {
   MENSAJE_ERROR_CONSULTA_SQL,
 } from "../helpers/Const.js";
 import { ObtenerHoraActual } from "../helpers/Func.js";
-import { ObtenerInformacionDelSistema } from "../helpers/InformacionDelSistema.js";
 
-// EN ESTA FUNCIÓN VAMOS A VERIFICAR EL TOKEN DE UN USUARIO
-// SE UTILIZA EN LAS VISTAS: Todas
-export const VerificarTokenUsuario = async (req, res) => {
-  const { TOKEN_DE_ACCESO_USMX } = req.body;
-
-  const { TokenSistema } = await ObtenerInformacionDelSistema();
-
-  jwt.verify(
-    TOKEN_DE_ACCESO_USMX,
-    TokenSistema,
-    async (err, InformacionDelToken) => {
-      if (err) {
-        return res
-          .status(400)
-          .json("¡Oops! Parece que tú TOKEN DE ACCESO no es válido.");
-      }
-      const { idUsuario } = InformacionDelToken;
-      const InformacionUsuario = await ObtenerInformacionDelUsuario(idUsuario);
-      return res.status(200).json(InformacionUsuario);
-    }
-  );
-};
-const ObtenerInformacionDelUsuario = async (idUsuario) => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT * FROM usuarios WHERE idUsuario = ?`;
-    CONEXION.query(sql, [idUsuario], (error, result) => {
-      if (error) return reject(error);
-      return resolve(result[0]);
-    });
-  });
-};
 // EN ESTA FUNCIÓN VAMOS A INICIAR SESIÓN DE UN USUARIO
 // SE UTILIZA EN LAS VISTAS: Iniciar Sesión
 export const IniciarSesionUsuario = (req, res) => {
@@ -58,29 +24,18 @@ export const IniciarSesionUsuario = (req, res) => {
     CONEXION.query(sql, [Usuario, Contraseña], async (error, result) => {
       if (error) return res.status(400).json(MENSAJE_ERROR_CONSULTA_SQL);
       if (result.length > 0) {
-        const INFO_USUARIO = {
-          idUsuario: result[0].idUsuario,
-          Usuario: result[0].Usuario,
-          Correo: result[0].Correo,
-          Foto: result[0].Foto,
-          Telefono: result[0].Telefono,
-          Permisos: result[0].Permisos,
-          ModoOscuro: result[0].ModoOscuro,
-          FechaCreacionUsuario: result[0].FechaCreacionUsuario,
-          HoraCreacionUsuario: result[0].HoraCreacionUsuario,
-        };
         // CREAMOS EL ID EN UN TOKEN
-        const TOKEN_DE_ACCESO_USMX = await CrearTokenDeAcceso(INFO_USUARIO);
-        // ALMACENAMOS EL TOKEN EN UN COOKIE
-        // res.cookie("TOKEN_DE_ACCESO_USMX", TOKEN_DE_ACCESO_USMX);
+        const TOKEN_DE_ACCESO_USMX = await CrearTokenDeAcceso({
+          idUsuario: result[0].idUsuario,
+        });
         res.cookie("TOKEN_DE_ACCESO_USMX", TOKEN_DE_ACCESO_USMX, {
           secure: true,
           sameSite: "none",
           expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 horas
         });
-        INFO_USUARIO.TOKEN_DE_ACCESO_USMX = TOKEN_DE_ACCESO_USMX;
+
         // ENVIAMOS EL TOKEN AL CLIENTE
-        res.status(200).json(INFO_USUARIO);
+        res.status(200).json(TOKEN_DE_ACCESO_USMX);
       } else {
         res
           .status(401)
@@ -429,18 +384,6 @@ export const DesasignarAgenciaAlUsuario = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json(MENSAJE_DE_ERROR);
-  }
-};
-// EN ESTA FUNCIÓN VAMOS A CERRAR SESION
-// SE UTILIZA EN LAS VISTAS: Todas
-export const CerrarSesionUsuario = async (req, res) => {
-  try {
-    res.cookie("TOKEN_DE_ACCESO_USMX", "", {
-      expires: new Date(0),
-    });
-    res.status(200).json("¡Tu sesión se ha sido finalizada correctamente!");
-  } catch (error) {
     res.status(500).json(MENSAJE_DE_ERROR);
   }
 };

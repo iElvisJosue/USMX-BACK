@@ -8,7 +8,7 @@ const ArchivosPermitidos = /png|jpg|jpeg/;
 const MulterAlmacenamiento = multer.memoryStorage();
 
 // Configuración de Multer
-export const ValidarFotoUsuario = multer({
+export const ValidarFotoUnica = multer({
   MulterAlmacenamiento,
   fileFilter: (req, file, cb) => {
     const mimeType = ArchivosPermitidos.test(file.mimetype); // Valida MIME type

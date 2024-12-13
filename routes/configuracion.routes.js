@@ -8,10 +8,6 @@ import {
   RegistrarTipoDeEnvio,
   ObtenerTiposDeEnvio,
   EliminarTipoDeEnvio,
-  ObtenerModoOscuro,
-  ActualizarModoOscuro,
-  ObtenerIdioma,
-  ActualizarIdioma,
   ObtenerApiGoogleMapsAutoCompletado,
 } from "../controllers/configuracion.controllers.js";
 // IMPORTAMOS EL MIDDLEWARE PARA VERIFICAR QUE TENGAS UN TOKEN DE ACCESO
@@ -40,14 +36,6 @@ router.delete(
   ValidarToken,
   EliminarTipoDeEnvio
 );
-// RUTA PARA OBTENER EL MODO OSCURO DEL USUARIO
-router.get("/ObtenerModoOscuro/:idUsuario", ObtenerModoOscuro);
-// RUTA PARA ACTUALIZAR EL MODO OSCURO DEL USUARIO
-router.put("/ActualizarModoOscuro", ValidarToken, ActualizarModoOscuro);
-// RUTA PARA OBTENER EL IDIOMA DEL USUARIO
-router.get("/ObtenerIdioma/:idUsuario", ObtenerIdioma);
-// RUTA PARA ACTUALIZAR EL IDIOMA DEL USUARIO
-router.put("/ActualizarIdioma", ValidarToken, ActualizarIdioma);
 // RUTA PARA OBTENER LA API DE GOOGLE MAPS AUTO COMPLETADO
 router.get(
   "/ObtenerApiGoogleMapsAutoCompletado/:CookieConToken",
