@@ -24,8 +24,6 @@ import usuariosRoutes from "../routes/usuarios.routes.js";
 import operacionesRoutes from "../routes/operaciones.routes.js";
 // IMPORTAMOS LAS RUTAS PARA PROCESOS DE OCURRENCIAS
 import ocurreRoutes from "../routes/ocurre.routes.js";
-// IMPORTAMOS LAS RUTAS PARA PROCESOS DE CONFIGURACIÓN
-import configuracionRoutes from "../routes/configuracion.routes.js";
 
 // CONFIGURAMOS EL PATH
 import { fileURLToPath } from "url";
@@ -65,6 +63,5 @@ app.use("/api/productos", productosRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/operaciones", operacionesRoutes);
 app.use("/api/ocurre", ocurreRoutes);
-app.use("/api/configuracion", configuracionRoutes);
 
 export default app;
